@@ -343,33 +343,33 @@ export HTTPS_PROXY="https://proxy.company:8443"   # HTTPS 代理（如果需要�
 
 <h2 id="command-line-flags">命令行标志</h2>
 
-| Flag / Command                             | Description                                                                                                                                              | Example                                                     |
+| 标志 / 命令                             | 描述                                                                                                                                              | 示例                                                     |
 | :----------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------- | :---------------------------------------------------------- |
-| `-d, --debug`                              | Enable debug mode (shows detailed debug output).                                                                                                        | `claude -d -p "query"`                                      |
-| `--mcp-debug`                               | [DEPRECATED] MCP debug mode (shows MCP server errors). Use `--debug` instead.                                                                             | `claude --mcp-debug`                                        |
-| `--verbose`                                 | Override verbose mode setting from config (shows expanded logging / turn-by-turn output).                                                                | `claude --verbose`                                          |
-| `-p, --print`                               | Print response and exit (useful for piping output).                                                                                                     | `claude -p "query"`                                         |
-| `--output-format <format>`                  | Output format (only works with `--print`): `text` (default), `json` (single result), or `stream-json` (realtime streaming).                              | `claude -p "query" --output-format json`                    |
-| `--input-format <format>`                   | Input format (only works with `--print`): `text` (default) or `stream-json` (realtime streaming input).                                                  | `claude -p --output-format stream-json --input-format stream-json` |
-| `--replay-user-messages`                    | Re-emit user messages from stdin back to stdout for acknowledgment — **only works with** `--input-format=stream-json` **and** `--output-format=stream-json`. | `claude --input-format stream-json --output-format stream-json --replay-user-messages` |
-| `--allowedTools`, `--allowed-tools <tools...>`  | Comma/space-separated list of tool names to allow (e.g. `"Bash(git:*) Edit"`).                                                                           | `--allowed-tools "Bash(git:*)" Edit"`                       |
-| `--disallowedTools`, `--disallowed-tools <tools...>` | Comma/space-separated list of tool names to deny (e.g. `"Bash(git:*) Edit"`).                                                                            | `--disallowed-tools "Edit"`                                 |
-| `--mcp-config <configs...>`                 | Load MCP servers from JSON files or strings (space-separated).                                                                                          | `claude --mcp-config ./mcp-servers.json`                    |
-| `--strict-mcp-config`                       | Only use MCP servers from `--mcp-config`, ignoring other MCP configurations.                                                                             | `claude --mcp-config ./a.json --strict-mcp-config`          |
-| `--append-system-prompt <prompt>`           | Append a system prompt to the default system prompt (useful in print mode).                                                                              | `claude -p --append-system-prompt "Do X then Y"`            |
-| `--permission-mode <mode>`                  | Permission mode for the session (choices include `acceptEdits`, `bypassPermissions`, `default`, `plan`).                                                 | `claude --permission-mode plan`                             |
-| `--permission-prompt-tool <tool>`           | Specify an MCP tool to handle permission prompts in non-interactive mode.                                                                               | `claude -p --permission-prompt-tool mcp_auth_tool "query"`  |
-| `--fallback-model <model>`                  | Enable automatic fallback to a specified model when the default is overloaded (note: only works with `--print` per help).                                 | `claude -p --fallback-model claude-haiku-20240307 "query"`  |
-| `--model <model>`                            | Model for the current session. Accepts aliases like `sonnet`/`opus` or a full model name (e.g. `claude-sonnet-4-20250514`).                               | `claude --model sonnet`                                     |
-| `--settings <file-or-json>`                  | Load additional settings from a JSON file or a JSON string.                                                                                              | `claude --settings ./settings.json`                         |
-| `--add-dir <directories...>`                 | Additional directories to allow tool access to.                                                                                                          | `claude --add-dir ../apps ../lib`                           |
-| `--ide`                                      | Automatically connect to an IDE on startup if exactly one valid IDE is available.                                                                        | `claude --ide`                                              |
-| `-c, --continue`                             | Continue the most recent conversation in the current directory.                                                                                          | `claude --continue`                                         |
-| `-r, --resume [sessionId]`                   | Resume a conversation; provide a session ID or interactively select one.                                                                                 | `claude -r "abc123"`                                        |
-| `--session-id <uuid>`                        | Use a specific session ID for the conversation (must be a valid UUID).                                                                                   | `claude --session-id 123e4567-e89b-12d3-a456-426614174000`  |
-| `--dangerously-skip-permissions`             | Bypass all permission checks (only for trusted sandboxes).                                                                                               | `claude --dangerously-skip-permissions`                     |
-| `-v, --version`                              | Show the installed `claude` CLI version.                                                                                                                 | `claude --version`                                          |
-| `-h, --help`                                 | Display help / usage.                                                                                                                                     | `claude --help`                                             |
+| `-d, --debug`                              | 启用调试模式（显示详细的调试输出）。                                                                                                        | `claude -d -p "query"`                                      |
+| `--mcp-debug`                               | [已弃用] MCP 调试模式（显示 MCP 服务器错误）。请使用 `--debug` 代替。                                                                             | `claude --mcp-debug`                                        |
+| `--verbose`                                 | 覆盖配置中的详细模式设置（显示扩展日志 / 逐步输出）。                                                                | `claude --verbose`                                          |
+| `-p, --print`                               | 打印响应并退出（用于管道输出）。                                                                                                     | `claude -p "query"`                                         |
+| `--output-format <format>`                  | 输出格式（仅适用于 `--print`）：`text`（默认）、`json`（单个结果）或 `stream-json`（实时流）。                              | `claude -p "query" --output-format json`                    |
+| `--input-format <format>`                   | 输入格式（仅适用于 `--print`）：`text`（默认）或 `stream-json`（实时流输入）。                                                  | `claude -p --output-format stream-json --input-format stream-json` |
+| `--replay-user-messages`                    | 将用户消息从 stdin 重新发送到 stdout 以进行确认 — **仅适用于** `--input-format=stream-json` **和** `--output-format=stream-json`。 | `claude --input-format stream-json --output-format stream-json --replay-user-messages` |
+| `--allowedTools`, `--allowed-tools <tools...>`  | 允许的工具名称的逗号/空格分隔列表（例如 `"Bash(git:*) Edit"`）。                                                                           | `--allowed-tools "Bash(git:*)" Edit"`                       |
+| `--disallowedTools`, `--disallowed-tools <tools...>` | 拒绝的工具名称的逗号/空格分隔列表（例如 `"Bash(git:*) Edit"`）。                                                                            | `--disallowed-tools "Edit"`                                 |
+| `--mcp-config <configs...>`                 | 从 JSON 文件或字符串加载 MCP 服务器（空格分隔）。                                                                                          | `claude --mcp-config ./mcp-servers.json`                    |
+| `--strict-mcp-config`                       | 仅使用来自 `--mcp-config` 的 MCP 服务器，忽略其他 MCP 配置。                                                                             | `claude --mcp-config ./a.json --strict-mcp-config`          |
+| `--append-system-prompt <prompt>`           | 在默认系统提示后附加系统提示（在打印模式中有用）。                                                                              | `claude -p --append-system-prompt "Do X then Y"`            |
+| `--permission-mode <mode>`                  | 会话的权限模式（选项包括 `acceptEdits`、`bypassPermissions`、`default`、`plan`）。                                                 | `claude --permission-mode plan`                             |
+| `--permission-prompt-tool <tool>`           | 指定一个 MCP 工具来在非交互模式中处理权限提示。                                                                               | `claude -p --permission-prompt-tool mcp_auth_tool "query"`  |
+| `--fallback-model <model>`                  | 当默认模型超载时，启用自动备用到指定模型（注：仅适用于 `--print`）。                                 | `claude -p --fallback-model claude-haiku-20240307 "query"`  |
+| `--model <model>`                            | 当前会话的模型。接受别名如 `sonnet`/`opus` 或完整模型名称（例如 `claude-sonnet-4-20250514`）。                               | `claude --model sonnet`                                     |
+| `--settings <file-or-json>`                  | 从 JSON 文件或 JSON 字符串加载附加设置。                                                                                              | `claude --settings ./settings.json`                         |
+| `--add-dir <directories...>`                 | 允许工具访问的附加目录。                                                                                                          | `claude --add-dir ../apps ../lib`                           |
+| `--ide`                                      | 如果有且仅有一个有效的 IDE 可用，则在启动时自动连接到 IDE。                                                                        | `claude --ide`                                              |
+| `-c, --continue`                             | 继续当前目录中最近的对话。                                                                                          | `claude --continue`                                         |
+| `-r, --resume [sessionId]`                   | 恢复对话；提供会话 ID 或交互式选择一个。                                                                                 | `claude -r "abc123"`                                        |
+| `--session-id <uuid>`                        | 为对话使用特定的会话 ID（必须是有效的 UUID）。                                                                                   | `claude --session-id 123e4567-e89b-12d3-a456-426614174000`  |
+| `--dangerously-skip-permissions`             | 绕过所有权限检查（仅限可信的沙盒）。                                                                                               | `claude --dangerously-skip-permissions`                     |
+| `-v, --version`                              | 显示已安装的 `claude` CLI 版本。                                                                                                                 | `claude --version`                                          |
+| `-h, --help`                                 | 显示帮助 / 用法。                                                                                                                                     | `claude --help`                                             |
 
 
 > The `--output-format json` flag is particularly useful for scripting and automation, allowing you to parse Claude's responses programmatically.
@@ -462,30 +462,30 @@ claude --dangerously-skip-permissions               # Skip permission prompts (u
 
 <h2 id="keyboard-shortcuts">键盘快捷键</h2>
 
-| Shortcut         | Description                        | Context                    |
+| 快捷键         | 描述                        | 上下文                    |
 | :--------------- | :--------------------------------- | :------------------------- |
-| `Ctrl+C`         | Cancel current input or generation | Standard interrupt         |
-| `Ctrl+D`         | Exit Claude Code session           | EOF signal                 |
-| `Ctrl+L`         | Clear terminal screen              | Keeps conversation history |
-| `Up/Down arrows` | Navigate command history           | Recall previous inputs     |
-| `Esc` + `Esc`    | Edit previous message              | Double-escape to modify    |
+| `Ctrl+C`         | 取消当前输入或生成 | 标准中断         |
+| `Ctrl+D`         | 退出 Claude Code 会话           | EOF 信号                 |
+| `Ctrl+L`         | 清除终端屏幕              | 保持对话历史 |
+| `Up/Down arrows` | 导航命令历史           | 回顾之前的输入     |
+| `Esc` + `Esc`    | 编辑上一条消息              | 双击 Escape 进行修改    |
 
 <h3 id="multiline-input">Multiline Input</h3>
 
-| Method           | Shortcut       | Context                           |
+| 方法           | 快捷键       | 上下文                           |
 | :--------------- | :------------- | :-------------------------------- |
-| Quick escape     | `\` + `Enter`  | Works in all terminals            |
-| macOS default    | `Option+Enter` | Default on macOS                  |
-| Terminal setup   | `Shift+Enter`  | After `/terminal-setup`           |
-| Control sequence | `Ctrl+J`       | Line feed character for multiline |
-| Paste mode       | Paste directly | For code blocks, logs             |
+| 快速转义     | `\` + `Enter`  | 在所有终端中工作            |
+| macOS 默认    | `Option+Enter` | 在 macOS 上的默认设置                  |
+| 终端设置   | `Shift+Enter`  | 在 `/terminal-setup` 之后           |
+| 控制序列 | `Ctrl+J`       | 用于多行的换行字符 |
+| 粘贴模式       | 直接粘贴 | 用于代码块、日志             |
 
 <h3 id="quick-commands">Quick Commands</h3>
 
-| Shortcut     | Description                        | Notes                                                     |
+| 快捷键     | 描述                        | 备注                                                     |
 | :----------- | :--------------------------------- | :-------------------------------------------------------- |
-| `#` at start | Memory shortcut add to CLAUDE.md | Prompts for file selection                                |
-| `/` at start | Slash command                      |  
+| 开头的 `#` | 内存快捷键添加到 CLAUDE.md | 提示选择文件                                |
+| 开头的 `/` | 斜杠命令                      |  
 
 <h2 id="vim-mode">Vim 模式</h2>
 
@@ -494,42 +494,42 @@ claude --dangerously-skip-permissions               # Skip permission prompts (u
 
 <h3 id="vim-mode-switching">Vim Mode Switching</h3>
 
-| Command | Action                      | From mode |
+| 命令 | 操作                      | 来源模式 |
 | :------ | :-------------------------- | :-------- |
-| `Esc`   | Enter NORMAL mode           | INSERT    |
-| `i`     | Insert before cursor        | NORMAL    |
-| `I`     | Insert at beginning of line | NORMAL    |
-| `a`     | Insert after cursor         | NORMAL    |
-| `A`     | Insert at end of line       | NORMAL    |
-| `o`     | Open line below             | NORMAL    |
-| `O`     | Open line above             | NORMAL    |
+| `Esc`   | 进入 NORMAL 模式           | INSERT    |
+| `i`     | 在光标前插入        | NORMAL    |
+| `I`     | 在行首插入 | NORMAL    |
+| `a`     | 在光标后插入         | NORMAL    |
+| `A`     | 在行尾插入       | NORMAL    |
+| `o`     | 在下方开新行             | NORMAL    |
+| `O`     | 在上方开新行             | NORMAL    |
 
 <h3 id="vim-navigation">Vim Navigation</h3>
 
-| Command         | Action                    |
+| 命令         | 操作                    |
 | :-------------- | :------------------------ |
-| `h`/`j`/`k`/`l` | Move left/down/up/right   |
-| `w`             | Next word                 |
-| `e`             | End of word               |
-| `b`             | Previous word             |
-| `0`             | Beginning of line         |
-| `$`             | End of line               |
-| `^`             | First non-blank character |
-| `gg`            | Beginning of input        |
-| `G`             | End of input              |
+| `h`/`j`/`k`/`l` | 左/下/上/右移动   |
+| `w`             | 下一个单词                 |
+| `e`             | 单词结尾               |
+| `b`             | 上一个单词             |
+| `0`             | 行首         |
+| `$`             | 行尾               |
+| `^`             | 首个非空字符 |
+| `gg`            | 输入开始        |
+| `G`             | 输入结束              |
 
 <h3 id="vim-editing">Vim Editing</h3>
 
-| Command        | Action                  |
+| 命令        | 操作                  |
 | :------------- | :---------------------- |
-| `x`            | Delete character        |
-| `dd`           | Delete line             |
-| `D`            | Delete to end of line   |
-| `dw`/`de`/`db` | Delete word/to end/back |
-| `cc`           | Change line             |
-| `C`            | Change to end of line   |
-| `cw`/`ce`/`cb` | Change word/to end/back |
-| `.`            | Repeat last change      |
+| `x`            | 删除字符        |
+| `dd`           | 删除行             |
+| `D`            | 删除到行尾   |
+| `dw`/`de`/`db` | 删除单词/到尾/向后 |
+| `cc`           | 修改行             |
+| `C`            | 修改到行尾   |
+| `cw`/`ce`/`cb` | 修改单词/到尾/向后 |
+| `.`            | 重复上次修改      |
 
 > [!Tip]
 > Configure your preferred line break behavior in terminal settings. Run `/terminal-setup` to install Shift+Enter binding for iTerm2 and VS Code terminals.
@@ -1059,16 +1059,16 @@ Hooks communicate status through exit codes, stdout, and stderr:
 
 ##### Exit Code 2 Behavior
 
-| Hook Event         | Behavior                                                           |
+| 钩子事件         | 行为                                                           |
 | ------------------ | ------------------------------------------------------------------ |
-| `PreToolUse`       | Blocks the tool call, shows stderr to Claude                       |
-| `PostToolUse`      | Shows stderr to Claude (tool already ran)                          |
-| `Notification`     | N/A, shows stderr to user only                                     |
-| `UserPromptSubmit` | Blocks prompt processing, erases prompt, shows stderr to user only |
-| `Stop`             | Blocks stoppage, shows stderr to Claude                            |
-| `SubagentStop`     | Blocks stoppage, shows stderr to Claude subagent                   |
-| `PreCompact`       | N/A, shows stderr to user only                                     |
-| `SessionStart`     | N/A, shows stderr to user only                                     |
+| `PreToolUse`       | 阻止工具调用，将 stderr 显示给 Claude                       |
+| `PostToolUse`      | 将 stderr 显示给 Claude（工具已运行）                          |
+| `Notification`     | 不适用，仅将 stderr 显示给用户                                     |
+| `UserPromptSubmit` | 阻止提示处理，清除提示，仅将 stderr 显示给用户 |
+| `Stop`             | 阻止停止，将 stderr 显示给 Claude                            |
+| `SubagentStop`     | 阻止停止，将 stderr 显示给 Claude 子代理                   |
+| `PreCompact`       | 不适用，仅将 stderr 显示给用户                                     |
+| `SessionStart`     | 不适用，仅将 stderr 显示给用户                                     |
 
 #### 高级：JSON 输出
 
