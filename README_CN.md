@@ -552,8 +552,8 @@ claude --dangerously-skip-permissions               # 跳过权限提示（谨�
 <h2 id="thinking-keywords">思考关键词</h2>
 
 > [!Note]
-> **Gives Claude extra pre-answer planning time by adding ONE of these keywords to your prompt.**
-> **Order (lowest → highest) token consumption**
+> **通过在提示中添加以下关键词之一，为 Claude 提供额外的预答案规划时间。**
+> **顺序（从低到高）token 消耗量**
 > <table><tr><td>
 > 
 > > **<kbd>think</kbd> -------------> Lowest**
@@ -566,154 +566,154 @@ claude --dangerously-skip-permissions               # 跳过权限提示（谨�
 > 
 > </td></tr></table>
 
-<h3 id="this-makes-claude-spend-more-time">This makes Claude spend more time:</h3>
+<h3 id="this-makes-claude-spend-more-time">这会让 Claude 花费更多时间：</h3>
 
-1. **Planning the solution**
-2. #### breaking down steps
-3. #### weighing alternatives/trade-offs
-4. #### checking constraints & edge cases
-> > #### Higher levels usually increase **latency** and **token usage** pick the smallest that works.
+1. **规划解决方案**
+2. #### 分解步骤
+3. #### 权衡备选方案/权衡利弊
+4. #### 检查约束条件和边界情况
+> > #### 更高级别通常会增加**延迟**和**token 使用量**，请选择有效的最小级别。
 
 
-<h5 id="thinking-examples">Examples</h5>
+<h5 id="thinking-examples">示例</h5>
 
 ```md
-# Small boost
-claude -p "Think. Outline a plan to refactor the auth module."
+# 小幅提升
+claude -p "Think. 概述重构认证模块的计划。"
 
-# Medium boost
-claude -p "Think harder. Draft a migration plan from REST to gRPC."
+# 中等提升
+claude -p "Think harder. 起草从 REST 到 gRPC 的迁移计划。"
 
-# Max boost
-claude -p "Ultrathink. Propose a step-by-step strategy to fix flaky payment tests and add guardrails."
+# 最大提升
+claude -p "Ultrathink. 提出修复不稳定支付测试并添加防护措施的分步策略。"
 ```
 
 <h2 id="sub-agents">子代理</h2>
 
-> Sub‑Agents are purpose‑built helpers with their **own prompts, tools, and isolated context windows**. Treat this like a "mixture‑of‑experts" you **compose** per repo.
+> 子代理是专门构建的助手，具有它们**自己的提示、工具和隔离的上下文窗口**。将其视为您每个仓库**组合**的“混合专家”。
 
-**When to use them**
-> - You need high signal responses (plans, reviews, diffs) without side quests.
-> - You want version‑controlled prompts and tool policies alongside the codebase.
-> - You work in PR‑driven teams and want scoped edits by role.
+**何时使用**
+> - 您需要高信号响应（计划、审查、差异）而无支线任务。
+> - 您希望与代码库一起进行版本控制的提示和工具策略。
+> - 您在 PR 驱动的团队中工作，希望按角色进行限定范围的编辑。
 
-<h3 id="each-sub-agent-has-its-own-context">Each Sub‑Agent Has Its Own Context</h3>
+<h3 id="each-sub-agent-has-its-own-context">每个子代理都有自己的上下文</h3>
 
-**Design rules for your lineup**
-> - Define **one clear responsibility** per agent.
-> - Keep the **minimum** tool set needed for that role.
-> - Prefer **read‑only** agents for analysis/review tasks.
-> - Give edit powers to as few agents as possible.
+**阵容设计规则**
+> - 为每个代理定义**一个明确的职责**。
+> - 保持该角色所需的**最小**工具集。
+> - 对于分析/审查任务，优先使用**只读**代理。
+> - 给尽可能少的代理编辑权限。
 
 <img width="700" height="160" alt="image" src="https://github.com/user-attachments/assets/42767417-20aa-4bd4-aaf2-cfa0e515b54b" />
 
-*Caption: Agents selection UI in the terminal.*
+*说明：终端中的代理选择 UI。*
 
-<h3 id="configure-agents">Configure Agents</h3>
+<h3 id="configure-agents">配置代理</h3>
 
-> Keep agents **in the project** so they're versioned with the repo and evolve via PRs.
+> 将代理保持**在项目中**，这样它们会与仓库一起进行版本控制，并通过 PR 演进。
 
-<h3 id="agents-quick-start">Quick start</h3>
+<h3 id="agents-quick-start">快速开始</h3>
 
-> Update CLI and open the agents panel
+> 更新 CLI 并打开代理面板
 ```bash
 claude update
 /agents
 ```
 
-<h3 id="create-your-core-agents">Create your core agents</h3>
+<h3 id="create-your-core-agents">创建核心代理</h3>
 
-> - **planner** (read‑only): turns features/issues into small, testable tasks; outputs a task list or plan.md.
-> - **codegen** (edit‑capable): implements tasks; limited to `src/` + `tests/`.
-> - **tester** (read‑only or patch‑only): writes *one* failing test or a minimal repro.
-> - **reviewer** (read‑only): leaves structured review comments; never edits.
-> - **docs** (edit‑capable): updates `README.md`/`docs/` only.
+> - **planner**（只读）：将功能/问题转化为小的、可测试的任务；输出任务列表或 plan.md。
+> - **codegen**（可编辑）：实现任务；限制于 `src/` + `tests/`。
+> - **tester**（只读或仅补丁）：编写*一个*失败测试或最小复现。
+> - **reviewer**（只读）：留下结构化的审查意见；从不编辑。
+> - **docs**（可编辑）：仅更新 `README.md`/`docs/`。
 
-***Policy** tip: Prefer **patch output** for edit‑capable agents so changes land through your normal Git workflow.*
+***策略**提示：对于可编辑的代理，优先使用**补丁输出**，这样更改会通过您的正常 Git 工作流落地。*
 
 <img width="700" height="173" alt="image" src="https://github.com/user-attachments/assets/84bc80de-35b8-4ef7-9b27-f74f7d4a51f9" />
 
-*Caption: Choose only the tools an agent truly needs (e.g., advisory vs editing access).*
+*说明：仅选择代理真正需要的工具（例如，咨询访问 vs 编辑访问）。*
 
-<h3 id="example-prompts">Example prompts</h3>
+<h3 id="example-prompts">示例提示</h3>
 
-> Keep prompts short, testable, and repo‑specific. Check them into `agents/`:
+> 保持提示简短、可测试且特定于仓库。将它们检入 `agents/`：
 
 <img width="700" height="217" alt="image" src="https://github.com/user-attachments/assets/b4f92591-ff5c-4775-aec2-051f145b9616" />
 
-*Caption: Example prompt for a **test‑coverage‑analyzer** agent.*
+*说明：**测试覆盖率分析器**代理的示例提示。*
 
-**tester.prompt.md (sample)**
+**tester.prompt.md（示例）**
 ```
-Role: Write a single, focused failing test for the specific scenario I describe.
-Scope: Only create/modify tests under tests/. Do not change src/.
-Output: A brief rationale + a unified diff or patch.
-If the scenario is unclear, ask exactly one clarifying question.
+角色：为我描述的特定场景编写一个单一、专注的失败测试。
+范围：仅在 tests/ 下创建/修改测试。不要更改 src/。
+输出：简要的理由 + 统一差异或补丁。
+如果场景不清楚，请只问一个澄清问题。
 ```
 
-<h3 id="expected-output">Expected output</h3>
+<h3 id="expected-output">预期输出</h3>
 
-> Your tester agent should produce a small diff or patch plus a short rationale:
+> 您的测试器代理应该产生一个小的差异或补丁加上简短的理由：
 
 <img width="700" height="273" alt="image" src="https://github.com/user-attachments/assets/839151ce-02c9-4283-a53b-9dd105802ada" />
 
-*Caption: Example response from the **test‑coverage‑analyzer** agent.*
+*说明：**测试覆盖率分析器**代理的示例响应。*
 
-<h3 id="why-this-shift-matters">Why This Shift Matters</h3>
+<h3 id="why-this-shift-matters">为什么这种转变很重要</h3>
 
-**Operational benefits**
-> - **Less context switching:** you stay in one mental mode; agents do the rest.
-> - **Cleaner PRs:** narrow prompts + limited tools → smaller, reviewable diffs.
-> - **Fewer regressions:** tester/reviewer agents catch gaps before merge.
-> - **Repeatability:** prompts + policies live in the repo and travel with branches.
+**运营益处**
+> - **更少的上下文切换：**您保持在一种思维模式中；代理做其余工作。
+> - **更清洁的 PR：**狭窄的提示 + 有限的工具 → 更小、可审查的差异。
+> - **更少的退化：**测试器/审查器代理在合并前捕获缺口。
+> - **可重复性：**提示 + 策略住在仓库中，并与分支一起移动。
 
-**Security & governance**
-> - Limit write access by path (e.g., `src/`, `tests/`, `docs/`).
-> - Favor read‑only analysis for high‑risk areas.
-> - Log/commit assistant outputs as patches for auditability.
+**安全与治理**
+> - 按路径限制写入访问（例如，`src/`、`tests/`、`docs/`）。
+> - 对于高风险区域，优先使用只读分析。
+> - 将助手输出作为补丁记录/提交，以便审计。
 
-<h3 id="a-mindset-shift">A Mindset Shift</h3>
+<h3 id="a-mindset-shift">思维转变</h3>
 
-**Do**
-> - Treat agents as teammates with job descriptions.
-> - Start read‑only; grant write access *last*.
-> - Keep prompts in version control and iterate via PR.
+**做**
+> - 将代理视为具有工作描述的队友。
+> - 从只读开始；*最后*授予写入访问权限。
+> - 将提示保持在版本控制中，并通过 PR 迭代。
 
-**Don't**
-> - Ask one agent to plan, code, and test in a single turn.
-> - Give blanket write permissions.
-> - Accept multi‑file diffs when you asked for one test.
+**不要**
+> - 要求一个代理在单次轮次中计划、编码和测试。
+> - 给予全面的写入权限。
+> - 当您要求一个测试时，接受多文件差异。
 
 <h2 id="mcp-integration">MCP 集成</h2>
 
-<h3 id="understanding-mcp-model-context-protocol">Understanding MCP (Model Context Protocol)</h3>
+<h3 id="understanding-mcp-model-context-protocol">理解 MCP（模型上下文协议）</h3>
 
 #### MCP 是什么？
-> MCP extends Claude's capabilities by connecting to external services, databases, APIs, and tools (filesystem, Puppeteer, GitHub, Context7 etc...)
+> MCP 通过连接到外部服务、数据库、API 和工具（文件系统、Puppeteer、GitHub、Context7 等）来扩展 Claude 的能力。
 
 
-###### **MCP Architecture:**
+###### **MCP 架构：**
 ```
-Claude Code ←→ MCP Protocol ←→ MCP Servers ←→ External Services
+Claude Code ←→ MCP 协议 ←→ MCP 服务器 ←→ 外部服务
 ```
 
-<h3 id="mcp-setup--configuration">MCP Setup & Configuration</h3>
+<h3 id="mcp-setup--configuration">MCP 设置与配置</h3>
 
-###### Basic MCP Commands
+###### 基本 MCP 命令
 ```bash
-claude mcp                   # Interactive MCP configuration
-claude mcp list              # List configured servers            
-claude mcp add <name> <cmd>  # Add new server
-claude mcp remove <name>     # Remove server
+claude mcp                   # 交互式 MCP 配置
+claude mcp list              # 列出配置的服务器            
+claude mcp add <name> <cmd>  # 添加新服务器
+claude mcp remove <name>     # 删除服务器
 ```
 
-###### MCP Configuration File Location
+###### MCP 配置文件位置
 ```bash
-~/.claude.json      # Global File
-`.mcp.json`         # Project-scoped servers are stored in a File at your project's root directory
+~/.claude.json      # 全局文件
+`.mcp.json`         # 项目范围的服务器存储在项目根目录的文件中
 ```
 
-<h3 id="popular-mcp-servers">Popular MCP Servers</h3>
+<h3 id="popular-mcp-servers">流行的 MCP 服务器</h3>
 
 #### 开发工具
 ```bash
@@ -729,7 +729,7 @@ npm install -g postgres-mcp-server
 npm install -g mysql-mcp-server                  
 npm install -g sqlite-mcp-server               
 
-# Setup examples may look like this:
+# 设置示例可能如下所示：
 # export POSTGRES_URL="postgresql://user:password@localhost:5432/mydb"
 # claude mcp add postgres "postgres-mcp-server --url $POSTGRES_URL"
 ```
@@ -737,36 +737,36 @@ npm install -g sqlite-mcp-server
 #### MCP 工具权限
 
 ```bash
-# Allow specific MCP tools 
+# 允许特定的 MCP 工具 
 claude --allowedTools "mcp__git__commit,mcp__git__push"
 
-# Allow all tools from specific server
+# 允许来自特定服务器的所有工具
 claude --allowedTools "mcp__postgres__*"
 
-# Combined with built-in tools
+# 与内置工具结合
 claude --allowedTools "Edit,View,mcp__git__*"
 ```
 
 <h2 id="hooks-system">钩子系统</h2>
 
-> This page provides reference documentation for implementing hooks in Claude Code.
+> 本页提供在 Claude Code 中实现钩子的参考文档。
 
 <Tip>
-  For a quickstart guide with examples, see [Get started with Claude Code hooks](/en/docs/claude-code/hooks-guide).
+  要获取带有示例的快速入门指南，请参阅 [Claude Code 钩子入门](/en/docs/claude-code/hooks-guide)。
 </Tip>
 
-<h3 id="hooks-configuration">Configuration</h3>
+<h3 id="hooks-configuration">配置</h3>
 
-Claude Code hooks are configured in your [settings files](/en/docs/claude-code/settings):
+Claude Code 钩子在您的 [设置文件](/en/docs/claude-code/settings) 中配置：
 
-* `~/.claude/settings.json` - User settings
-* `.claude/settings.json` - Project settings
-* `.claude/settings.local.json` - Local project settings (not committed)
-* Enterprise managed policy settings
+* `~/.claude/settings.json` - 用户设置
+* `.claude/settings.json` - 项目设置
+* `.claude/settings.local.json` - 本地项目设置（不提交）
+* 企业管理的策略设置
 
 #### 结构
 
-Hooks are organized by matchers, where each matcher can have multiple hooks:
+钩子按匹配器组织，每个匹配器可以有多个钩子：
 
 ```json
 {
@@ -786,21 +786,19 @@ Hooks are organized by matchers, where each matcher can have multiple hooks:
 }
 ```
 
-* **matcher**: Pattern to match tool names, case-sensitive (only applicable for
-  `PreToolUse` and `PostToolUse`)
-  * Simple strings match exactly: `Write` matches only the Write tool
-  * Supports regex: `Edit|Write` or `Notebook.*`
-  * Use `*` to match all tools. You can also use empty string (`""`) or leave
-    `matcher` blank.
-* **hooks**: Array of commands to execute when the pattern matches
-  * `type`: Currently only `"command"` is supported
-  * `command`: The bash command to execute (can use `$CLAUDE_PROJECT_DIR`
-    environment variable)
-  * `timeout`: (Optional) How long a command should run, in seconds, before
-    canceling that specific command.
+* **matcher**: 匹配工具名称的模式，区分大小写（仅适用于
+  `PreToolUse` 和 `PostToolUse`）
+  * 简单字符串精确匹配：`Write` 仅匹配 Write 工具
+  * 支持正则表达式：`Edit|Write` 或 `Notebook.*`
+  * 使用 `*` 匹配所有工具。您也可以使用空字符串（`""`）或留空
+    `matcher`。
+* **hooks**: 当模式匹配时执行的命令数组
+  * `type`: 目前仅支持 `"command"`
+  * `command`: 要执行的 bash 命令（可以使用 `$CLAUDE_PROJECT_DIR`
+    环境变量）
+  * `timeout`: （可选）在取消该特定命令之前，命令应该运行多久（以秒为单位）。
 
-For events like `UserPromptSubmit`, `Notification`, `Stop`, and `SubagentStop`
-that don't use matchers, you can omit the matcher field:
+对于不使用匹配器的事件（如 `UserPromptSubmit`、`Notification`、`Stop` 和 `SubagentStop`），您可以省略 matcher 字段：
 
 ```json
 {
@@ -821,9 +819,7 @@ that don't use matchers, you can omit the matcher field:
 
 #### 项目特定的钩子脚本
 
-You can use the environment variable `CLAUDE_PROJECT_DIR` (only available when
-Claude Code spawns the hook command) to reference scripts stored in your project,
-ensuring they work regardless of Claude's current directory:
+您可以使用环境变量 `CLAUDE_PROJECT_DIR`（仅在 Claude Code 生成钩子命令时可用）来引用存储在项目中的脚本，确保它们无论 Claude 的当前目录如何都能正常工作：
 
 ```json
 {
@@ -843,95 +839,89 @@ ensuring they work regardless of Claude's current directory:
 }
 ```
 
-<h3 id="hook-events">Hook Events</h3>
+<h3 id="hook-events">钩子事件</h3>
 
 #### 工具使用前
 
-Runs after Claude creates tool parameters and before processing the tool call.
+在 Claude 创建工具参数之后、处理工具调用之前运行。
 
-**Common matchers:**
+**常用匹配器：**
 
-* `Task` - Subagent tasks (see [subagents documentation](/en/docs/claude-code/sub-agents))
-* `Bash` - Shell commands
-* `Glob` - File pattern matching
-* `Grep` - Content search
-* `Read` - File reading
-* `Edit`, `MultiEdit` - File editing
-* `Write` - File writing
-* `WebFetch`, `WebSearch` - Web operations
+* `Task` - 子代理任务（参见 [子代理文档](/en/docs/claude-code/sub-agents)）
+* `Bash` - Shell 命令
+* `Glob` - 文件模式匹配
+* `Grep` - 内容搜索
+* `Read` - 文件读取
+* `Edit`, `MultiEdit` - 文件编辑
+* `Write` - 文件写入
+* `WebFetch`, `WebSearch` - Web 操作
 
 #### 工具使用后
 
-Runs immediately after a tool completes successfully.
+在工具成功完成后立即运行。
 
-Recognizes the same matcher values as PreToolUse.
+识别与 PreToolUse 相同的匹配器值。
 
 #### 通知
 
-Runs when Claude Code sends notifications. Notifications are sent when:
+在 Claude Code 发送通知时运行。在以下情况下会发送通知：
 
-1. Claude needs your permission to use a tool. Example: "Claude needs your
-   permission to use Bash"
-2. The prompt input has been idle for at least 60 seconds. "Claude is waiting
-   for your input"
+1. Claude 需要您的权限来使用工具。示例：“Claude 需要您的
+   权限来使用 Bash”
+2. 提示输入已空闲至少 60 秒。“Claude 正在等待
+   您的输入”
 
 #### 用户提示提交
 
-Runs when the user submits a prompt, before Claude processes it. This allows you
-to add additional context based on the prompt/conversation, validate prompts, or
-block certain types of prompts.
+在用户提交提示时、Claude 处理之前运行。这允许您根据提示/对话添加额外上下文、验证提示或阻止某些类型的提示。
 
 #### 停止
 
-Runs when the main Claude Code agent has finished responding. Does not run if
-the stoppage occurred due to a user interrupt.
+在主 Claude Code 代理完成响应时运行。如果停止是由于用户中断导致的，则不会运行。
 
 #### 子代理停止
 
-Runs when a Claude Code subagent (Task tool call) has finished responding.
+在 Claude Code 子代理（Task 工具调用）完成响应时运行。
 
 #### 压缩前
 
-Runs before Claude Code is about to run a compact operation.
+在 Claude Code 即将运行压缩操作之前运行。
 
-**Matchers:**
+**匹配器：**
 
-* `manual` - Invoked from `/compact`
-* `auto` - Invoked from auto-compact (due to full context window)
+* `manual` - 从 `/compact` 调用
+* `auto` - 从自动压缩调用（由于上下文窗口已满）
 
 #### 会话开始
 
-Runs when Claude Code starts a new session or resumes an existing session (which
-currently does start a new session under the hood). Useful for loading in
-development context like existing issues or recent changes to your codebase.
+在 Claude Code 启动新会话或恢复现有会话时运行（目前在底层会启动新会话）。对于加载开发上下文（如现有问题或代码库的最近更改）很有用。
 
-**Matchers:**
+**匹配器：**
 
-* `startup` - Invoked from startup
-* `resume` - Invoked from `--resume`, `--continue`, or `/resume`
-* `clear` - Invoked from `/clear`
+* `startup` - 从启动调用
+* `resume` - 从 `--resume`、`--continue` 或 `/resume` 调用
+* `clear` - 从 `/clear` 调用
 
-<h3 id="hook-input">Hook Input</h3>
+<h3 id="hook-input">钩子输入</h3>
 
-Hooks receive JSON data via stdin containing session information and
-event-specific data:
+钩子通过 stdin 接收包含会话信息和事件特定数据的 JSON 数据：
 
 ```typescript
 {
-  // Common fields
+  // 公共字段
   session_id: string
-  transcript_path: string  // Path to conversation JSON
-  cwd: string              // The current working directory when the hook is invoked
+  transcript_path: string  // 对话 JSON 的路径
+  cwd: string              // 调用钩子时的当前工作目录
 
-  // Event-specific fields
+  // 事件特定字段
   hook_event_name: string
   ...
 }
 ```
 
-#### 工具使用前 Input
+#### 工具使用前输入
 
-The exact schema for `tool_input` depends on the tool.
+`tool_input` 的确切模式取决于工具。
 
 ```json
 {
@@ -947,9 +937,9 @@ The exact schema for `tool_input` depends on the tool.
 }
 ```
 
-#### 工具使用后 Input
+#### 工具使用后输入
 
-The exact schema for `tool_input` and `tool_response` depends on the tool.
+`tool_input` 和 `tool_response` 的确切模式取决于工具。
 
 ```json
 {
@@ -969,7 +959,7 @@ The exact schema for `tool_input` and `tool_response` depends on the tool.
 }
 ```
 
-#### 通知 Input
+#### 通知输入
 
 ```json
 {
@@ -981,7 +971,7 @@ The exact schema for `tool_input` and `tool_response` depends on the tool.
 }
 ```
 
-#### 用户提示提交 Input
+#### 用户提示提交输入
 
 ```json
 {
@@ -993,11 +983,9 @@ The exact schema for `tool_input` and `tool_response` depends on the tool.
 }
 ```
 
-#### 停止 and SubagentStop Input
+#### 停止和子代理停止输入
 
-`stop_hook_active` is true when Claude Code is already continuing as a result of
-a stop hook. Check this value or process the transcript to prevent Claude Code
-from running indefinitely.
+当 Claude Code 已经由于停止钩子而继续运行时，`stop_hook_active` 为 true。检查此值或处理记录以防止 Claude Code 无限期运行。
 
 ```json
 {
@@ -1008,10 +996,9 @@ from running indefinitely.
 }
 ```
 
-#### 压缩前 Input
+#### 压缩前输入
 
-For `manual`, `custom_instructions` comes from what the user passes into
-`/compact`. For `auto`, `custom_instructions` is empty.
+对于 `manual`，`custom_instructions` 来自用户传递给 `/compact` 的内容。对于 `auto`，`custom_instructions` 为空。
 
 ```json
 {
@@ -1023,7 +1010,7 @@ For `manual`, `custom_instructions` comes from what the user passes into
 }
 ```
 
-#### 会话开始 Input
+#### 会话开始输入
 
 ```json
 {
@@ -1034,30 +1021,26 @@ For `manual`, `custom_instructions` comes from what the user passes into
 }
 ```
 
-<h3 id="hook-output">Hook Output</h3>
+<h3 id="hook-output">钩子输出</h3>
 
-There are two ways for hooks to return output back to Claude Code. The output
-communicates whether to block and any feedback that should be shown to Claude
-and the user.
+钩子有两种方式将输出返回给 Claude Code。输出传达是否阻止以及应该向 Claude 和用户显示的任何反馈。
 
 #### 简单：退出代码
 
-Hooks communicate status through exit codes, stdout, and stderr:
+钩子通过退出代码、stdout 和 stderr 来传达状态：
 
-* **Exit code 0**: Success. `stdout` is shown to the user in transcript mode
-  (CTRL-R), except for `UserPromptSubmit` and `SessionStart`, where stdout is
-  added to the context.
-* **Exit code 2**: Blocking error. `stderr` is fed back to Claude to process
-  automatically. See per-hook-event behavior below.
-* **Other exit codes**: Non-blocking error. `stderr` is shown to the user and
-  execution continues.
+* **退出代码 0**：成功。`stdout` 在记录模式中显示给用户
+  （CTRL-R），除了 `UserPromptSubmit` 和 `SessionStart`，其 stdout 被
+  添加到上下文中。
+* **退出代码 2**：阻止错误。`stderr` 被反馈给 Claude 自动处理。
+  请参阅下面的每个钩子事件行为。
+* **其他退出代码**：非阻止错误。`stderr` 显示给用户，执行继续。
 
 <Warning>
-  Reminder: Claude Code does not see stdout if the exit code is 0, except for
-  the `UserPromptSubmit` hook where stdout is injected as context.
+  提醒：如果退出代码为 0，Claude Code 不会看到 stdout，除了 `UserPromptSubmit` 钩子，其中 stdout 被注入为上下文。
 </Warning>
 
-##### Exit Code 2 Behavior
+##### 退出代码 2 行为
 
 | 钩子事件         | 行为                                                           |
 | ------------------ | ------------------------------------------------------------------ |
@@ -1072,46 +1055,45 @@ Hooks communicate status through exit codes, stdout, and stderr:
 
 #### 高级：JSON 输出
 
-Hooks can return structured JSON in `stdout` for more sophisticated control:
+钩子可以在 `stdout` 中返回结构化的 JSON 以进行更复杂的控制：
 
-##### Common JSON Fields
+##### 公共 JSON 字段
 
-All hook types can include these optional fields:
+所有钩子类型都可以包含这些可选字段：
 
 ```json
 {
-  "continue": true, // Whether Claude should continue after hook execution (default: true)
-  "stopReason": "string" // Message shown when continue is false
-  "suppressOutput": true, // Hide stdout from transcript mode (default: false)
+  "continue": true, // Claude 是否应在钩子执行后继续（默认：true）
+  "stopReason": "string" // 当 continue 为 false 时显示的消息
+  "suppressOutput": true, // 在记录模式中隐藏 stdout（默认：false）
 }
 ```
 
-If `continue` is false, Claude stops processing after the hooks run.
+如果 `continue` 为 false，Claude 在钩子运行后停止处理。
 
-* For `PreToolUse`, this is different from `"permissionDecision": "deny"`, which
-  only blocks a specific tool call and provides automatic feedback to Claude.
-* For `PostToolUse`, this is different from `"decision": "block"`, which
-  provides automated feedback to Claude.
-* For `UserPromptSubmit`, this prevents the prompt from being processed.
-* For `Stop` and `SubagentStop`, this takes precedence over any
-  `"decision": "block"` output.
-* In all cases, `"continue" = false` takes precedence over any
-  `"decision": "block"` output.
+* 对于 `PreToolUse`，这与 `"permissionDecision": "deny"` 不同，后者
+  仅阻止特定的工具调用并向 Claude 提供自动反馈。
+* 对于 `PostToolUse`，这与 `"decision": "block"` 不同，后者
+  向 Claude 提供自动化反馈。
+* 对于 `UserPromptSubmit`，这会阻止提示被处理。
+* 对于 `Stop` 和 `SubagentStop`，这优先于任何
+  `"decision": "block"` 输出。
+* 在所有情况下，`"continue" = false` 优先于任何
+  `"decision": "block"` 输出。
 
-`stopReason` accompanies `continue` with a reason shown to the user, not shown
-to Claude.
+`stopReason` 伴随 `continue` 提供显示给用户的原因，不显示给 Claude。
 
-##### `PreToolUse` Decision Control
+##### `PreToolUse` 决策控制
 
-`PreToolUse` hooks can control whether a tool call proceeds.
+`PreToolUse` 钩子可以控制工具调用是否继续。
 
-* `"allow"` bypasses the permission system. `permissionDecisionReason` is shown
-  to the user but not to Claude. (*Deprecated `"approve"` value + `reason` has
-  the same behavior.*)
-* `"deny"` prevents the tool call from executing. `permissionDecisionReason` is
-  shown to Claude. (*`"block"` value + `reason` has the same behavior.*)
-* `"ask"` asks the user to confirm the tool call in the UI.
-  `permissionDecisionReason` is shown to the user but not to Claude.
+* `"allow"` 绕过权限系统。`permissionDecisionReason` 显示
+  给用户但不显示给 Claude。（*已弃用的 `"approve"` 值 + `reason` 具有
+  相同行为。*）
+* `"deny"` 阻止工具调用执行。`permissionDecisionReason` 显示
+  给 Claude。（*`"block"` 值 + `reason` 具有相同行为。*）
+* `"ask"` 要求用户在 UI 中确认工具调用。
+  `permissionDecisionReason` 显示给用户但不显示给 Claude。
 
 ```json
 {
@@ -1125,12 +1107,12 @@ to Claude.
 }
 ```
 
-##### `PostToolUse` Decision Control
+##### `PostToolUse` 决策控制
 
-`PostToolUse` hooks can control whether a tool call proceeds.
+`PostToolUse` 钩子可以控制工具调用是否继续。
 
-* `"block"` automatically prompts Claude with `reason`.
-* `undefined` does nothing. `reason` is ignored.
+* `"block"` 自动使用 `reason` 提示 Claude。
+* `undefined` 不做任何事。忽略 `reason`。
 
 ```json
 {
@@ -1139,15 +1121,15 @@ to Claude.
 }
 ```
 
-##### `UserPromptSubmit` Decision Control
+##### `UserPromptSubmit` 决策控制
 
-`UserPromptSubmit` hooks can control whether a user prompt is processed.
+`UserPromptSubmit` 钩子可以控制用户提示是否被处理。
 
-* `"block"` prevents the prompt from being processed. The submitted prompt is
-  erased from context. `"reason"` is shown to the user but not added to context.
-* `undefined` allows the prompt to proceed normally. `"reason"` is ignored.
-* `"hookSpecificOutput.additionalContext"` adds the string to the context if not
-  blocked.
+* `"block"` 阻止提示被处理。提交的提示从上下文中
+  删除。`"reason"` 显示给用户但不添加到上下文。
+* `undefined` 允许提示正常进行。忽略 `"reason"`。
+* `"hookSpecificOutput.additionalContext"` 如果未被阻止，将字符串
+  添加到上下文。
 
 ```json
 {
@@ -1160,13 +1142,13 @@ to Claude.
 }
 ```
 
-##### `Stop`/`SubagentStop` Decision Control
+##### `Stop`/`SubagentStop` 决策控制
 
-`Stop` and `SubagentStop` hooks can control whether Claude must continue.
+`Stop` 和 `SubagentStop` 钩子可以控制 Claude 是否必须继续。
 
-* `"block"` prevents Claude from stopping. You must populate `reason` for Claude
-  to know how to proceed.
-* `undefined` allows Claude to stop. `reason` is ignored.
+* `"block"` 阻止 Claude 停止。您必须填写 `reason` 以便 Claude
+  知道如何继续。
+* `undefined` 允许 Claude 停止。忽略 `reason`。
 
 ```json
 {
@@ -1175,11 +1157,11 @@ to Claude.
 }
 ```
 
-##### `SessionStart` Decision Control
+##### `SessionStart` 决策控制
 
-`SessionStart` hooks allow you to load in context at the start of a session.
+`SessionStart` 钩子允许您在会话开始时加载上下文。
 
-* `"hookSpecificOutput.additionalContext"` adds the string to the context.
+* `"hookSpecificOutput.additionalContext"` 将字符串添加到上下文。
 
 ```json
 {
@@ -1190,7 +1172,7 @@ to Claude.
 }
 ```
 
-##### Exit Code Example: Bash Command Validation
+##### 退出代码示例：Bash 命令验证
 
 ```python
 #!/usr/bin/env python3
@@ -1198,15 +1180,15 @@ import json
 import re
 import sys
 
-# Define validation rules as a list of (regex pattern, message) tuples
+# 将验证规则定义为（正则模式，消息）元组的列表
 VALIDATION_RULES = [
     (
         r"\bgrep\b(?!.*\|)",
-        "Use 'rg' (ripgrep) instead of 'grep' for better performance and features",
+        "使用 'rg' (ripgrep) 而不是 'grep' 以获得更好的性能和功能",
     ),
     (
         r"\bfind\s+\S+\s+-name\b",
-        "Use 'rg --files | rg pattern' or 'rg --files -g pattern' instead of 'find -name' for better performance",
+        "使用 'rg --files | rg pattern' 或 'rg --files -g pattern' 而不是 'find -name' 以获得更好的性能",
     ),
 ]
 
@@ -1232,23 +1214,23 @@ command = tool_input.get("command", "")
 if tool_name != "Bash" or not command:
     sys.exit(1)
 
-# Validate the command
+# 验证命令
 issues = validate_command(command)
 
 if issues:
     for message in issues:
         print(f"• {message}", file=sys.stderr)
-    # Exit code 2 blocks tool call and shows stderr to Claude
+    # 退出代码 2 阻止工具调用并向 Claude 显示 stderr
     sys.exit(2)
 ```
 
-##### JSON Output Example: UserPromptSubmit to Add Context and Validation
+##### JSON 输出示例：UserPromptSubmit 添加上下文和验证
 
 <Note>
-  For `UserPromptSubmit` hooks, you can inject context using either method:
+  对于 `UserPromptSubmit` 钩子，您可以使用任一方法注入上下文：
 
-  * Exit code 0 with stdout: Claude sees the context (special case for `UserPromptSubmit`)
-  * JSON output: Provides more control over the behavior
+  * 退出代码 0 加 stdout：Claude 看到上下文（`UserPromptSubmit` 的特殊情况）
+  * JSON 输出：提供对行为的更多控制
 </Note>
 
 ```python
@@ -1267,27 +1249,27 @@ except json.JSONDecodeError as e:
 
 prompt = input_data.get("prompt", "")
 
-# Check for sensitive patterns
+# 检查敏感模式
 sensitive_patterns = [
-    (r"(?i)\b(password|secret|key|token)\s*[:=]", "Prompt contains potential secrets"),
+    (r"(?i)\b(password|secret|key|token)\s*[:=]", "提示包含潜在机密"),
 ]
 
 for pattern, message in sensitive_patterns:
     if re.search(pattern, prompt):
-        # Use JSON output to block with a specific reason
+        # 使用 JSON 输出以特定原因阻止
         output = {
             "decision": "block",
-            "reason": f"Security policy violation: {message}. Please rephrase your request without sensitive information."
+            "reason": f"安全策略违反：{message}。请重新表述您的请求，不要包含敏感信息。"
         }
         print(json.dumps(output))
         sys.exit(0)
 
-# Add current time to context
-context = f"Current time: {datetime.datetime.now()}"
+# 将当前时间添加到上下文
+context = f"当前时间：{datetime.datetime.now()}"
 print(context)
 
 """
-The following is also equivalent:
+以下也是等效的：
 print(json.dumps({
   "hookSpecificOutput": {
     "hookEventName": "UserPromptSubmit",
@@ -1296,11 +1278,11 @@ print(json.dumps({
 }))
 """
 
-# Allow the prompt to proceed with the additional context
+# 允许提示使用额外上下文继续
 sys.exit(0)
 ```
 
-##### JSON Output Example: PreToolUse with Approval
+##### JSON 输出示例：PreToolUse 批准
 
 ```python
 #!/usr/bin/env python3
@@ -1317,41 +1299,38 @@ except json.JSONDecodeError as e:
 tool_name = input_data.get("tool_name", "")
 tool_input = input_data.get("tool_input", {})
 
-# Example: Auto-approve file reads for documentation files
+# 示例：自动批准文档文件的文件读取
 if tool_name == "Read":
     file_path = tool_input.get("file_path", "")
     if file_path.endswith((".md", ".mdx", ".txt", ".json")):
-        # Use JSON output to auto-approve the tool call
+        # 使用 JSON 输出自动批准工具调用
         output = {
             "decision": "approve",
-            "reason": "Documentation file auto-approved",
-            "suppressOutput": True  # Don't show in transcript mode
+            "reason": "文档文件自动批准",
+            "suppressOutput": True  # 不在记录模式中显示
         }
         print(json.dumps(output))
         sys.exit(0)
 
-# For other cases, let the normal permission flow proceed
+# 对于其他情况，让正常的权限流程继续
 sys.exit(0)
 ```
 
-<h3 id="working-with-mcp-tools">Working with MCP Tools</h3>
+<h3 id="working-with-mcp-tools">使用 MCP 工具</h3>
 
-Claude Code hooks work seamlessly with
-[Model Context Protocol (MCP) tools](/en/docs/claude-code/mcp). When MCP servers
-provide tools, they appear with a special naming pattern that you can match in
-your hooks.
+Claude Code 钩子与 [模型上下文协议 (MCP) 工具](/en/docs/claude-code/mcp)无缝协作。当 MCP 服务器提供工具时，它们以您可以在钩子中匹配的特殊命名模式出现。
 
 #### MCP 工具命名
 
-MCP tools follow the pattern `mcp__<server>__<tool>`, for example:
+MCP 工具遵循 `mcp__<server>__<tool>` 模式，例如：
 
-* `mcp__memory__create_entities` - Memory server's create entities tool
-* `mcp__filesystem__read_file` - Filesystem server's read file tool
-* `mcp__github__search_repositories` - GitHub server's search tool
+* `mcp__memory__create_entities` - 内存服务器的创建实体工具
+* `mcp__filesystem__read_file` - 文件系统服务器的读取文件工具
+* `mcp__github__search_repositories` - GitHub 服务器的搜索工具
 
 #### 为 MCP 工具配置钩子
 
-You can target specific MCP tools or entire MCP servers:
+您可以针对特定的 MCP 工具或整个 MCP 服务器：
 
 ```json
 {
@@ -1362,7 +1341,7 @@ You can target specific MCP tools or entire MCP servers:
         "hooks": [
           {
             "type": "command",
-            "command": "echo 'Memory operation initiated' >> ~/mcp-operations.log"
+            "command": "echo '内存操作已启动' >> ~/mcp-operations.log"
           }
         ]
       },
@@ -1380,99 +1359,94 @@ You can target specific MCP tools or entire MCP servers:
 }
 ```
 
-<h3 id="hooks-examples">Examples</h3>
+<h3 id="hooks-examples">示例</h3>
 
 <Tip>
-  For practical examples including code formatting, notifications, and file protection, see [More Examples](/en/docs/claude-code/hooks-guide#more-examples) in the get started guide.
+  要获取包括代码格式化、通知和文件保护在内的实用示例，请参阅入门指南中的 [更多示例](/en/docs/claude-code/hooks-guide#more-examples)。
 </Tip>
 
-<h3 id="security-considerations">Security Considerations</h3>
+<h3 id="security-considerations">安全考虑</h3>
 
 #### 免责声明
 
-**USE AT YOUR OWN RISK**: Claude Code hooks execute arbitrary shell commands on
-your system automatically. By using hooks, you acknowledge that:
+**风险自担**：Claude Code 钩子会在您的系统上自动执行任意 shell 命令。通过使用钩子，您承认：
 
-* You are solely responsible for the commands you configure
-* Hooks can modify, delete, or access any files your user account can access
-* Malicious or poorly written hooks can cause data loss or system damage
-* Anthropic provides no warranty and assumes no liability for any damages
-  resulting from hook usage
-* You should thoroughly test hooks in a safe environment before production use
+* 您对配置的命令承担全部责任
+* 钩子可以修改、删除或访问您的用户账户可以访问的任何文件
+* 恶意或编写不当的钩子可能导致数据丢失或系统损坏
+* Anthropic 不提供任何保证，并不对使用钩子造成的任何损害承担责任
+* 您应该在生产使用前在安全环境中充分测试钩子
 
-Always review and understand any hook commands before adding them to your
-configuration.
+在将任何钩子命令添加到配置中之前，始终要审查并理解它们。
 
 ##<h2 id="security-best-practices-main">安全最佳实践</h2>
 
-Here are some key practices for writing more secure hooks:
+以下是编写更安全钩子的一些关键实践：
 
-1. **Validate and sanitize inputs** - Never trust input data blindly
-2. **Always quote shell variables** - Use `"$VAR"` not `$VAR`
-3. **Block path traversal** - Check for `..` in file paths
-4. **Use absolute paths** - Specify full paths for scripts (use
-   `$CLAUDE_PROJECT_DIR` for the project path)
-5. **Skip sensitive files** - Avoid `.env`, `.git/`, keys, etc.
+1. **验证和清理输入** - 永远不要盲目信任输入数据
+2. **始终引用 shell 变量** - 使用 `"$VAR"` 而不是 `$VAR`
+3. **阻止路径遍历** - 检查文件路径中的 `..`
+4. **使用绝对路径** - 为脚本指定完整路径（使用
+   `$CLAUDE_PROJECT_DIR` 作为项目路径）
+5. **跳过敏感文件** - 避免 `.env`、`.git/`、密钥等
 
 #### 配置安全
 
-Direct edits to hooks in settings files don't take effect immediately. Claude
-Code:
+对设置文件中钩子的直接编辑不会立即生效。Claude Code：
 
-1. Captures a snapshot of hooks at startup
-2. Uses this snapshot throughout the session
-3. Warns if hooks are modified externally
-4. Requires review in `/hooks` menu for changes to apply
+1. 在启动时捕获钩子的快照
+2. 在整个会话中使用此快照
+3. 如果钩子被外部修改，则警告
+4. 需要在 `/hooks` 菜单中审查才能应用更改
 
-This prevents malicious hook modifications from affecting your current session.
+这可以防止恶意的钩子修改影响您的当前会话。
 
-<h3 id="hook-execution-details">Hook Execution Details</h3>
+<h3 id="hook-execution-details">钩子执行详细信息</h3>
 
-* **Timeout**: 60-second execution limit by default, configurable per command.
-  * A timeout for an individual command does not affect the other commands.
-* **Parallelization**: All matching hooks run in parallel
-* **Environment**: Runs in current directory with Claude Code's environment
-  * The `CLAUDE_PROJECT_DIR` environment variable is available and contains the
-    absolute path to the project root directory
-* **Input**: JSON via stdin
-* **Output**:
-  * PreToolUse/PostToolUse/Stop: Progress shown in transcript (Ctrl-R)
-  * Notification: Logged to debug only (`--debug`)
+* **超时**：默认 60 秒执行限制，每个命令可配置。
+  * 单个命令的超时不会影响其他命令。
+* **并行化**：所有匹配的钩子并行运行
+* **环境**：在当前目录中使用 Claude Code 的环境运行
+  * `CLAUDE_PROJECT_DIR` 环境变量可用，包含
+    项目根目录的绝对路径
+* **输入**：通过 stdin 的 JSON
+* **输出**：
+  * PreToolUse/PostToolUse/Stop：在记录中显示进度 (Ctrl-R)
+  * Notification：仅记录到调试 (`--debug`)
 
-<h3 id="hooks-debugging">Debugging</h3>
+<h3 id="hooks-debugging">调试</h3>
 
 #### 基本故障排除
 
-If your hooks aren't working:
+如果您的钩子不起作用：
 
-1. **Check configuration** - Run `/hooks` to see if your hook is registered
-2. **Verify syntax** - Ensure your JSON settings are valid
-3. **Test commands** - Run hook commands manually first
-4. **Check permissions** - Make sure scripts are executable
-5. **Review logs** - Use `claude --debug` to see hook execution details
+1. **检查配置** - 运行 `/hooks` 查看您的钩子是否已注册
+2. **验证语法** - 确保您的 JSON 设置有效
+3. **测试命令** - 先手动运行钩子命令
+4. **检查权限** - 确保脚本可执行
+5. **审查日志** - 使用 `claude --debug` 查看钩子执行详细信息
 
-Common issues:
+常见问题：
 
-* **Quotes not escaped** - Use `\"` inside JSON strings
-* **Wrong matcher** - Check tool names match exactly (case-sensitive)
-* **Command not found** - Use full paths for scripts
+* **引号未转义** - 在 JSON 字符串内使用 `\"`
+* **匹配器错误** - 检查工具名称是否完全匹配（区分大小写）
+* **找不到命令** - 为脚本使用完整路径
 
 #### 高级调试
 
-For complex hook issues:
+对于复杂的钩子问题：
 
-1. **Inspect hook execution** - Use `claude --debug` to see detailed hook
-   execution
-2. **Validate JSON schemas** - Test hook input/output with external tools
-3. **Check environment variables** - Verify Claude Code's environment is correct
-4. **Test edge cases** - Try hooks with unusual file paths or inputs
-5. **Monitor system resources** - Check for resource exhaustion during hook
-   execution
-6. **Use structured logging** - Implement logging in your hook scripts
+1. **检查钩子执行** - 使用 `claude --debug` 查看详细的钩子
+   执行情况
+2. **验证 JSON 模式** - 使用外部工具测试钩子输入/输出
+3. **检查环境变量** - 验证 Claude Code 的环境是否正确
+4. **测试边界情况** - 使用异常文件路径或输入测试钩子
+5. **监控系统资源** - 检查钩子执行期间的资源耗尽情况
+6. **使用结构化日志** - 在您的钩子脚本中实现日志记录
 
 #### 调试输出示例
 
-Use `claude --debug` to see hook execution details:
+使用 `claude --debug` 查看钩子执行详细信息：
 
 ```
 [DEBUG] Executing hooks for PostToolUse:Write
@@ -1484,12 +1458,12 @@ Use `claude --debug` to see hook execution details:
 [DEBUG] Hook command completed with status 0: <Your stdout>
 ```
 
-Progress messages appear in transcript mode (Ctrl-R) showing:
+进度消息在记录模式 (Ctrl-R) 中显示：
 
-* Which hook is running
-* Command being executed
-* Success/failure status
-* Output or error messages
+* 正在运行的钩子
+* 正在执行的命令
+* 成功/失败状态
+* 输出或错误消息
 
 ---
 
