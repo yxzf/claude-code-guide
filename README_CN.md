@@ -93,41 +93,41 @@ _快速链接:_ [安装](#quick-start) · [命令](#claude-commands) · [快捷�
 > **Go to [Help & Troubleshooting](#help--troubleshooting) to fix issues...**
 ```C
 # Node.js 18+⭐️              
-/*Universal Method       */ npm install -g @anthropic-ai/claude-code
+/*通用方法       */ npm install -g @anthropic-ai/claude-code
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # Windows
-/* Via CMD               */ npm install -g @anthropic-ai/claude-code
-/* Via Powershell        */ irm https://claude.ai/install.ps1 | iex
+/* 通过 CMD               */ npm install -g @anthropic-ai/claude-code
+/* 通过 Powershell        */ irm https://claude.ai/install.ps1 | iex
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # WSL/GIT
-/* Via Terminal          */ npm install -g @anthropic-ai/claude-code
-/* Via Terminal          */ curl -fsSL https://claude.ai/install.sh | bash
+/* 通过终端          */ npm install -g @anthropic-ai/claude-code
+/* 通过终端          */ curl -fsSL https://claude.ai/install.sh | bash
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # MacOS                  */ brew install node && npm install -g @anthropic-ai/claude-code
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # Linux 
-/* Via Terminal          */ sudo apt update && sudo apt install -y nodejs npm
-/* Via Terminal          */ npm install -g @anthropic-ai/claude-code
-/* Via Terminal          */ curl -fsSL https://claude.ai/install.sh | bash
+/* 通过终端          */ sudo apt update && sudo apt install -y nodejs npm
+/* 通过终端          */ npm install -g @anthropic-ai/claude-code
+/* 通过终端          */ curl -fsSL https://claude.ai/install.sh | bash
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # Arch                     
-/* Via Terminal          */ yay -S claude-code*/ 
+/* 通过终端          */ yay -S claude-code*/ 
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # Docker 
 /* Windows (CMD)         */ docker run -it --rm -v "%cd%:/workspace" -e ANTHROPIC_API_KEY="sk-your-key" node:20-slim bash -lc "npm i -g @anthropic-ai/claude-code && cd /workspace && claude"
 /* macOS/Linux (bash/zsh)*/ docker run -it --rm -v "$PWD:/workspace" -e ANTHROPIC_API_KEY="sk-your-key" node:20-slim bash -lc 'npm i -g @anthropic-ai/claude-code && cd /workspace && claude'
-/* No bash Fallback      */ docker run -it --rm -v "$PWD:/workspace" -e ANTHROPIC_API_KEY="sk-your-key" node:20-slim sh -lc 'npm i -g @anthropic-ai/claude-code && cd /workspace && claude'
+/* 无 bash 备用方案      */ docker run -it --rm -v "$PWD:/workspace" -e ANTHROPIC_API_KEY="sk-your-key" node:20-slim sh -lc 'npm i -g @anthropic-ai/claude-code && cd /workspace && claude'
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-# Check if claude is installed correctly
+# 检查 claude 是否正确安装
 /* Linux                 */ which claude 
 /* Windows               */ where claude
-/* Universal             */ claude --version
+/* 通用             */ claude --version
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-# Common Management
-/*claude config          */ Configure settings
-/*claude mcp list        */ Setup MCP servers, you can also replace "list" with add/remove
-/*claude /agents         */ Configure/Setup Subagents for different tasks
-/*claude update          */ Update to latest
+# 常用管理
+/*claude config          */ 配置设置
+/*claude mcp list        */ 设置 MCP 服务器，你也可以用 add/remove 替换 "list"
+/*claude /agents         */ 为不同任务配置/设置子代理
+/*claude update          */ 更新到最新版本
 ```
 
 ---
@@ -179,16 +179,16 @@ _快速链接:_ [安装](#quick-start) · [命令](#claude-commands) · [快捷�
 /* remove-session     */ unset ANTHROPIC_API_KEY
 ----------------------------------------------------------------------------------------------------------------------------------
 # Powershell
-/* ps-session         */ $env:ANTHROPIC_API_KEY = "sk-your-key-here-here"
-/* ps-masked-check    */ "OK: $($env:ANTHROPIC_API_KEY.Substring(0,8))***"
-/* ps-persist         */ [Environment]::SetEnvironmentVariable("ANTHROPIC_API_KEY","sk-your-key-here-here","User") 
-/* ps-rotate          */ $env:ANTHROPIC_API_KEY = "sk-new-key"
-/* ps-remove          */ Remove-Item Env:\ANTHROPIC_API_KEY
+/* ps-会话         */ $env:ANTHROPIC_API_KEY = "sk-your-key-here-here"
+/* ps-掩码检查    */ "OK: $($env:ANTHROPIC_API_KEY.Substring(0,8))***"
+/* ps-持久化         */ [Environment]::SetEnvironmentVariable("ANTHROPIC_API_KEY","sk-your-key-here-here","User") 
+/* ps-轮换          */ $env:ANTHROPIC_API_KEY = "sk-new-key"
+/* ps-移除          */ Remove-Item Env:\ANTHROPIC_API_KEY
 ----------------------------------------------------------------------------------------------------------------------------------
-# Other...
-# persist-bash/*      */ echo 'export ANTHROPIC_API_KEY="sk-your-key-here-here"' >> ~/.bashrc && source ~/.bashrc
-# persist-zsh /*      */ echo 'export ANTHROPIC_API_KEY="sk-your-key-here-here"' >> ~/.zshrc  && source ~/.zshrc
-# persist-fish/*      */ fish -lc 'set -Ux ANTHROPIC_API_KEY sk-your-key-here-here'
+# 其他...
+# 持久化-bash/*      */ echo 'export ANTHROPIC_API_KEY="sk-your-key-here-here"' >> ~/.bashrc && source ~/.bashrc
+# 持久化-zsh /*      */ echo 'export ANTHROPIC_API_KEY="sk-your-key-here-here"' >> ~/.zshrc  && source ~/.zshrc
+# 持久化-fish/*      */ fish -lc 'set -Ux ANTHROPIC_API_KEY sk-your-key-here-here'
 ----------------------------------------------------------------------------------------------------------------------------------
 ```
 
@@ -203,99 +203,99 @@ _快速链接:_ [安装](#quick-start) · [命令](#claude-commands) · [快捷�
 > [!Important] 
 > **Windows Users replace <kbd>export</kbd> with <kbd>set</kbd> or <kbd>setx</kbd> for perm**
 ```bash
-# Environment toggles (put in ~/.bashrc or ~/.zshrc)
-export ANTHROPIC_API_KEY="sk-your-key-here-here"      # API key sent as X-Api-Key header (interactive usage: /login)
-export ANTHROPIC_AUTH_TOKEN="my-auth-token"           # Custom Authorization header; Claude adds "Bearer " prefix automatically
-export ANTHROPIC_CUSTOM_HEADERS="X-Trace-Id: 12345"   # Extra request headers (format: "Name: Value")
+# 环境切换（放在 ~/.bashrc 或 ~/.zshrc 中）
+export ANTHROPIC_API_KEY="sk-your-key-here-here"      # 作为 X-Api-Key 头发送的 API 密钥（交互使用：/login）
+export ANTHROPIC_AUTH_TOKEN="my-auth-token"           # 自定义授权头；Claude 自动添加 "Bearer " 前缀
+export ANTHROPIC_CUSTOM_HEADERS="X-Trace-Id: 12345"   # 额外的请求头（格式："Name: Value"）
 
-export ANTHROPIC_MODEL="claude-sonnet-4-20250514"                # Custom model name to use
-export ANTHROPIC_DEFAULT_SONNET_MODEL="claude-sonnet-4-20250514" # Default Sonnet model alias
-export ANTHROPIC_DEFAULT_OPUS_MODEL="claude-opus-4-20250514"     # Default Opus model alias
-export ANTHROPIC_SMALL_FAST_MODEL="haiku-model"                  # Haiku-class model for background tasks (placeholder)
-export ANTHROPIC_SMALL_FAST_MODEL_AWS_REGION="REGION"            # Override AWS region for the small/fast model on Bedrock (placeholder)
+export ANTHROPIC_MODEL="claude-sonnet-4-20250514"                # 要使用的自定义模型名称
+export ANTHROPIC_DEFAULT_SONNET_MODEL="claude-sonnet-4-20250514" # 默认 Sonnet 模型别名
+export ANTHROPIC_DEFAULT_OPUS_MODEL="claude-opus-4-20250514"     # 默认 Opus 模型别名
+export ANTHROPIC_SMALL_FAST_MODEL="haiku-model"                  # 用于后台任务的 Haiku 类模型（占位符）
+export ANTHROPIC_SMALL_FAST_MODEL_AWS_REGION="REGION"            # 覆盖 Bedrock 上小型/快速模型的 AWS 区域（占位符）
 
-export AWS_BEARER_TOKEN_BEDROCK="bedrock_..."         # Amazon Bedrock API key/token for authentication
+export AWS_BEARER_TOKEN_BEDROCK="bedrock_..."         # 用于身份验证的 Amazon Bedrock API 密钥/令牌
 
-export BASH_DEFAULT_TIMEOUT_MS=60000                  # Default timeout (ms) for long-running bash commands
-export BASH_MAX_TIMEOUT_MS=300000                     # Maximum timeout (ms) allowed for long-running bash commands
-export BASH_MAX_OUTPUT_LENGTH=20000                   # Max characters in bash outputs before middle-truncation
+export BASH_DEFAULT_TIMEOUT_MS=60000                  # 长时间运行 bash 命令的默认超时（毫秒）
+export BASH_MAX_TIMEOUT_MS=300000                     # 长时间运行 bash 命令允许的最大超时（毫秒）
+export BASH_MAX_OUTPUT_LENGTH=20000                   # bash 输出中间截断前的最大字符数
 
-export CLAUDE_BASH_MAINTAIN_PROJECT_WORKING_DIR=1     # (0 or 1) return to original project dir after each Bash command
-export CLAUDE_CODE_API_KEY_HELPER_TTL_MS=600000       # Interval (ms) to refresh creds when using apiKeyHelper
-export CLAUDE_CODE_IDE_SKIP_AUTO_INSTALL=1            # (0 or 1) skip auto-installation of IDE extensions
-export CLAUDE_CODE_MAX_OUTPUT_TOKENS=4096             # Max number of output tokens for most requests
+export CLAUDE_BASH_MAINTAIN_PROJECT_WORKING_DIR=1     # (0 或 1) 每次 Bash 命令后返回原始项目目录
+export CLAUDE_CODE_API_KEY_HELPER_TTL_MS=600000       # 使用 apiKeyHelper 时刷新凭据的间隔（毫秒）
+export CLAUDE_CODE_IDE_SKIP_AUTO_INSTALL=1            # (0 或 1) 跳过 IDE 扩展的自动安装
+export CLAUDE_CODE_MAX_OUTPUT_TOKENS=4096             # 大多数请求的最大输出令牌数
 
-export CLAUDE_CODE_USE_BEDROCK=1                      # (0 or 1) use Amazon Bedrock
-export CLAUDE_CODE_USE_VERTEX=0                       # (0 or 1) use Google Vertex AI
-export CLAUDE_CODE_SKIP_BEDROCK_AUTH=0                # (0 or 1) skip AWS auth for Bedrock (e.g., via LLM gateway)
-export CLAUDE_CODE_SKIP_VERTEX_AUTH=0                 # (0 or 1) skip Google auth for Vertex (e.g., via LLM gateway)
+export CLAUDE_CODE_USE_BEDROCK=1                      # (0 或 1) 使用 Amazon Bedrock
+export CLAUDE_CODE_USE_VERTEX=0                       # (0 或 1) 使用 Google Vertex AI
+export CLAUDE_CODE_SKIP_BEDROCK_AUTH=0                # (0 或 1) 跳过 Bedrock 的 AWS 身份验证（例如，通过 LLM 网关）
+export CLAUDE_CODE_SKIP_VERTEX_AUTH=0                 # (0 或 1) 跳过 Vertex 的 Google 身份验证（例如，通过 LLM 网关）
 
-export CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=0     # (0 or 1) disable nonessential traffic (equivalent to DISABLE_* below)
-export CLAUDE_CODE_DISABLE_TERMINAL_TITLE=0           # (0 or 1) disable automatic terminal title updates
+export CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=0     # (0 或 1) 禁用非必要的流量（等同于下面的 DISABLE_*）
+export CLAUDE_CODE_DISABLE_TERMINAL_TITLE=0           # (0 或 1) 禁用自动终端标题更新
 
-export DISABLE_AUTOUPDATER=0                          # (0 or 1) disable automatic updates (overrides autoUpdates setting)
-export DISABLE_BUG_COMMAND=0                          # (0 or 1) disable the /bug command
-export DISABLE_COST_WARNINGS=0                        # (0 or 1) disable cost warning messages
-export DISABLE_ERROR_REPORTING=0                      # (0 or 1) opt out of Sentry error reporting
-export DISABLE_NON_ESSENTIAL_MODEL_CALLS=0            # (0 or 1) disable model calls for non-critical paths
-export DISABLE_TELEMETRY=0                            # (0 or 1) opt out of Statsig telemetry
+export DISABLE_AUTOUPDATER=0                          # (0 或 1) 禁用自动更新（覆盖 autoUpdates 设置）
+export DISABLE_BUG_COMMAND=0                          # (0 或 1) 禁用 /bug 命令
+export DISABLE_COST_WARNINGS=0                        # (0 或 1) 禁用成本警告消息
+export DISABLE_ERROR_REPORTING=0                      # (0 或 1) 退出 Sentry 错误报告
+export DISABLE_NON_ESSENTIAL_MODEL_CALLS=0            # (0 或 1) 禁用非关键路径的模型调用
+export DISABLE_TELEMETRY=0                            # (0 或 1) 退出 Statsig 遥测
 
-export HTTP_PROXY="http://proxy:8080"                 # HTTP proxy server URL
-export HTTPS_PROXY="https://proxy:8443"               # HTTPS proxy server URL
+export HTTP_PROXY="http://proxy:8080"                 # HTTP 代理服务器 URL
+export HTTPS_PROXY="https://proxy:8443"               # HTTPS 代理服务器 URL
 
-export MAX_THINKING_TOKENS=0                          # (0 or 1 to turn off/on) force a thinking budget for the model
-export MCP_TIMEOUT=120000                             # MCP server startup timeout (ms)
-export MCP_TOOL_TIMEOUT=60000                         # MCP tool execution timeout (ms)
-export MAX_MCP_OUTPUT_TOKENS=25000                    # Max tokens allowed in MCP tool responses (default 25000)
+export MAX_THINKING_TOKENS=0                          # (0 或 1 关闭/开启) 强制为模型设置思考预算
+export MCP_TIMEOUT=120000                             # MCP 服务器启动超时（毫秒）
+export MCP_TOOL_TIMEOUT=60000                         # MCP 工具执行超时（毫秒）
+export MAX_MCP_OUTPUT_TOKENS=25000                    # MCP 工具响应中允许的最大令牌数（默认 25000）
 
-export USE_BUILTIN_RIPGREP=0                          # (0 or 1) set 0 to use system-installed rg instead of bundled one
+export USE_BUILTIN_RIPGREP=0                          # (0 或 1) 设置为 0 使用系统安装的 rg 而不是打包的
 
-export VERTEX_REGION_CLAUDE_3_5_HAIKU="REGION"        # Region override for Claude 3.5 Haiku on Vertex AI
-export VERTEX_REGION_CLAUDE_3_5_SONNET="REGION"       # Region override for Claude 3.5 Sonnet on Vertex AI
-export VERTEX_REGION_CLAUDE_3_7_SONNET="REGION"       # Region override for Claude 3.7 Sonnet on Vertex AI
-export VERTEX_REGION_CLAUDE_4_0_OPUS="REGION"         # Region override for Claude 4.0 Opus on Vertex AI
-export VERTEX_REGION_CLAUDE_4_0_SONNET="REGION"       # Region override for Claude 4.0 Sonnet on Vertex AI
-export VERTEX_REGION_CLAUDE_4_1_OPUS="REGION"         # Region override for Claude 4.1 Opus on Vertex AI
+export VERTEX_REGION_CLAUDE_3_5_HAIKU="REGION"        # Vertex AI 上 Claude 3.5 Haiku 的区域覆盖
+export VERTEX_REGION_CLAUDE_3_5_SONNET="REGION"       # Vertex AI 上 Claude 3.5 Sonnet 的区域覆盖
+export VERTEX_REGION_CLAUDE_3_7_SONNET="REGION"       # Vertex AI 上 Claude 3.7 Sonnet 的区域覆盖
+export VERTEX_REGION_CLAUDE_4_0_OPUS="REGION"         # Vertex AI 上 Claude 4.0 Opus 的区域覆盖
+export VERTEX_REGION_CLAUDE_4_0_SONNET="REGION"       # Vertex AI 上 Claude 4.0 Sonnet 的区域覆盖
+export VERTEX_REGION_CLAUDE_4_1_OPUS="REGION"         # Vertex AI 上 Claude 4.1 Opus 的区域覆盖
 ```
 
 <h2 id="global-config-options">全局配置选项</h2>
 
 ```bash
-claude config set -g theme dark                               # Theme: dark | light | light-daltonized | dark-daltonized
-claude config set -g preferredNotifChannel iterm2_with_bell   # Notification channel: iterm2 | iterm2_with_bell | terminal_bell | notifications_disabled
-claude config set -g autoUpdates true                         # Auto-download & install updates (applied on restart)
-claude config set -g verbose true                             # Show full bash/command outputs
+claude config set -g theme dark                               # 主题：dark | light | light-daltonized | dark-daltonized
+claude config set -g preferredNotifChannel iterm2_with_bell   # 通知渠道：iterm2 | iterm2_with_bell | terminal_bell | notifications_disabled
+claude config set -g autoUpdates true                         # 自动下载和安装更新（重启时应用）
+claude config set -g verbose true                             # 显示完整的 bash/命令输出
 
-claude config set -g includeCoAuthoredBy false                # Omit "co-authored-by Claude" in git commits/PRs
-claude config set -g forceLoginMethod console                 # Restrict login to Anthropic Console (API billing)
-claude config set -g model "claude-3-5-sonnet-20241022"       # Default model override
-claude config set -g statusLine '{"type":"command","command":"~/.claude/statusline.sh"}'  # Custom status line
+claude config set -g includeCoAuthoredBy false                # 在 git 提交/PR 中省略 "co-authored-by Claude"
+claude config set -g forceLoginMethod console                 # 限制登录到 Anthropic Console（API 计费）
+claude config set -g model "claude-3-5-sonnet-20241022"       # 默认模型覆盖
+claude config set -g statusLine '{"type":"command","command":"~/.claude/statusline.sh"}'  # 自定义状态栏
 
-claude config set -g enableAllProjectMcpServers true              # Auto-approve all MCP servers from .mcp.json
-claude config set -g enabledMcpjsonServers '["memory","github"]'  # Approve specific MCP servers
-claude config set -g disabledMcpjsonServers '["filesystem"]'      # Reject specific MCP servers
+claude config set -g enableAllProjectMcpServers true              # 自动批准来自 .mcp.json 的所有 MCP 服务器
+claude config set -g enabledMcpjsonServers '["memory","github"]'  # 批准特定的 MCP 服务器
+claude config set -g disabledMcpjsonServers '["filesystem"]'      # 拒绝特定的 MCP 服务器
 ```
 > [!Important] 
 > **Windows Users replace <kbd>export</kbd> with <kbd>set</kbd>**
 ```bash
-export DISABLE_AUTOUPDATER=1                      # Turn off automatic updates globally (overrides autoUpdates)
-export CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1 # Disable nonessential traffic (equiv. to DISABLE_* toggles below)
-export DISABLE_TELEMETRY=1                        # Opt out of Statsig telemetry
-export DISABLE_ERROR_REPORTING=1                  # Opt out of Sentry error reporting
-export DISABLE_BUG_COMMAND=1                      # Disable the /bug command
-export DISABLE_COST_WARNINGS=0                    # Keep cost warnings (set 1 to hide)
-export DISABLE_NON_ESSENTIAL_MODEL_CALLS=1        # Skip non-critical model calls (flavor text, etc.)
+export DISABLE_AUTOUPDATER=1                      # 全局关闭自动更新（覆盖 autoUpdates）
+export CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1 # 禁用非必要的流量（等同于下面的 DISABLE_* 切换）
+export DISABLE_TELEMETRY=1                        # 退出 Statsig 遥测
+export DISABLE_ERROR_REPORTING=1                  # 退出 Sentry 错误报告
+export DISABLE_BUG_COMMAND=1                      # 禁用 /bug 命令
+export DISABLE_COST_WARNINGS=0                    # 保持成本警告（设置为 1 隐藏）
+export DISABLE_NON_ESSENTIAL_MODEL_CALLS=1        # 跳过非关键模型调用（装饰性文本等）
 
-export CLAUDE_CODE_DISABLE_TERMINAL_TITLE=1       # Stop auto-updating terminal titles
-export CLAUDE_BASH_MAINTAIN_PROJECT_WORKING_DIR=1 # Return to original project dir after each Bash command
-export CLAUDE_CODE_IDE_SKIP_AUTO_INSTALL=1        # Skip auto-installation of IDE extensions
-export USE_BUILTIN_RIPGREP=0                      # Use system 'rg' (0) instead of bundled 'rg'
+export CLAUDE_CODE_DISABLE_TERMINAL_TITLE=1       # 停止自动更新终端标题
+export CLAUDE_BASH_MAINTAIN_PROJECT_WORKING_DIR=1 # 每次 Bash 命令后返回原始项目目录
+export CLAUDE_CODE_IDE_SKIP_AUTO_INSTALL=1        # 跳过 IDE 扩展的自动安装
+export USE_BUILTIN_RIPGREP=0                      # 使用系统的 'rg' (0) 而不是打包的 'rg'
 
-export MAX_THINKING_TOKENS=0                      # (0 or 1 to turn off/on) force a thinking budget for the model
-export CLAUDE_CODE_MAX_OUTPUT_TOKENS=4096         # Cap typical response size (example value)
+export MAX_THINKING_TOKENS=0                      # (0 或 1 关闭/开启) 强制为模型设置思考预算
+export CLAUDE_CODE_MAX_OUTPUT_TOKENS=4096         # 限制典型响应大小（示例值）
 
-export HTTP_PROXY="http://proxy.company:8080"     # HTTP proxy (if needed)
-export HTTPS_PROXY="https://proxy.company:8443"   # HTTPS proxy (if needed)
+export HTTP_PROXY="http://proxy.company:8080"     # HTTP 代理（如果需要）
+export HTTPS_PROXY="https://proxy.company:8443"   # HTTPS 代理（如果需要）
 ```
 
 <h2 id="configuration-files">配置文件</h2>
@@ -377,7 +377,7 @@ export HTTPS_PROXY="https://proxy.company:8443"   # HTTPS proxy (if needed)
 <h2 id="cheat-sheet">备忘单</h2>
 
 ```md
-## Claude Cheat Sheet 
+## Claude 备忘单 
 # Basics / interactive
 claude                                 # Start interactive REPL
 claude "explain this project"          # Start REPL seeded with a prompt
@@ -405,7 +405,7 @@ claude config list                     # Show all current settings for project (
 
 # Example project-scoped settings
 claude config set model "claude-3-5-sonnet-20241022"   # Override default model for this project
-claude config set includeCoAuthoredBy false            # Disable "co-authored-by Claude" byline in git/PRs
+claude config set includeCoAuthoredBy false            # 禁用 git/PR 中的 "co-authored-by Claude" 署名行
 claude config set forceLoginMethod claudeai            # Restrict login flow: claudeai | console
 claude config set enableAllProjectMcpServers true      # Auto-approve all MCP servers from .mcp.json
 claude config set defaultMode "acceptEdits"            # Set default permission mode
