@@ -300,16 +300,16 @@ export HTTPS_PROXY="https://proxy.company:8443"   # HTTPS 代理（如果需要�
 
 <h2 id="configuration-files">配置文件</h2>
 
-**(Memory type) Claude Code offers four memory locations in a hierarchical structure, each serving a different purpose:**
+**（内存类型）Claude Code 提供四个分层结构的内存位置，每个都有不同的用途：**
 
-| Memory Type                | Location                                                                                                                                                | Purpose                                             | Use Case Examples                                                    | Shared With                     |
+| 内存类型                | 位置                                                                                                                                                | 用途                                             | 使用案例示例                                                    | 共享对象                     |
 | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- | -------------------------------------------------------------------- | ------------------------------- |
-| **Enterprise policy**      | macOS: `/Library/Application Support/ClaudeCode/CLAUDE.md`<br />Linux: `/etc/claude-code/CLAUDE.md`<br />Windows: `C:\ProgramData\ClaudeCode\CLAUDE.md` | Organization-wide instructions managed by IT/DevOps | Company coding standards, security policies, compliance requirements | All users in organization       |
-| **Project memory**         | `./CLAUDE.md`                                                                                                                                           | Team-shared instructions for the project            | Project architecture, coding standards, common workflows             | Team members via source control |
-| **User memory**            | `~/.claude/CLAUDE.md`                                                                                                                                   | Personal preferences for all projects               | Code styling preferences, personal tooling shortcuts                 | Just you (all projects)         |
-| **Project memory (local)** | `./CLAUDE.local.md`                                                                                                                                     | Personal project-specific preferences               | *(Deprecated, see below)* Your sandbox URLs, preferred test data     | Just you (current project)      |
+| **企业策略**      | macOS: `/Library/Application Support/ClaudeCode/CLAUDE.md`<br />Linux: `/etc/claude-code/CLAUDE.md`<br />Windows: `C:\ProgramData\ClaudeCode\CLAUDE.md` | 由 IT/DevOps 管理的组织范围指令 | 公司编码标准、安全策略、合规要求 | 组织中的所有用户       |
+| **项目内存**         | `./CLAUDE.md`                                                                                                                                           | 项目的团队共享指令            | 项目架构、编码标准、通用工作流程             | 通过源代码控制的团队成员 |
+| **用户内存**            | `~/.claude/CLAUDE.md`                                                                                                                                   | 所有项目的个人偏好设置               | 代码样式偏好、个人工具快捷方式                 | 仅限你（所有项目）         |
+| **项目内存（本地）** | `./CLAUDE.local.md`                                                                                                                                     | 项目特定的个人偏好设置               | *（已弃用，见下文）* 你的沙盒 URL、首选测试数据     | 仅限你（当前项目）      |
 
->All memory files are automatically loaded into Claude Code's context when launched. Files higher in the hierarchy take precedence and are loaded first, providing a foundation that more specific memories build upon.
+>所有内存文件在 Claude Code 启动时会自动加载到上下文中。层次结构中较高的文件优先加载，为更具体的内存提供基础。
 
 ---
 
@@ -317,29 +317,29 @@ export HTTPS_PROXY="https://proxy.company:8443"   # HTTPS 代理（如果需要�
 
 <h2 id="claude-commands">Claude 命令</h2>
 
-| Command                   | Purpose                                                                                                                                      |
+| 命令                   | 用途                                                                                                                                      |
 | :------------------------ | :------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/add-dir`                | Add additional working directories                                                                                                           |
-| `/agents`                 | Manage custom AI subagents for specialized tasks                                                                                             |
-| `/bug`                    | Report bugs (sends conversation to Anthropic)                                                                                                |
-| `/clear`                  | Clear conversation history                                                                                                                   |
-| `/compact [instructions]` | Compact conversation with optional focus instructions                                                                                        |
-| `/config`                 | View/modify configuration                                                                                                                    |
-| `/cost`                   | Show token usage statistics and billing information |
-| `/doctor`                 | Checks the health of your Claude Code installation                                                                                           |
-| `/help`                   | Get usage help                                                                                                                               |
-| `/init`                   | Initialize project with CLAUDE.md guide                                                                                                      |
-| `/login`                  | Switch Anthropic accounts                                                                                                                    |
-| `/logout`                 | Sign out from your Anthropic account                                                                                                         |
-| `/mcp`                    | Manage MCP server connections and OAuth authentication                                                                                       |
-| `/memory`                 | Edit CLAUDE.md memory files                                                                                                                  |
-| `/model`                  | Select or change the AI model                                                                                                                |
-| `/permissions`            | View or update tool permissions |
-| `/pr_comments`            | View pull request comments                                                                                                                   |
-| `/review`                 | Request code review                                                                                                                          |
-| `/status`                 | View account and system statuses                                                                                                             |
-| `/terminal-setup`         | Install Shift+Enter key binding for newlines (iTerm2 and VSCode only)                                                                        |
-| `/vim`                    | Enter vim mode for alternating insert and command modes                                                                                      |
+| `/add-dir`                | 添加附加的工作目录                                                                                                           |
+| `/agents`                 | 管理用于专门任务的自定义 AI 子代理                                                                                             |
+| `/bug`                    | 报告错误（将对话发送给 Anthropic）                                                                                                |
+| `/clear`                  | 清除对话历史                                                                                                                   |
+| `/compact [instructions]` | 压缩对话，可选聚焦指令                                                                                        |
+| `/config`                 | 查看/修改配置                                                                                                                    |
+| `/cost`                   | 显示令牌使用统计和计费信息 |
+| `/doctor`                 | 检查你的 Claude Code 安装的健康状态                                                                                           |
+| `/help`                   | 获取使用帮助                                                                                                                               |
+| `/init`                   | 使用 CLAUDE.md 指南初始化项目                                                                                                      |
+| `/login`                  | 切换 Anthropic 账户                                                                                                                    |
+| `/logout`                 | 从你的 Anthropic 账户登出                                                                                                         |
+| `/mcp`                    | 管理 MCP 服务器连接和 OAuth 身份验证                                                                                       |
+| `/memory`                 | 编辑 CLAUDE.md 内存文件                                                                                                                  |
+| `/model`                  | 选择或更改 AI 模型                                                                                                                |
+| `/permissions`            | 查看或更新工具权限 |
+| `/pr_comments`            | 查看拉取请求评论                                                                                                                   |
+| `/review`                 | 请求代码审查                                                                                                                          |
+| `/status`                 | 查看账户和系统状态                                                                                                             |
+| `/terminal-setup`         | 为换行安装 Shift+Enter 键绑定（仅限 iTerm2 和 VSCode）                                                                        |
+| `/vim`                    | 进入 vim 模式，交替插入和命令模式                                                                                      |
 
 <h2 id="command-line-flags">命令行标志</h2>
 
