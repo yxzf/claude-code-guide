@@ -378,82 +378,82 @@ export HTTPS_PROXY="https://proxy.company:8443"   # HTTPS 代理（如果需要�
 
 ```md
 ## Claude 备忘单 
-# Basics / interactive
-claude                                 # Start interactive REPL
-claude "explain this project"          # Start REPL seeded with a prompt
-claude -p "summarize README.md"        # Non-interactive print mode (SDK-backed)
-cat logs.txt | claude -p "explain"     # Pipe input to Claude and exit
-claude -c                              # Continue most recent conversation (alias for --continue)
-claude -r "<session-id>" "finish this" # Resume specific session by ID (alias for --resume)
-claude --model claude-sonnet-4-20250514# Pick model for this run
-claude --max-turns 3 -p "lint this"    # Cap agentic turns in print mode
-claude --replay-user-messages          # Replay user messages to stdout for debugging / SDK workflows
+# 基本 / 交互式
+claude                                 # 启动交互式 REPL
+claude "explain this project"          # 使用提示启动 REPL
+claude -p "summarize README.md"        # 非交互式打印模式（SDK 支持）
+cat logs.txt | claude -p "explain"     # 将输入传递给 Claude 并退出
+claude -c                              # 继续最近的对话（--continue 的别名）
+claude -r "<session-id>" "finish this" # 通过 ID 恢复特定会话（--resume 的别名）
+claude --model claude-sonnet-4-20250514# 为此次运行选择模型
+claude --max-turns 3 -p "lint this"    # 在打印模式中限制代理轮次
+claude --replay-user-messages          # 将用户消息重放到 stdout 用于调试 / SDK 工作流
 
-# Update & install
-claude update                          # Manually update Claude Code
-claude doctor                          # Diagnose install/version & setup
-claude install                         # Start native binary installer (beta)
-claude migrate-installer               # Migrate from global npm to local installer
+# 更新与安装
+claude update                          # 手动更新 Claude Code
+claude doctor                          # 诊断安装/版本和设置
+claude install                         # 启动原生二进制安装程序（测试版）
+claude migrate-installer               # 从全局 npm 迁移到本地安装程序
 
-# Config: interactive wizard + direct ops
-claude config                          # Interactive config wizard
-claude config get <key>                # Get value (e.g., claude config get theme)
-claude config set <key> <val>          # Set value (e.g., claude config set theme dark)
-claude config add <key> <vals…>        # Append to array-type keys (e.g., claude config add env DEV=1)
-claude config remove <key> <vals…>     # Remove items from list-type keys
-claude config list                     # Show all current settings for project (project scope is default)
+# 配置：交互式向导 + 直接操作
+claude config                          # 交互式配置向导
+claude config get <key>                # 获取值（例如：claude config get theme）
+claude config set <key> <val>          # 设置值（例如：claude config set theme dark）
+claude config add <key> <vals…>        # 追加到数组类型键（例如：claude config add env DEV=1）
+claude config remove <key> <vals…>     # 从列表类型键中删除项目
+claude config list                     # 显示项目的所有当前设置（默认为项目范围）
 
-# Example project-scoped settings
-claude config set model "claude-3-5-sonnet-20241022"   # Override default model for this project
+# 项目范围设置示例
+claude config set model "claude-3-5-sonnet-20241022"   # 为此项目覆盖默认模型
 claude config set includeCoAuthoredBy false            # 禁用 git/PR 中的 "co-authored-by Claude" 署名行
-claude config set forceLoginMethod claudeai            # Restrict login flow: claudeai | console
-claude config set enableAllProjectMcpServers true      # Auto-approve all MCP servers from .mcp.json
-claude config set defaultMode "acceptEdits"            # Set default permission mode
-claude config set disableBypassPermissionsMode disable # Prevent bypassPermissions mode (example key)
+claude config set forceLoginMethod claudeai            # 限制登录流程：claudeai | console
+claude config set enableAllProjectMcpServers true      # 自动批准来自 .mcp.json 的所有 MCP 服务器
+claude config set defaultMode "acceptEdits"            # 设置默认权限模式
+claude config set disableBypassPermissionsMode disable # 阻止绕过权限模式（示例键）
 
-# Manage list settings (project scope)
-claude config add enabledMcpjsonServers github         # Approve a specific MCP server from .mcp.json
-claude config add enabledMcpjsonServers memory         # Add another
-claude config remove enabledMcpjsonServers memory      # Remove one entry
-claude config add disabledMcpjsonServers filesystem    # Explicitly reject a specific MCP server
+# 管理列表设置（项目范围）
+claude config add enabledMcpjsonServers github         # 批准来自 .mcp.json 的特定 MCP 服务器
+claude config add enabledMcpjsonServers memory         # 添加另一个
+claude config remove enabledMcpjsonServers memory      # 删除一个条目
+claude config add disabledMcpjsonServers filesystem    # 明确拒绝特定的 MCP 服务器
 
-# Global scope (use -g or --global)
-claude config set -g autoUpdates false                 # Turn off automatic updates globally
+# 全局范围（使用 -g 或 --global）
+claude config set -g autoUpdates false                 # 全局关闭自动更新
 claude config set --global preferredNotifChannel iterm2_with_bell
-claude config set -g theme dark                        # Theme: dark | light | light-daltonized | dark-daltonized
-claude config set -g verbose true                      # Show full bash/command outputs everywhere
-claude config get -g theme                             # Confirm a global value
+claude config set -g theme dark                        # 主题：dark | light | light-daltonized | dark-daltonized
+claude config set -g verbose true                      # 在所有地方显示完整的 bash/命令输出
+claude config get -g theme                             # 确认全局值
 
-# MCP (Model Context Protocol) management
-claude mcp                          # Launch MCP wizard / configure MCP servers
-claude mcp list                     # List configured MCP servers
-claude mcp get <name>               # Show details for a server
-claude mcp remove <name>            # Remove a server
-claude mcp add <name> <command> [args...]                 # Add local stdio server
-claude mcp add --transport sse <name> <url>               # Add remote SSE server
-claude mcp add --transport http <name> <url>              # Add remote HTTP server
-claude mcp add <name> --env KEY=VALUE -- <cmd> [args...]  # Pass env to server command
+# MCP（模型上下文协议）管理
+claude mcp                          # 启动 MCP 向导/配置 MCP 服务器
+claude mcp list                     # 列出配置的 MCP 服务器
+claude mcp get <name>               # 显示服务器详细信息
+claude mcp remove <name>            # 删除服务器
+claude mcp add <name> <command> [args...]                 # 添加本地 stdio 服务器
+claude mcp add --transport sse <name> <url>               # 添加远程 SSE 服务器
+claude mcp add --transport http <name> <url>              # 添加远程 HTTP 服务器
+claude mcp add <name> --env KEY=VALUE -- <cmd> [args...]  # 向服务器命令传递环境变量
 claude mcp add --transport sse private-api https://api.example/mcp \
-  --header "Authorization: Bearer TOKEN"                  # Add with auth header
-claude mcp add-json <name> '<json>'                       # Add server via JSON blob
-claude mcp add-from-claude-desktop                        # Import servers from Claude Desktop
-claude mcp reset-project-choices                          # Reset approvals for project .mcp.json servers
-claude mcp serve                                          # Run Claude Code itself as an MCP stdio server
+  --header "Authorization: Bearer TOKEN"                  # 添加带认证头的服务器
+claude mcp add-json <name> '<json>'                       # 通过 JSON 数据添加服务器
+claude mcp add-from-claude-desktop                        # 从 Claude Desktop 导入服务器
+claude mcp reset-project-choices                          # 重置项目 .mcp.json 服务器的批准状态
+claude mcp serve                                          # 将 Claude Code 本身作为 MCP stdio 服务器运行
 
-# Other useful flags (print / SDK mode)
-claude --add-dir ../apps ../lib                     # Add additional working directories
-claude --allowedTools "Bash(git log:*)" "Read"      # Allow listed tools without permission prompts
-claude --disallowedTools "Edit"                     # Disallow listed tools without permission prompts
-claude --append-system-prompt "Custom instruction"  # Append to system prompt (only with -p)
-claude -p "query" --output-format json --input-format stream-json  # Control IO formats for scripting
-claude --verbose                                    # Verbose logging (turn-by-turn)
-claude --dangerously-skip-permissions               # Skip permission prompts (use with caution)
+# 其他有用的标志（打印/SDK 模式）
+claude --add-dir ../apps ../lib                     # 添加额外的工作目录
+claude --allowedTools "Bash(git log:*)" "Read"      # 允许列出的工具无需权限提示
+claude --disallowedTools "Edit"                     # 禁止列出的工具无需权限提示
+claude --append-system-prompt "Custom instruction"  # 追加到系统提示（仅适用于 -p）
+claude -p "query" --output-format json --input-format stream-json  # 控制脚本的 IO 格式
+claude --verbose                                    # 详细日志记录（逐轮）
+claude --dangerously-skip-permissions               # 跳过权限提示（谨慎使用）
 
-# Quick verification / notes
-# - Project scope is default for 'claude config'; use -g/--global to affect all projects.
-# - Settings precedence: Enterprise > CLI args > local project > shared project > user (~/.claude).
-# - Use 'add' / 'remove' only with list-type keys (e.g., enabledMcpjsonServers).
-# - The CLI reference and release notes are the authoritative sources for flags and recent additions.
+# 快速验证/注意事项
+# - 'claude config' 默认为项目范围；使用 -g/--global 影响所有项目。
+# - 设置优先级：企业 > CLI 参数 > 本地项目 > 共享项目 > 用户（~/.claude）。
+# - 仅对列表类型键使用 'add'/'remove'（例如：enabledMcpjsonServers）。
+# - CLI 参考和发布说明是标志和最新添加功能的权威来源。
 ```
 
 ---
