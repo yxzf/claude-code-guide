@@ -46,47 +46,22 @@ flowchart LR
 
 ## Agent vs Workflow：架构差异详解
 
-### 技术演进：从基础到自主
+### 重要概念澄清
 
-在对比Agent和Workflow之前，先理解AI系统的演进路径：
+很多人容易混淆**增强LLM**和**Agent**，先澄清这个关键区别：
 
-```mermaid
-graph TD
-    A[🤖 基础LLM] --> B[🔧 增强LLM]
-    B --> C[🧠 Agent系统]
-    B --> D[🔄 Workflow编排]
-    
-    A1[单次问答] --> B1[工具调用]
-    B1 --> C1[自主决策]
-    B1 --> D1[预定义流程]
-    
-    A --> A1
-    B --> B1  
-    C --> C1
-    D --> D1
-    
-    style A fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
-    style B fill:#fff3e0,stroke:#f57c00,stroke-width:2px
-    style C fill:#e8f5e8,stroke:#388e3c,stroke-width:2px
-    style D fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px
-```
+| 对比维度 | 增强LLM | Agent |
+|---------|---------|--------|
+| **交互方式** | 单次调用 | 多轮循环 |
+| **工具使用** | 一次性调用 | 动态选择和组合 |
+| **状态管理** | 无状态 | 维护记忆和上下文 |
+| **决策能力** | 反应式响应 | 主动规划和调整 |
 
-**技术路径说明：**
+**简单判断方法：**
+- 如果只是"调用工具返回结果" → 增强LLM
+- 如果能"分析-决策-执行-反思-再决策" → Agent
 
-- **基础LLM**：纯文本问答，无外部交互
-- **增强LLM**：具备工具调用能力，单轮交互
-- **Agent系统**：基于增强LLM，增加多轮循环和自主决策
-- **Workflow编排**：基于增强LLM，增加预定义的执行流程
-
-**两条技术路径：**
-从增强LLM出发，有两个不同方向：
-- **Agent路径**：追求自主性和灵活性，适合复杂未知问题
-- **Workflow路径**：追求可控性和可预测性，适合确定性任务
-
-**常见误解澄清：**
-很多人以为有了Function Calling就是Agent，其实那只是增强LLM。真正的Agent需要在多个回合中保持状态、记忆和策略。
-
-理解这个演进路径后，我们来看Agent和Workflow的核心差异：
+澄清这个区别后，我们来看Agent和Workflow的核心差异：
 
 ### 核心架构对比
 
