@@ -48,6 +48,10 @@ flowchart LR
 
 ### 重要概念澄清
 
+**增强LLM (Augmented LLM)** = 基础LLM + Function Calling（工具调用能力）
+
+简单说就是让ChatGPT、Claude这样的模型能够调用外部工具，比如搜索网页、执行代码、查询数据库等。
+
 很多人容易混淆**增强LLM**和**Agent**，先澄清这个关键区别：
 
 | 对比维度 | 增强LLM | Agent |
