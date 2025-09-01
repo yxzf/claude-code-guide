@@ -47,37 +47,22 @@ Agent可以调用各种外部工具，如搜索引擎、数据库、API等。
 
 ```mermaid
 flowchart TD
-    A[📋 接收任务/目标] -->|启动| B{🔍 评估当前状态}
-    B -->|分析| C[⚙️ 分析可用选项]
-    C -->|规划| D[🎯 选择下一步行动]
-    D -->|执行| E[🔧 执行工具调用]
-    E -->|反馈| F[📊 获取环境反馈]
-    F -->|检查| G{✅ 目标是否完成?}
-    G ==>|❌ 否| H[🔄 更新状态和策略]
-    H ==>|循环| B
-    G ==>|✅ 是| I[🎉 返回最终结果]
+    A[📋 接收任务] --> B{🔍 状态评估}
+    B --> C[⚙️ 分析选项]
+    C --> D[🎯 选择行动]
+    D --> E[🔧 执行工具]
+    E --> F[📊 获取反馈]
+    F --> G{✅ 完成?}
+    G ==>|否| H[🔄 更新策略]
+    H ==> B
+    G ==>|是| I[🎉 输出结果]
     
-    %% 样式定义
-    style A fill:#e3f2fd,stroke:#1976d2,stroke-width:3px,color:#000
-    style I fill:#e8f5e8,stroke:#388e3c,stroke-width:3px,color:#000
-    style G fill:#fff3e0,stroke:#f57c00,stroke-width:2px,color:#000
-    style B fill:#fff3e0,stroke:#f57c00,stroke-width:2px,color:#000
-    style E fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px,color:#000
-    style H fill:#ffebee,stroke:#d32f2f,stroke-width:2px,color:#000
-    style C fill:#f1f8e9,stroke:#689f38,stroke-width:2px,color:#000
-    style D fill:#f1f8e9,stroke:#689f38,stroke-width:2px,color:#000
-    style F fill:#e0f2f1,stroke:#00796b,stroke-width:2px,color:#000
-    
-    %% 连接线样式
-    linkStyle 0 stroke:#1976d2,stroke-width:2px
-    linkStyle 1 stroke:#f57c00,stroke-width:2px
-    linkStyle 2 stroke:#689f38,stroke-width:2px
-    linkStyle 3 stroke:#7b1fa2,stroke-width:3px
-    linkStyle 4 stroke:#00796b,stroke-width:2px
-    linkStyle 5 stroke:#f57c00,stroke-width:2px
-    linkStyle 6 stroke:#d32f2f,stroke-width:4px
-    linkStyle 7 stroke:#ff5722,stroke-width:4px
-    linkStyle 8 stroke:#388e3c,stroke-width:4px
+    style A fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    style I fill:#e8f5e8,stroke:#388e3c,stroke-width:2px
+    style G fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    style B fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    style E fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    style H fill:#ffebee,stroke:#d32f2f,stroke-width:2px
 ```
 
 **Agent核心工作循环说明：**
@@ -109,55 +94,42 @@ flowchart TD
 ```mermaid
 graph TD
     subgraph WF ["🔄 Workflow编排式架构"]
-        direction TD
-        A1[📥 用户输入] -->|预定义路径| B1[🔍 步骤1: 数据验证]
-        B1 -->|固定流程| C1[⚙️ 步骤2: 业务逻辑]
-        C1 -->|确定顺序| D1[📊 步骤3: 结果处理]
-        D1 -->|输出| E1[📤 固定输出]
+        A1[📥 用户输入] --> B1[🔍 数据验证]
+        B1 --> C1[⚙️ 业务逻辑]
+        C1 --> D1[📊 结果处理]
+        D1 --> E1[📤 固定输出]
         
-        F1[✓ 检查点1] -.-|监控| B1
-        G1[✓ 检查点2] -.-|监控| C1
-        H1[✓ 检查点3] -.-|监控| D1
+        F1[✓ 检查点1] -.-> B1
+        G1[✓ 检查点2] -.-> C1
+        H1[✓ 检查点3] -.-> D1
     end
     
     subgraph AG ["🤖 Agent自主决策架构"]
-        direction TD
-        A2[🎯 用户目标] -->|目标分析| B2{🧠 LLM规划器}
-        B2 -->|智能选择| C2[🛠️ 工具选择]
-        C2 -->|执行| D2[⚡ 执行行动]
-        D2 -->|反馈| E2{📋 结果评估}
-        E2 ==>|❌ 继续| F2[🔄 策略调整]
-        F2 ==>|循环优化| B2
-        E2 ==>|✅ 完成| G2[🎉 达成目标]
+        A2[🎯 用户目标] --> B2{🧠 LLM规划器}
+        B2 --> C2[🛠️ 工具选择]
+        C2 --> D2[⚡ 执行行动]
+        D2 --> E2{📋 结果评估}
+        E2 -->|❌ 继续| F2[🔄 策略调整]
+        F2 --> B2
+        E2 -->|✅ 完成| G2[🎉 达成目标]
         
-        H2[🌍 环境反馈] -.-|实时输入| E2
-        I2[🧠 上下文记忆] -.-|历史信息| B2
+        H2[🌍 环境反馈] -.-> E2
+        I2[🧠 上下文记忆] -.-> B2
     end
     
-    %% Workflow样式
-    style A1 fill:#e3f2fd,stroke:#1976d2,stroke-width:3px,color:#000
-    style B1 fill:#e8f5e8,stroke:#4caf50,stroke-width:2px,color:#000
-    style C1 fill:#e8f5e8,stroke:#4caf50,stroke-width:2px,color:#000
-    style D1 fill:#e8f5e8,stroke:#4caf50,stroke-width:2px,color:#000
-    style E1 fill:#c8e6c9,stroke:#388e3c,stroke-width:3px,color:#000
-    style F1 fill:#fff3e0,stroke:#ff9800,stroke-width:1px,color:#666
-    style G1 fill:#fff3e0,stroke:#ff9800,stroke-width:1px,color:#666
-    style H1 fill:#fff3e0,stroke:#ff9800,stroke-width:1px,color:#666
+    style A1 fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    style B1 fill:#e8f5e8,stroke:#4caf50,stroke-width:2px
+    style C1 fill:#e8f5e8,stroke:#4caf50,stroke-width:2px
+    style D1 fill:#e8f5e8,stroke:#4caf50,stroke-width:2px
+    style E1 fill:#c8e6c9,stroke:#388e3c,stroke-width:2px
     
-    %% Agent样式
-    style A2 fill:#f3e5f5,stroke:#9c27b0,stroke-width:3px,color:#000
-    style B2 fill:#fff3e0,stroke:#ff9800,stroke-width:3px,color:#000
-    style C2 fill:#e0f2f1,stroke:#009688,stroke-width:2px,color:#000
-    style D2 fill:#e0f2f1,stroke:#009688,stroke-width:2px,color:#000
-    style E2 fill:#fff3e0,stroke:#ff9800,stroke-width:3px,color:#000
-    style F2 fill:#ffebee,stroke:#f44336,stroke-width:2px,color:#000
-    style G2 fill:#c8e6c9,stroke:#388e3c,stroke-width:3px,color:#000
-    style H2 fill:#f1f8e9,stroke:#8bc34a,stroke-width:1px,color:#666
-    style I2 fill:#f1f8e9,stroke:#8bc34a,stroke-width:1px,color:#666
-    
-    %% 子图样式
-    style WF fill:#f8f9fa,stroke:#6c757d,stroke-width:2px
-    style AG fill:#fff8f0,stroke:#fd7e14,stroke-width:2px
+    style A2 fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px
+    style B2 fill:#fff3e0,stroke:#ff9800,stroke-width:2px
+    style C2 fill:#e0f2f1,stroke:#009688,stroke-width:2px
+    style D2 fill:#e0f2f1,stroke:#009688,stroke-width:2px
+    style E2 fill:#fff3e0,stroke:#ff9800,stroke-width:2px
+    style F2 fill:#ffebee,stroke:#f44336,stroke-width:2px
+    style G2 fill:#c8e6c9,stroke:#388e3c,stroke-width:2px
 ```
 
 ### Workflow：编排式系统
