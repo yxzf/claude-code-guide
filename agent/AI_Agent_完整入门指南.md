@@ -86,25 +86,45 @@ LLM动态指导自己的流程和工具使用，保持对任务完成方式的�
 
 ```mermaid
 graph TB
-    subgraph W ["🔄 Workflow：预定义路径"]
+    subgraph W ["🔄 Workflow编排式架构"]
         direction LR
-        W1[📥 输入] --> W2[⚙️ 步骤1] --> W3[⚙️ 步骤2] --> W4[📤 输出]
+        W1[📥 用户输入] --> W2[🔍 数据验证]
+        W2 --> W3[⚙️ 业务逻辑]
+        W3 --> W4[📊 结果处理]
+        W4 --> W5[📤 固定输出]
+        
+        W6[✓ 检查点1] -.-> W2
+        W7[✓ 检查点2] -.-> W3
+        W8[✓ 检查点3] -.-> W4
     end
     
-    subgraph A ["🤖 Agent：动态循环"]
+    subgraph A ["🤖 Agent自主决策架构"]
         direction LR
-        A1[🎯 目标] --> A2{🧠 规划}
-        A2 --> A3[⚡ 行动]
-        A3 --> A4{📊 评估}
-        A4 -->|继续| A2
-        A4 -->|完成| A5[✅ 结果]
+        A1[🎯 用户目标] --> A2{🧠 LLM规划器}
+        A2 --> A3[🛠️ 工具选择]
+        A3 --> A4[⚡ 执行行动]
+        A4 --> A5{📋 结果评估}
+        A5 -->|❌ 继续| A6[🔄 策略调整]
+        A6 --> A2
+        A5 -->|✅ 完成| A7[🎉 达成目标]
+        
+        A8[🌍 环境反馈] -.-> A5
+        A9[🧠 上下文记忆] -.-> A2
     end
     
     style W1 fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
-    style W4 fill:#c8e6c9,stroke:#388e3c,stroke-width:2px
+    style W2 fill:#e8f5e8,stroke:#4caf50,stroke-width:2px
+    style W3 fill:#e8f5e8,stroke:#4caf50,stroke-width:2px
+    style W4 fill:#e8f5e8,stroke:#4caf50,stroke-width:2px
+    style W5 fill:#c8e6c9,stroke:#388e3c,stroke-width:2px
+    
     style A1 fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px
-    style A2 fill:#fff3e0,stroke:#f57c00,stroke-width:2px
-    style A5 fill:#c8e6c9,stroke:#388e3c,stroke-width:2px
+    style A2 fill:#fff3e0,stroke:#ff9800,stroke-width:2px
+    style A3 fill:#e0f2f1,stroke:#009688,stroke-width:2px
+    style A4 fill:#e0f2f1,stroke:#009688,stroke-width:2px
+    style A5 fill:#fff3e0,stroke:#ff9800,stroke-width:2px
+    style A6 fill:#ffebee,stroke:#f44336,stroke-width:2px
+    style A7 fill:#c8e6c9,stroke:#388e3c,stroke-width:2px
 ```
 
 ### 实际代码对比
