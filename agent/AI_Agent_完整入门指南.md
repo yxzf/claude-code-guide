@@ -85,17 +85,19 @@ LLM动态指导自己的流程和工具使用，保持对任务完成方式的�
 ### 架构对比图解
 
 ```mermaid
-graph LR
-    subgraph W ["🔄 Workflow"]
-        W1[输入] --> W2[步骤1] --> W3[步骤2] --> W4[输出]
+graph TB
+    subgraph W ["🔄 Workflow：预定义路径"]
+        direction LR
+        W1[📥 输入] --> W2[⚙️ 步骤1] --> W3[⚙️ 步骤2] --> W4[📤 输出]
     end
     
-    subgraph A ["🤖 Agent"]
-        A1[目标] --> A2{规划}
-        A2 --> A3[行动]
-        A3 --> A4{评估}
+    subgraph A ["🤖 Agent：动态循环"]
+        direction LR
+        A1[🎯 目标] --> A2{🧠 规划}
+        A2 --> A3[⚡ 行动]
+        A3 --> A4{📊 评估}
         A4 -->|继续| A2
-        A4 -->|完成| A5[结果]
+        A4 -->|完成| A5[✅ 结果]
     end
     
     style W1 fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
@@ -128,19 +130,7 @@ def document_agent(doc, goal):
     return result
 ```
 
-### 选择决策框架
-
-**选择Workflow的情况：**
-- 任务步骤明确且相对固定
-- 需要高度一致性和可预测性
-- 成本敏感或需要快速响应
-- 团队对LLM决策信任度较低
-
-**选择Agent的情况：**
-- 任务开放性强，难以预测步骤
-- 需要根据中间结果调整策略
-- 个性化需求高，每次执行可能不同
-- 可以承受一定的不确定性和成本
+理解了这些差异后，下一章我们将详细探讨Workflow的5种常见模式。
 
 ---
 
