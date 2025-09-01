@@ -3,9 +3,9 @@
 ## 📖 目录
 1. [什么是AI Agent](#什么是ai-agent)
 2. [Agent vs Workflow：架构差异详解](#agent-vs-workflow架构差异详解)
-3. [何时构建Agent：场景判断指南](#何时构建agent场景判断指南)
-4. [Agent构建方法论](#agent构建方法论)
-5. [Workflow模式详解](#workflow模式详解)
+3. [Workflow模式详解](#workflow模式详解)
+4. [何时构建Agent：场景判断指南](#何时构建agent场景判断指南)
+5. [Agent构建方法论](#agent构建方法论)
 6. [Agent设计原则与最佳实践](#agent设计原则与最佳实践)
 7. [工具设计与提示工程](#工具设计与提示工程)
 8. [实际案例分析](#实际案例分析)
@@ -220,6 +220,267 @@ def customer_service_agent(query):
 | **维护成本** | 高（需重新编程） | 低（自动适应） |
 | **响应速度** | 快 | 慢 |
 | **准确性** | 高 | 中等到高 |
+
+---
+
+## Workflow模式详解
+
+理解Workflow模式对于做出正确的架构选择至关重要。以下是5种常见的Workflow模式：
+
+### 1. 提示链模式 (Prompt Chaining)
+
+**顺序执行的线性处理模式**
+
+```mermaid
+graph LR
+    A[📥 输入] --> B[🔍 LLM调用1<br/>提取信息]
+    B --> C[⚙️ LLM调用2<br/>整理结构]
+    C --> D[📝 LLM调用3<br/>格式化输出]
+    D --> E[📤 最终结果]
+    
+    style A fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    style E fill:#c8e6c9,stroke:#388e3c,stroke-width:2px
+    style B fill:#f1f8e9,stroke:#689f38,stroke-width:2px
+    style C fill:#f1f8e9,stroke:#689f38,stroke-width:2px
+    style D fill:#f1f8e9,stroke:#689f38,stroke-width:2px
+```
+
+将复杂任务分解为顺序执行的简单子任务。
+
+```python
+def document_processing_chain(raw_text):
+    # 步骤1：内容提取
+    extracted = llm_call_1("请从以下文本中提取关键信息：", raw_text)
+    
+    # 步骤2：信息整理
+    organized = llm_call_2("请整理以下信息的结构：", extracted)
+    
+    # 步骤3：格式化输出
+    formatted = llm_call_3("请将信息格式化为正式报告：", organized)
+    
+    return formatted
+```
+
+**适用场景：**
+- 文档处理流水线
+- 内容创作流程
+- 数据分析管道
+
+**优点：**
+- 每一步都简单明确
+- 容易调试和优化
+- 结果可预测
+
+**缺点：**
+- 缺乏灵活性
+- 无法处理异常情况
+- 不能根据中间结果调整策略
+
+### 2. 路由模式 (Routing)
+
+**智能分流的专家处理模式**
+
+```mermaid
+graph LR
+    A[❓ 用户查询] --> B{🧠 分类器LLM}
+    B --> C[💻 技术专家LLM]
+    B --> D[💰 计费专家LLM]
+    B --> E[📞 通用支持LLM]
+    C --> F[📋 专门回答]
+    D --> F
+    E --> F
+    
+    style A fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    style B fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    style F fill:#c8e6c9,stroke:#388e3c,stroke-width:2px
+    style C fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px
+    style D fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px
+    style E fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px
+```
+
+根据输入类型将任务分配给专门的处理器。
+
+```python
+def intelligent_routing(user_query):
+    # 分类查询类型
+    query_type = classifier_llm(f"请将以下查询分类：{user_query}")
+    
+    # 路由到专门处理器
+    if query_type == "technical":
+        return technical_expert_llm(user_query)
+    elif query_type == "billing":
+        return billing_expert_llm(user_query)
+    elif query_type == "general":
+        return general_support_llm(user_query)
+    else:
+        return fallback_handler(user_query)
+```
+
+**适用场景：**
+- 客户服务系统
+- 多领域问答系统
+- 智能分流系统
+
+### 3. 并行化模式 (Parallelization)
+
+**同时执行的多任务处理模式**
+
+```mermaid
+graph LR
+    A[📊 输入数据] --> B[😊 情感分析]
+    A --> C[🔍 关键词提取]
+    A --> D[📈 主题建模]
+    A --> E[📖 可读性分析]
+    B --> F[🔄 结果聚合器]
+    C --> F
+    D --> F
+    E --> F
+    F --> G[📊 综合报告]
+    
+    style A fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    style F fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px
+    style G fill:#c8e6c9,stroke:#388e3c,stroke-width:2px
+    style B fill:#e0f2f1,stroke:#009688,stroke-width:2px
+    style C fill:#e0f2f1,stroke:#009688,stroke-width:2px
+    style D fill:#e0f2f1,stroke:#009688,stroke-width:2px
+    style E fill:#e0f2f1,stroke:#009688,stroke-width:2px
+```
+
+同时执行多个任务，然后聚合结果。
+
+```python
+import asyncio
+
+async def parallel_analysis(data):
+    # 并行执行多种分析
+    tasks = [
+        sentiment_analysis(data),
+        keyword_extraction(data),
+        topic_modeling(data),
+        readability_analysis(data)
+    ]
+    
+    results = await asyncio.gather(*tasks)
+    
+    # 聚合结果
+    final_report = aggregate_results(results)
+    return final_report
+```
+
+**适用场景：**
+- 多角度分析
+- 性能优化
+- 冗余验证
+
+### 4. 编排器-工作者模式 (Orchestrator-Workers)
+
+**中央调度的分工协作模式**
+
+```mermaid
+graph LR
+    A[📋 项目描述] --> B{🎭 中央编排器}
+    B --> C[💻 代码分析工作者]
+    B --> D[📝 文档工作者]
+    B --> E[🧪 测试工作者]
+    B --> F[🚀 部署工作者]
+    C --> G[🔄 结果整合]
+    D --> G
+    E --> G
+    F --> G
+    
+    style A fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    style B fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    style G fill:#c8e6c9,stroke:#388e3c,stroke-width:2px
+    style C fill:#f1f8e9,stroke:#689f38,stroke-width:2px
+    style D fill:#f1f8e9,stroke:#689f38,stroke-width:2px
+    style E fill:#f1f8e9,stroke:#689f38,stroke-width:2px
+    style F fill:#f1f8e9,stroke:#689f38,stroke-width:2px
+```
+
+中央编排器动态分配任务给多个工作者。
+
+```python
+class TaskOrchestrator:
+    def __init__(self):
+        self.workers = [
+            CodeAnalysisWorker(),
+            DocumentationWorker(),
+            TestingWorker(),
+            DeploymentWorker()
+        ]
+    
+    def process_project(self, project_description):
+        # 分析项目需求
+        requirements = self.analyze_requirements(project_description)
+        
+        # 动态分配任务
+        tasks = self.create_task_plan(requirements)
+        
+        # 协调工作者执行
+        results = []
+        for task in tasks:
+            suitable_worker = self.select_worker(task)
+            result = suitable_worker.execute(task)
+            results.append(result)
+        
+        # 整合最终结果
+        return self.integrate_results(results)
+```
+
+### 5. 评估器-优化器模式 (Evaluator-Optimizer)
+
+**迭代改进的反馈循环模式**
+
+```mermaid
+graph LR
+    A[❓ 初始问题] --> B[⚡ 生成器LLM]
+    B --> C[📄 初始解决方案]
+    C --> D[⚖️ 评估器LLM]
+    D --> E{✅ 满意?}
+    E -->|❌ 否| F[🔧 优化器LLM]
+    F --> C
+    E -->|✅ 是| G[🎉 最终方案]
+    
+    style A fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    style E fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    style G fill:#c8e6c9,stroke:#388e3c,stroke-width:2px
+    style B fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px
+    style D fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px
+    style F fill:#ffebee,stroke:#f44336,stroke-width:2px
+```
+
+一个组件生成解决方案，另一个组件评估并优化。
+
+```python
+def iterative_improvement(initial_problem):
+    current_solution = generator_llm(f"请为以下问题提供解决方案：{initial_problem}")
+    
+    for iteration in range(max_iterations):
+        # 评估当前解决方案
+        evaluation = evaluator_llm(f"""
+        问题：{initial_problem}
+        当前解决方案：{current_solution}
+        请评估此解决方案并提出改进建议。
+        """)
+        
+        if evaluation.is_satisfactory:
+            break
+            
+        # 基于评估改进解决方案
+        current_solution = optimizer_llm(f"""
+        原问题：{initial_problem}
+        当前方案：{current_solution}
+        改进建议：{evaluation.suggestions}
+        请提供改进后的解决方案。
+        """)
+    
+    return current_solution
+```
+
+**适用场景：**
+- 复杂问题求解
+- 内容质量优化
+- 创意设计迭代
 
 ---
 
@@ -680,266 +941,6 @@ class LearningAgent:
 
 ---
 
-## Workflow模式详解
-
-虽然本文重点介绍Agent，但理解Workflow模式对于做出正确的架构选择至关重要。以下是常见的Workflow模式：
-
-### 1. 提示链模式 (Prompt Chaining)
-
-**顺序执行的线性处理模式**
-
-```mermaid
-graph LR
-    A[📥 输入] --> B[🔍 LLM调用1<br/>提取信息]
-    B --> C[⚙️ LLM调用2<br/>整理结构]
-    C --> D[📝 LLM调用3<br/>格式化输出]
-    D --> E[📤 最终结果]
-    
-    style A fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
-    style E fill:#c8e6c9,stroke:#388e3c,stroke-width:2px
-    style B fill:#f1f8e9,stroke:#689f38,stroke-width:2px
-    style C fill:#f1f8e9,stroke:#689f38,stroke-width:2px
-    style D fill:#f1f8e9,stroke:#689f38,stroke-width:2px
-```
-
-将复杂任务分解为顺序执行的简单子任务。
-
-```python
-def document_processing_chain(raw_text):
-    # 步骤1：内容提取
-    extracted = llm_call_1("请从以下文本中提取关键信息：", raw_text)
-    
-    # 步骤2：信息整理
-    organized = llm_call_2("请整理以下信息的结构：", extracted)
-    
-    # 步骤3：格式化输出
-    formatted = llm_call_3("请将信息格式化为正式报告：", organized)
-    
-    return formatted
-```
-
-**适用场景：**
-- 文档处理流水线
-- 内容创作流程
-- 数据分析管道
-
-**优点：**
-- 每一步都简单明确
-- 容易调试和优化
-- 结果可预测
-
-**缺点：**
-- 缺乏灵活性
-- 无法处理异常情况
-- 不能根据中间结果调整策略
-
-### 2. 路由模式 (Routing)
-
-**智能分流的专家处理模式**
-
-```mermaid
-graph LR
-    A[❓ 用户查询] --> B{🧠 分类器LLM}
-    B --> C[💻 技术专家LLM]
-    B --> D[💰 计费专家LLM]
-    B --> E[📞 通用支持LLM]
-    C --> F[📋 专门回答]
-    D --> F
-    E --> F
-    
-    style A fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
-    style B fill:#fff3e0,stroke:#f57c00,stroke-width:2px
-    style F fill:#c8e6c9,stroke:#388e3c,stroke-width:2px
-    style C fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px
-    style D fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px
-    style E fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px
-```
-
-根据输入类型将任务分配给专门的处理器。
-
-```python
-def intelligent_routing(user_query):
-    # 分类查询类型
-    query_type = classifier_llm(f"请将以下查询分类：{user_query}")
-    
-    # 路由到专门处理器
-    if query_type == "technical":
-        return technical_expert_llm(user_query)
-    elif query_type == "billing":
-        return billing_expert_llm(user_query)
-    elif query_type == "general":
-        return general_support_llm(user_query)
-    else:
-        return fallback_handler(user_query)
-```
-
-**适用场景：**
-- 客户服务系统
-- 多领域问答系统
-- 智能分流系统
-
-### 3. 并行化模式 (Parallelization)
-
-**同时执行的多任务处理模式**
-
-```mermaid
-graph LR
-    A[📊 输入数据] --> B[😊 情感分析]
-    A --> C[🔍 关键词提取]
-    A --> D[📈 主题建模]
-    A --> E[📖 可读性分析]
-    B --> F[🔄 结果聚合器]
-    C --> F
-    D --> F
-    E --> F
-    F --> G[📊 综合报告]
-    
-    style A fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
-    style F fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px
-    style G fill:#c8e6c9,stroke:#388e3c,stroke-width:2px
-    style B fill:#e0f2f1,stroke:#009688,stroke-width:2px
-    style C fill:#e0f2f1,stroke:#009688,stroke-width:2px
-    style D fill:#e0f2f1,stroke:#009688,stroke-width:2px
-    style E fill:#e0f2f1,stroke:#009688,stroke-width:2px
-```
-
-同时执行多个任务，然后聚合结果。
-
-```python
-import asyncio
-
-async def parallel_analysis(data):
-    # 并行执行多种分析
-    tasks = [
-        sentiment_analysis(data),
-        keyword_extraction(data),
-        topic_modeling(data),
-        readability_analysis(data)
-    ]
-    
-    results = await asyncio.gather(*tasks)
-    
-    # 聚合结果
-    final_report = aggregate_results(results)
-    return final_report
-```
-
-**适用场景：**
-- 多角度分析
-- 性能优化
-- 冗余验证
-
-### 4. 编排器-工作者模式 (Orchestrator-Workers)
-
-**中央调度的分工协作模式**
-
-```mermaid
-graph LR
-    A[📋 项目描述] --> B{🎭 中央编排器}
-    B --> C[💻 代码分析工作者]
-    B --> D[📝 文档工作者]
-    B --> E[🧪 测试工作者]
-    B --> F[🚀 部署工作者]
-    C --> G[🔄 结果整合]
-    D --> G
-    E --> G
-    F --> G
-    
-    style A fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
-    style B fill:#fff3e0,stroke:#f57c00,stroke-width:2px
-    style G fill:#c8e6c9,stroke:#388e3c,stroke-width:2px
-    style C fill:#f1f8e9,stroke:#689f38,stroke-width:2px
-    style D fill:#f1f8e9,stroke:#689f38,stroke-width:2px
-    style E fill:#f1f8e9,stroke:#689f38,stroke-width:2px
-    style F fill:#f1f8e9,stroke:#689f38,stroke-width:2px
-```
-
-中央编排器动态分配任务给多个工作者。
-
-```python
-class TaskOrchestrator:
-    def __init__(self):
-        self.workers = [
-            CodeAnalysisWorker(),
-            DocumentationWorker(),
-            TestingWorker(),
-            DeploymentWorker()
-        ]
-    
-    def process_project(self, project_description):
-        # 分析项目需求
-        requirements = self.analyze_requirements(project_description)
-        
-        # 动态分配任务
-        tasks = self.create_task_plan(requirements)
-        
-        # 协调工作者执行
-        results = []
-        for task in tasks:
-            suitable_worker = self.select_worker(task)
-            result = suitable_worker.execute(task)
-            results.append(result)
-        
-        # 整合最终结果
-        return self.integrate_results(results)
-```
-
-### 5. 评估器-优化器模式 (Evaluator-Optimizer)
-
-**迭代改进的反馈循环模式**
-
-```mermaid
-graph LR
-    A[❓ 初始问题] --> B[⚡ 生成器LLM]
-    B --> C[📄 初始解决方案]
-    C --> D[⚖️ 评估器LLM]
-    D --> E{✅ 满意?}
-    E -->|❌ 否| F[🔧 优化器LLM]
-    F --> C
-    E -->|✅ 是| G[🎉 最终方案]
-    
-    style A fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
-    style E fill:#fff3e0,stroke:#f57c00,stroke-width:2px
-    style G fill:#c8e6c9,stroke:#388e3c,stroke-width:2px
-    style B fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px
-    style D fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px
-    style F fill:#ffebee,stroke:#f44336,stroke-width:2px
-```
-
-一个组件生成解决方案，另一个组件评估并优化。
-
-```python
-def iterative_improvement(initial_problem):
-    current_solution = generator_llm(f"请为以下问题提供解决方案：{initial_problem}")
-    
-    for iteration in range(max_iterations):
-        # 评估当前解决方案
-        evaluation = evaluator_llm(f"""
-        问题：{initial_problem}
-        当前解决方案：{current_solution}
-        请评估此解决方案并提出改进建议。
-        """)
-        
-        if evaluation.is_satisfactory:
-            break
-            
-        # 基于评估改进解决方案
-        current_solution = optimizer_llm(f"""
-        原问题：{initial_problem}
-        当前方案：{current_solution}
-        改进建议：{evaluation.suggestions}
-        请提供改进后的解决方案。
-        """)
-    
-    return current_solution
-```
-
-**适用场景：**
-- 复杂问题求解
-- 内容质量优化
-- 创意设计迭代
-
----
 
 ## Agent设计原则与最佳实践
 
