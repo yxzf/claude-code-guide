@@ -221,6 +221,67 @@ def customer_service_agent(query):
 | **响应速度** | 快 | 慢 |
 | **准确性** | 高 | 中等到高 |
 
+#### 4. 实际代码对比示例
+
+**Workflow实现：数据分析任务**
+```python
+def data_analysis_workflow(dataset):
+    """固定步骤的数据分析流程"""
+    # 预定义的分析步骤
+    step1 = clean_data(dataset)
+    step2 = statistical_analysis(step1)
+    step3 = generate_visualization(step2)
+    step4 = create_report(step3)
+    return step4
+
+def clean_data(data):
+    # 固定的数据清理逻辑
+    return processed_data
+
+def statistical_analysis(data):
+    # 预设的统计分析方法
+    return analysis_results
+```
+
+**Agent实现：数据分析任务**
+```python
+def data_analysis_agent(dataset, objective):
+    """LLM驱动的自适应数据分析"""
+    context = f"数据集：{dataset}, 目标：{objective}"
+    
+    while not is_objective_met():
+        # LLM决定下一步分析策略
+        next_action = llm.plan_next_step(
+            context=context,
+            available_tools=["pandas", "matplotlib", "seaborn", "scipy"],
+            analysis_progress=current_progress
+        )
+        
+        # 执行LLM选择的分析方法
+        result = execute_analysis_tool(next_action)
+        
+        # LLM评估结果并调整策略
+        evaluation = llm.evaluate_progress(result, objective)
+        if evaluation.is_satisfactory:
+            break
+        else:
+            context += f"上一步结果：{result}, 需改进：{evaluation.suggestions}"
+    
+    return llm.synthesize_final_report(all_results)
+```
+
+#### 5. 选择决策框架
+
+通过以上对比分析，我们可以看到Workflow和Agent各有优势。在实际应用中：
+
+- **选择Workflow**：当任务流程清晰、步骤固定、对成本和性能要求较高时
+- **选择Agent**：当面对开放性问题、需要创造性解决方案、流程复杂多变时
+- **混合架构**：在复杂系统中，往往将Workflow作为基础流程，在关键决策点引入Agent进行智能决策
+
+### 深入学习Workflow模式
+
+为了帮助你在实际项目中做出正确的架构选择，接下来我们将深入学习Workflow的5种核心模式。每种模式都有其独特的应用场景和技术特点，掌握这些模式将帮助你构建更高效、更可控的AI系统。
+
 ---
 
 ## Workflow模式详解
