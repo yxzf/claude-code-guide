@@ -430,7 +430,7 @@ graph TB
         direction LR
         D[🔍 检索系统<br/>RAG & Vector Search]
         E[🛠️ 工具集成层<br/>Tool Registry & Execution]
-        F[🧠 记忆系统<br/>Short & Long-term Memory]
+        F[💾 记忆系统<br/>Short & Long-term Memory]
     end
     
     subgraph INTERFACE ["🔌 接口适配层"]
@@ -447,23 +447,19 @@ graph TB
         L[⚡ 执行环境<br/>Code Execution]
     end
     
-    %% 层间连接
-    INTERFACE -->|请求解析| CORE
-    CORE -->|能力调用| ENHANCE
-    ENHANCE -->|外部交互| EXTERNAL
-    CORE -->|响应生成| INTERFACE
+    %% 层间连接 - 简化
+    INTERFACE --> CORE
+    CORE --> ENHANCE
+    ENHANCE --> EXTERNAL
     
-    %% 内部连接
-    A -.->|模型调用| B
-    B -.->|上下文| C
-    B -.->|工具选择| E
-    E -.->|API调用| J
-    E -.->|代码执行| L
-    D -.->|数据检索| K
-    F -.->|记忆管理| C
-    G -.->|输入| A
-    B -.->|输出| H
-    I -.->|错误恢复| B
+    %% 关键内部连接 - 精简
+    A --> B
+    B --> C
+    E --> J
+    E --> L
+    D --> K
+    G --> A
+    B --> H
     
     %% 样式定义
     style A fill:#e3f2fd,stroke:#1976d2,stroke-width:3px,color:#000
