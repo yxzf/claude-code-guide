@@ -42,44 +42,46 @@ flowchart LR
 
 简单说，Agent就是"在循环中基于反馈选择工具的大模型"。关键在于这个反馈循环让它能处理复杂、不确定的任务。
 
-### Augmented LLM：从增强到自主
+---
 
-根据Anthropic的观点，构建Agent有一个重要的演进路径：
+## Agent vs Workflow：架构差异详解
+
+### 技术演进：从基础到自主
+
+在对比Agent和Workflow之前，先理解AI系统的演进路径：
 
 ```mermaid
 graph LR
     A[🤖 基础LLM] --> B[🔧 增强LLM]
     B --> C[🧠 Agent系统]
+    C --> D[🔄 Workflow编排]
     
     A1[单次问答] --> B1[工具调用]
-    B1 --> C1[自主决策]
+    B1 --> C1[自主决策] 
+    C1 --> D1[流程编排]
     
     A --> A1
     B --> B1  
     C --> C1
+    D --> D1
     
     style A fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
     style B fill:#fff3e0,stroke:#f57c00,stroke-width:2px
     style C fill:#e8f5e8,stroke:#388e3c,stroke-width:2px
+    style D fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px
 ```
 
-**三个层次的区别：**
+**演进层次说明：**
 
-- **基础LLM**：纯文本输入输出，无外部交互
-- **增强LLM (Augmented LLM)**：具备工具调用能力，但仍是单轮交互
+- **基础LLM**：纯文本问答，无外部交互
+- **增强LLM**：具备工具调用能力，但仍是单轮交互
 - **Agent系统**：多轮循环，自主规划和决策
+- **Workflow编排**：将Agent能力组织成可预测的流程
 
+**常见误解澄清：**
 很多人以为有了Function Calling就是Agent，其实那只是增强LLM。真正的Agent需要在多个回合中保持状态、记忆和策略。
 
-**关键区分：**
-- 增强LLM：我可以调用工具帮你解决问题
-- Agent：我会持续分析情况，选择最佳路径达成目标
-
----
-
-## Agent vs Workflow：架构差异详解
-
-理解Agent和Workflow的区别是构建智能系统的关键。两者都属于"智能系统"范畴，但在架构和行为上有本质差异。
+理解这个演进路径后，我们来看Agent和Workflow的核心差异：
 
 ### 核心架构对比
 
