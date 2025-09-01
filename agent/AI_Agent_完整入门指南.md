@@ -25,7 +25,7 @@ AI Agent（智能体）是一种能够**自主决策**的AI系统，不像传统
 ### 工作原理
 
 ```mermaid
-%%{init: {'flowchart': {'nodeSpacing': 30, 'rankSpacing': 40}}}%%
+%%{init: {'flowchart': {'nodeSpacing': 15, 'rankSpacing': 20}}}%%
 flowchart LR
     A[📋 任务] --> B{🔍 分析}
     B --> C[🎯 选择行动]
@@ -166,7 +166,7 @@ def document_agent(doc, goal):
 将复杂任务分解为顺序执行的简单子任务，每个LLM调用处理前一步的输出。
 
 ```mermaid
-%%{init: {'flowchart': {'nodeSpacing': 25, 'rankSpacing': 35}}}%%
+%%{init: {'flowchart': {'nodeSpacing': 15, 'rankSpacing': 20}}}%%
 graph LR
     A[📥 输入] --> B[🔍 LLM调用1<br/>提取信息]
     B --> C[⚙️ LLM调用2<br/>整理结构]
@@ -206,7 +206,7 @@ def document_processing_chain(raw_text):
 根据输入类型将任务分配给专门的处理器，实现分工协作。
 
 ```mermaid
-%%{init: {'flowchart': {'nodeSpacing': 25, 'rankSpacing': 35}}}%%
+%%{init: {'flowchart': {'nodeSpacing': 15, 'rankSpacing': 20}}}%%
 graph LR
     A[❓ 用户查询] --> B{🧠 分类器LLM}
     B --> C[💻 技术专家LLM]
@@ -252,7 +252,7 @@ def intelligent_routing(user_query):
 同时执行多个独立任务，然后聚合结果，提升处理效率。
 
 ```mermaid
-%%{init: {'flowchart': {'nodeSpacing': 20, 'rankSpacing': 30}}}%%
+%%{init: {'flowchart': {'nodeSpacing': 15, 'rankSpacing': 20}}}%%
 graph LR
     A[📊 输入数据] --> B[😊 情感分析]
     A --> C[🔍 关键词提取]
@@ -302,7 +302,7 @@ async def parallel_analysis(data):
 **中央调度的分工协作模式**
 
 ```mermaid
-%%{init: {'flowchart': {'nodeSpacing': 20, 'rankSpacing': 30}}}%%
+%%{init: {'flowchart': {'nodeSpacing': 15, 'rankSpacing': 20}}}%%
 graph LR
     A[📋 项目描述] --> B{🎭 中央编排器}
     B --> C[💻 代码分析工作者]
@@ -364,7 +364,7 @@ class TaskOrchestrator:
 **迭代改进的反馈循环模式**
 
 ```mermaid
-%%{init: {'flowchart': {'nodeSpacing': 25, 'rankSpacing': 35}}}%%
+%%{init: {'flowchart': {'nodeSpacing': 15, 'rankSpacing': 20}}}%%
 graph LR
     A[❓ 初始问题] --> B[⚡ 生成器LLM]
     B --> C[📄 初始解决方案]
