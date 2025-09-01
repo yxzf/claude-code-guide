@@ -689,118 +689,75 @@ class LearningAgent:
 
 虽然本文重点介绍Agent，但理解Workflow模式对于做出正确的架构选择至关重要。以下是常见的Workflow模式：
 
-### 五种核心Workflow模式详解
-
-#### 1. 提示链模式 (Prompt Chaining)
-
-**顺序执行的线性处理模式**
+### 五种核心Workflow模式架构图
 
 ```mermaid
-graph TD
-    A[📥 输入] -->|顺序处理| B[🔍 LLM调用1<br/>提取信息]
-    B -->|传递结果| C[⚙️ LLM调用2<br/>整理结构]
-    C -->|格式化| D[📝 LLM调用3<br/>格式化输出]
-    D -->|完成| E[📤 最终结果]
+graph TB
+    subgraph CHAIN ["🔗 1. 提示链 (Prompt Chaining)"]
+        A1[📥 输入] --> B1[🔍 LLM调用1<br/>提取信息]
+        B1 --> C1[⚙️ LLM调用2<br/>整理结构]
+        C1 --> D1[📝 LLM调用3<br/>格式化输出]
+        D1 --> E1[📤 最终结果]
+    end
     
-    style A fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
-    style E fill:#c8e6c9,stroke:#388e3c,stroke-width:2px
-    style B fill:#f1f8e9,stroke:#689f38,stroke-width:2px
-    style C fill:#f1f8e9,stroke:#689f38,stroke-width:2px
-    style D fill:#f1f8e9,stroke:#689f38,stroke-width:2px
-```
-
-#### 2. 路由模式 (Routing)
-
-**智能分流的专家处理模式**
-
-```mermaid
-graph TD
-    A[❓ 用户查询] -->|分类| B{🧠 分类器LLM}
-    B -->|技术问题| C[💻 技术专家LLM]
-    B -->|计费问题| D[💰 计费专家LLM]
-    B -->|一般问题| E[📞 通用支持LLM]
-    C -->|汇总| F[📋 专门回答]
-    D -->|汇总| F
-    E -->|汇总| F
+    subgraph ROUTE ["🚦 2. 路由 (Routing)"]
+        A2[❓ 用户查询] --> B2{🧠 分类器LLM}
+        B2 --> C2[💻 技术专家LLM]
+        B2 --> D2[💰 计费专家LLM]
+        B2 --> E2[📞 通用支持LLM]
+        C2 --> F2[📋 专门回答]
+        D2 --> F2
+        E2 --> F2
+    end
     
-    style A fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
-    style B fill:#fff3e0,stroke:#f57c00,stroke-width:2px
-    style F fill:#c8e6c9,stroke:#388e3c,stroke-width:2px
-    style C fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px
-    style D fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px
-    style E fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px
-```
-
-#### 3. 并行化模式 (Parallelization)
-
-**同时执行的多任务处理模式**
-
-```mermaid
-graph TD
-    A[📊 输入数据] -->|分发| B[😊 情感分析]
-    A -->|分发| C[🔍 关键词提取]
-    A -->|分发| D[📈 主题建模]
-    A -->|分发| E[📖 可读性分析]
-    B -->|聚合| F[🔄 结果聚合器]
-    C -->|聚合| F
-    D -->|聚合| F
-    E -->|聚合| F
-    F -->|输出| G[📊 综合报告]
+    subgraph PARALLEL ["⚡ 3. 并行化 (Parallelization)"]
+        A3[📊 输入数据] --> B3[😊 情感分析]
+        A3 --> C3[🔍 关键词提取]
+        A3 --> D3[📈 主题建模]
+        A3 --> E3[📖 可读性分析]
+        B3 --> F3[🔄 结果聚合器]
+        C3 --> F3
+        D3 --> F3
+        E3 --> F3
+        F3 --> G3[📊 综合报告]
+    end
     
-    style A fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
-    style F fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px
-    style G fill:#c8e6c9,stroke:#388e3c,stroke-width:2px
-    style B fill:#e0f2f1,stroke:#009688,stroke-width:2px
-    style C fill:#e0f2f1,stroke:#009688,stroke-width:2px
-    style D fill:#e0f2f1,stroke:#009688,stroke-width:2px
-    style E fill:#e0f2f1,stroke:#009688,stroke-width:2px
-```
-
-#### 4. 编排器-工作者模式 (Orchestrator-Workers)
-
-**中央调度的分工协作模式**
-
-```mermaid
-graph TD
-    A[📋 项目描述] -->|任务分配| B{🎭 中央编排器}
-    B -->|分配| C[💻 代码分析工作者]
-    B -->|分配| D[📝 文档工作者]
-    B -->|分配| E[🧪 测试工作者]
-    B -->|分配| F[🚀 部署工作者]
-    C -->|反馈| G[🔄 结果整合]
-    D -->|反馈| G
-    E -->|反馈| G
-    F -->|反馈| G
+    subgraph ORCHESTRATOR ["🎯 4. 编排器-工作者 (Orchestrator-Workers)"]
+        A4[📋 项目描述] --> B4{🎭 中央编排器}
+        B4 --> C4[💻 代码分析工作者]
+        B4 --> D4[📝 文档工作者]
+        B4 --> E4[🧪 测试工作者]
+        B4 --> F4[🚀 部署工作者]
+        C4 --> G4[🔄 结果整合]
+        D4 --> G4
+        E4 --> G4
+        F4 --> G4
+    end
     
-    style A fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
-    style B fill:#fff3e0,stroke:#f57c00,stroke-width:2px
-    style G fill:#c8e6c9,stroke:#388e3c,stroke-width:2px
-    style C fill:#f1f8e9,stroke:#689f38,stroke-width:2px
-    style D fill:#f1f8e9,stroke:#689f38,stroke-width:2px
-    style E fill:#f1f8e9,stroke:#689f38,stroke-width:2px
-    style F fill:#f1f8e9,stroke:#689f38,stroke-width:2px
-```
-
-#### 5. 评估器-优化器模式 (Evaluator-Optimizer)
-
-**迭代改进的反馈循环模式**
-
-```mermaid
-graph TD
-    A[❓ 初始问题] -->|生成| B[⚡ 生成器LLM]
-    B -->|产出| C[📄 初始解决方案]
-    C -->|评估| D[⚖️ 评估器LLM]
-    D -->|判断| E{✅ 满意?}
-    E -->|❌ 否| F[🔧 优化器LLM]
-    F -->|改进| C
-    E -->|✅ 是| G[🎉 最终方案]
+    subgraph EVALUATOR ["🔄 5. 评估器-优化器 (Evaluator-Optimizer)"]
+        A5[❓ 初始问题] --> B5[⚡ 生成器LLM]
+        B5 --> C5[📄 初始解决方案]
+        C5 --> D5[⚖️ 评估器LLM]
+        D5 --> E5{✅ 满意?}
+        E5 -->|❌ 否| F5[🔧 优化器LLM]
+        F5 --> C5
+        E5 -->|✅ 是| G5[🎉 最终方案]
+    end
     
-    style A fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
-    style E fill:#fff3e0,stroke:#f57c00,stroke-width:2px
-    style G fill:#c8e6c9,stroke:#388e3c,stroke-width:2px
-    style B fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px
-    style D fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px
-    style F fill:#ffebee,stroke:#f44336,stroke-width:2px
+    style A1 fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    style A2 fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    style A3 fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    style A4 fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    style A5 fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    style E1 fill:#c8e6c9,stroke:#388e3c,stroke-width:2px
+    style F2 fill:#c8e6c9,stroke:#388e3c,stroke-width:2px
+    style G3 fill:#c8e6c9,stroke:#388e3c,stroke-width:2px
+    style G4 fill:#c8e6c9,stroke:#388e3c,stroke-width:2px
+    style G5 fill:#c8e6c9,stroke:#388e3c,stroke-width:2px
+    style B2 fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    style B4 fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    style E5 fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    style F3 fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px
 ```
 
 ### 1. 提示链（Prompt Chaining）
