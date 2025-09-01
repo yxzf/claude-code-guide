@@ -419,6 +419,13 @@ class DataAnalysisAgent:
 
 ```mermaid
 graph TB
+    subgraph INTERFACE ["🔌 接口适配层"]
+        direction LR
+        G[📥 输入处理器<br/>Query Understanding]
+        H[📤 输出生成器<br/>Response Formatting]
+        I[⚠️ 错误处理器<br/>Error Recovery]
+    end
+    
     subgraph CORE ["🧠 增强型LLM核心层"]
         direction LR
         A[🤖 基础语言模型<br/>GPT-4, Claude等]
@@ -433,13 +440,6 @@ graph TB
         F[💾 记忆系统<br/>Short & Long-term Memory]
     end
     
-    subgraph INTERFACE ["🔌 接口适配层"]
-        direction LR
-        G[📥 输入处理器<br/>Query Understanding]
-        H[📤 输出生成器<br/>Response Formatting]
-        I[⚠️ 错误处理器<br/>Error Recovery]
-    end
-    
     subgraph EXTERNAL ["🌍 外部环境层"]
         direction LR
         J[🔗 API服务<br/>External APIs]
@@ -447,19 +447,18 @@ graph TB
         L[⚡ 执行环境<br/>Code Execution]
     end
     
-    %% 层间连接 - 简化
-    INTERFACE --> CORE
-    CORE --> ENHANCE
-    ENHANCE --> EXTERNAL
-    
-    %% 关键内部连接 - 精简
+    %% 主要数据流 - 从上到下
+    G --> A
     A --> B
-    B --> C
+    B --> E
     E --> J
     E --> L
-    D --> K
-    G --> A
     B --> H
+    
+    %% 支持连接
+    B --> C
+    D --> K
+    F --> C
     
     %% 样式定义
     style A fill:#e3f2fd,stroke:#1976d2,stroke-width:3px,color:#000
@@ -476,9 +475,9 @@ graph TB
     style L fill:#f1f8e9,stroke:#689f38,stroke-width:2px,color:#000
     
     %% 子图样式
+    style INTERFACE fill:#f8f0ff,stroke:#6610f2,stroke-width:2px
     style CORE fill:#f8f9fa,stroke:#007bff,stroke-width:3px
     style ENHANCE fill:#fff8f0,stroke:#fd7e14,stroke-width:2px
-    style INTERFACE fill:#f8f0ff,stroke:#6610f2,stroke-width:2px
     style EXTERNAL fill:#f0fff4,stroke:#28a745,stroke-width:2px
 ```
 
