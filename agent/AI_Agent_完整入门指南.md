@@ -732,83 +732,6 @@ class DataAnalysisAgent:
 
 ## 实际案例分析
 
-### 两个典型Agent案例架构对比
-
-```mermaid
-graph TB
-    subgraph CUSTOMER ["👥 案例1: AI客服Agent系统架构"]
-        direction TB
-        A1[📞 用户查询] -.->|并行分析| B1[😊 情绪分析器]
-        A1 -.->|并行检索| C1[🧠 对话记忆检索]
-        B1 -->|情绪数据| D1[🎯 Agent核心引擎]
-        C1 -->|历史上下文| D1
-        
-        D1 -->|智能决策| E1{{🤔 决策类型}}
-        E1 ==>|🛠️ 工具使用| F1[⚙️ 工具执行层]
-        E1 ==>|💬 直接回复| G1[📝 响应生成器]
-        E1 ==>|👨‍💼 人工转接| H1[🚀 升级处理器]
-        
-        F1 -.->|API调用| I1[💰 账单系统API]
-        F1 -.->|检索| J1[📚 知识库检索]
-        F1 -.->|创建| K1[🎫 工单系统API]
-        
-        G1 -->|更新| L1[💾 对话记忆更新]
-        L1 -->|响应| M1[✅ 用户响应]
-        H1 -->|转接| M1
-    end
-    
-    subgraph DEBUG ["💻 案例2: 代码调试Agent系统架构"]
-        direction TB
-        A2[🐛 代码问题输入] -.->|静态分析| B2[🔍 静态分析器]
-        A2 -->|问题输入| C2[🧠 Agent核心引擎]
-        B2 -->|分析结果| C2
-        
-        C2 -->|策略选择| D2{{🎯 调试策略}}
-        D2 ==>|🧪 执行测试| E2[⚡ 测试运行器]
-        D2 ==>|📊 代码分析| F2[💻 代码执行器]
-        D2 ==>|✏️ 文件修改| G2[📝 文件编辑器]
-        
-        E2 -->|测试结果| H2[📊 结果分析]
-        F2 -->|执行结果| H2
-        G2 -->|修改结果| H2
-        
-        H2 -->|评估| I2{{✅ 问题解决?}}
-        I2 ==>|❌ 否| J2[🔄 策略调整]
-        J2 ==>|重新规划| C2
-        I2 ==>|✅ 是| K2[🎉 解决方案输出]
-    end
-    
-    %% 客服Agent样式
-    style A1 fill:#e3f2fd,stroke:#1976d2,stroke-width:3px,color:#000
-    style D1 fill:#fff3e0,stroke:#f57c00,stroke-width:3px,color:#000
-    style E1 fill:#fff3e0,stroke:#f57c00,stroke-width:2px,color:#000
-    style F1 fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px,color:#000
-    style G1 fill:#e8f5e8,stroke:#4caf50,stroke-width:2px,color:#000
-    style H1 fill:#ffebee,stroke:#f44336,stroke-width:2px,color:#000
-    style M1 fill:#c8e6c9,stroke:#388e3c,stroke-width:3px,color:#000
-    
-    %% 调试Agent样式
-    style A2 fill:#e3f2fd,stroke:#1976d2,stroke-width:3px,color:#000
-    style C2 fill:#fff3e0,stroke:#f57c00,stroke-width:3px,color:#000
-    style D2 fill:#fff3e0,stroke:#f57c00,stroke-width:2px,color:#000
-    style H2 fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px,color:#000
-    style I2 fill:#fff3e0,stroke:#f57c00,stroke-width:2px,color:#000
-    style K2 fill:#c8e6c9,stroke:#388e3c,stroke-width:3px,color:#000
-    style J2 fill:#ffebee,stroke:#f44336,stroke-width:2px,color:#000
-    
-    %% 工具层样式
-    style I1 fill:#f1f8e9,stroke:#689f38,stroke-width:1px,color:#666
-    style J1 fill:#f1f8e9,stroke:#689f38,stroke-width:1px,color:#666
-    style K1 fill:#f1f8e9,stroke:#689f38,stroke-width:1px,color:#666
-    style E2 fill:#f1f8e9,stroke:#689f38,stroke-width:1px,color:#666
-    style F2 fill:#f1f8e9,stroke:#689f38,stroke-width:1px,color:#666
-    style G2 fill:#f1f8e9,stroke:#689f38,stroke-width:1px,color:#666
-    
-    %% 子图样式
-    style CUSTOMER fill:#f8f9fa,stroke:#007bff,stroke-width:3px
-    style DEBUG fill:#fff8f0,stroke:#fd7e14,stroke-width:3px
-```
-
 ### 案例1：AI客服Agent
 
 #### 业务需求
@@ -819,6 +742,37 @@ graph TB
 - **多工具集成**：账单系统、知识库、工单系统等
 - **记忆机制**：维护对话上下文，提供连贯体验
 - **智能转接**：必要时转接人工客服
+
+#### 架构图
+
+```mermaid
+graph TD
+    A[👥 用户查询] --> B[🧠 情绪分析模块]
+    B --> C[📚 历史记录检索]
+    C --> D{🎯 策略选择器}
+    
+    D -->|账单问题| E[💳 账单系统API]
+    D -->|技术支持| F[🔧 知识库查询]
+    D -->|复杂问题| G[🎫 工单系统]
+    D -->|情绪异常| H[👨‍💼 人工转接]
+    
+    E --> I[📝 响应生成]
+    F --> I
+    G --> I
+    H --> J[🤝 人工客服]
+    
+    I --> K[💾 记忆更新]
+    K --> L[✅ 用户反馈]
+    
+    style A fill:#e3f2fd,stroke:#1976d2,stroke-width:3px,stroke-dasharray: 5 5
+    style D fill:#fff3e0,stroke:#f57c00,stroke-width:3px
+    style I fill:#c8e6c9,stroke:#388e3c,stroke-width:3px
+    style J fill:#ffebee,stroke:#d32f2f,stroke-width:3px
+    style E fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px
+    style F fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px
+    style G fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px
+    style H fill:#ffebee,stroke:#d32f2f,stroke-width:2px
+```
 
 #### 工作流程
 1. 接收用户查询 → 分析情绪和历史
@@ -835,6 +789,44 @@ graph TB
 - **迭代式修复**：允许多轮调试，逐步改进代码
 - **验证机制**：每次修改后都进行全面验证
 - **工具链集成**：代码执行、测试运行、静态分析等
+
+#### 架构图
+
+```mermaid
+graph TB
+    A[💻 代码输入] --> B[🔍 初始诊断]
+    B --> C{🎯 问题分类器}
+    
+    C -->|语法错误| D[📝 语法检查器]
+    C -->|逻辑错误| E[🧪 测试运行器]
+    C -->|性能问题| F[📊 性能分析器]
+    C -->|运行时错误| G[🐛 调试器]
+    
+    D --> H[⚡ 修复生成器]
+    E --> H
+    F --> H
+    G --> H
+    
+    H --> I[✅ 验证器]
+    I --> J{🔄 验证通过?}
+    
+    J -->|是| K[🎉 修复完成]
+    J -->|否| L[📈 反馈学习]
+    L --> C
+    
+    K --> M[📋 修复报告]
+    
+    style A fill:#e3f2fd,stroke:#1976d2,stroke-width:3px,stroke-dasharray: 5 5
+    style C fill:#fff3e0,stroke:#f57c00,stroke-width:3px
+    style H fill:#f3e5f5,stroke:#9c27b0,stroke-width:3px
+    style I fill:#c8e6c9,stroke:#388e3c,stroke-width:3px
+    style K fill:#c8e6c9,stroke:#388e3c,stroke-width:3px
+    style J fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    style D fill:#e8f5e8,stroke:#4caf50,stroke-width:2px
+    style E fill:#e8f5e8,stroke:#4caf50,stroke-width:2px
+    style F fill:#e8f5e8,stroke:#4caf50,stroke-width:2px
+    style G fill:#e8f5e8,stroke:#4caf50,stroke-width:2px
+```
 
 #### 工作流程
 1. 初始诊断 → 分析代码问题和错误信息
