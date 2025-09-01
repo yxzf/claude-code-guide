@@ -721,67 +721,88 @@ class LearningAgent:
 
 ```mermaid
 graph TB
-    subgraph "1. 提示链 (Prompt Chaining)"
-        A1[输入] --> B1[LLM调用1<br/>提取信息]
-        B1 --> C1[LLM调用2<br/>整理结构]
-        C1 --> D1[LLM调用3<br/>格式化输出]
-        D1 --> E1[最终结果]
+    subgraph CHAIN ["🔗 1. 提示链 (Prompt Chaining)"]
+        direction TB
+        A1[📥 输入] -->|顺序处理| B1[🔍 LLM调用1<br/>提取信息]
+        B1 -->|传递结果| C1[⚙️ LLM调用2<br/>整理结构]
+        C1 -->|格式化| D1[📝 LLM调用3<br/>格式化输出]
+        D1 -->|完成| E1[📤 最终结果]
     end
     
-    subgraph "2. 路由 (Routing)"
-        A2[用户查询] --> B2[分类器LLM]
-        B2 --> C2[技术专家LLM]
-        B2 --> D2[计费专家LLM]
-        B2 --> E2[通用支持LLM]
-        C2 --> F2[专门回答]
-        D2 --> F2
-        E2 --> F2
+    subgraph ROUTE ["🚦 2. 路由 (Routing)"]
+        direction TB
+        A2[❓ 用户查询] -->|分类| B2{🧠 分类器LLM}
+        B2 -->|技术问题| C2[💻 技术专家LLM]
+        B2 -->|计费问题| D2[💰 计费专家LLM]
+        B2 -->|一般问题| E2[📞 通用支持LLM]
+        C2 -->|汇总| F2[📋 专门回答]
+        D2 -->|汇总| F2
+        E2 -->|汇总| F2
     end
     
-    subgraph "3. 并行化 (Parallelization)"
-        A3[输入数据] --> B3[情感分析]
-        A3 --> C3[关键词提取]
-        A3 --> D3[主题建模]
-        A3 --> E3[可读性分析]
-        B3 --> F3[结果聚合器]
-        C3 --> F3
-        D3 --> F3
-        E3 --> F3
-        F3 --> G3[综合报告]
+    subgraph PARALLEL ["⚡ 3. 并行化 (Parallelization)"]
+        direction TB
+        A3[📊 输入数据] -->|分发| B3[😊 情感分析]
+        A3 -->|分发| C3[🔍 关键词提取]
+        A3 -->|分发| D3[📈 主题建模]
+        A3 -->|分发| E3[📖 可读性分析]
+        B3 -->|聚合| F3[🔄 结果聚合器]
+        C3 -->|聚合| F3
+        D3 -->|聚合| F3
+        E3 -->|聚合| F3
+        F3 -->|输出| G3[📊 综合报告]
     end
     
-    subgraph "4. 编排器-工作者 (Orchestrator-Workers)"
-        A4[项目描述] --> B4[中央编排器]
-        B4 --> C4[代码分析工作者]
-        B4 --> D4[文档工作者]
-        B4 --> E4[测试工作者]
-        B4 --> F4[部署工作者]
-        C4 --> G4[结果整合]
-        D4 --> G4
-        E4 --> G4
-        F4 --> G4
+    subgraph ORCHESTRATOR ["🎯 4. 编排器-工作者 (Orchestrator-Workers)"]
+        direction TB
+        A4[📋 项目描述] -->|任务分配| B4{🎭 中央编排器}
+        B4 -->|分配| C4[💻 代码分析工作者]
+        B4 -->|分配| D4[📝 文档工作者]
+        B4 -->|分配| E4[🧪 测试工作者]
+        B4 -->|分配| F4[🚀 部署工作者]
+        C4 -->|反馈| G4[🔄 结果整合]
+        D4 -->|反馈| G4
+        E4 -->|反馈| G4
+        F4 -->|反馈| G4
     end
     
-    subgraph "5. 评估器-优化器 (Evaluator-Optimizer)"
-        A5[初始问题] --> B5[生成器LLM]
-        B5 --> C5[初始解决方案]
-        C5 --> D5[评估器LLM]
-        D5 --> E5{满意?}
-        E5 -->|否| F5[优化器LLM]
-        F5 --> C5
-        E5 -->|是| G5[最终方案]
+    subgraph EVALUATOR ["🔄 5. 评估器-优化器 (Evaluator-Optimizer)"]
+        direction TB
+        A5[❓ 初始问题] -->|生成| B5[⚡ 生成器LLM]
+        B5 -->|产出| C5[📄 初始解决方案]
+        C5 -->|评估| D5[⚖️ 评估器LLM]
+        D5 -->|判断| E5{{✅ 满意?}}
+        E5 ==>|❌ 否| F5[🔧 优化器LLM]
+        F5 ==>|改进| C5
+        E5 ==>|✅ 是| G5[🎉 最终方案]
     end
     
-    style A1 fill:#e3f2fd
-    style A2 fill:#e3f2fd
-    style A3 fill:#e3f2fd
-    style A4 fill:#e3f2fd
-    style A5 fill:#e3f2fd
-    style E1 fill:#c8e6c9
-    style F2 fill:#c8e6c9
-    style G3 fill:#c8e6c9
-    style G4 fill:#c8e6c9
-    style G5 fill:#c8e6c9
+    %% 输入节点样式
+    style A1 fill:#e3f2fd,stroke:#1976d2,stroke-width:3px,color:#000
+    style A2 fill:#e3f2fd,stroke:#1976d2,stroke-width:3px,color:#000
+    style A3 fill:#e3f2fd,stroke:#1976d2,stroke-width:3px,color:#000
+    style A4 fill:#e3f2fd,stroke:#1976d2,stroke-width:3px,color:#000
+    style A5 fill:#e3f2fd,stroke:#1976d2,stroke-width:3px,color:#000
+    
+    %% 输出节点样式
+    style E1 fill:#c8e6c9,stroke:#388e3c,stroke-width:3px,color:#000
+    style F2 fill:#c8e6c9,stroke:#388e3c,stroke-width:3px,color:#000
+    style G3 fill:#c8e6c9,stroke:#388e3c,stroke-width:3px,color:#000
+    style G4 fill:#c8e6c9,stroke:#388e3c,stroke-width:3px,color:#000
+    style G5 fill:#c8e6c9,stroke:#388e3c,stroke-width:3px,color:#000
+    
+    %% 关键节点样式
+    style B2 fill:#fff3e0,stroke:#f57c00,stroke-width:2px,color:#000
+    style B4 fill:#fff3e0,stroke:#f57c00,stroke-width:2px,color:#000
+    style E5 fill:#fff3e0,stroke:#f57c00,stroke-width:2px,color:#000
+    style F3 fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px,color:#000
+    
+    %% 子图样式
+    style CHAIN fill:#f8f9fa,stroke:#007bff,stroke-width:2px
+    style ROUTE fill:#fff8f0,stroke:#fd7e14,stroke-width:2px
+    style PARALLEL fill:#f0fff4,stroke:#28a745,stroke-width:2px
+    style ORCHESTRATOR fill:#f8f0ff,stroke:#6610f2,stroke-width:2px
+    style EVALUATOR fill:#fff0f6,stroke:#e83e8c,stroke-width:2px
 ```
 
 ### 1. 提示链（Prompt Chaining）
@@ -1413,55 +1434,77 @@ class ChainOfThoughtPrompt:
 
 ```mermaid
 graph TB
-    subgraph "案例1: AI客服Agent系统架构"
-        A1[用户查询] --> B1[情绪分析器]
-        A1 --> C1[对话记忆检索]
-        B1 --> D1[Agent核心引擎]
-        C1 --> D1
+    subgraph CUSTOMER ["👥 案例1: AI客服Agent系统架构"]
+        direction TB
+        A1[📞 用户查询] -.->|并行分析| B1[😊 情绪分析器]
+        A1 -.->|并行检索| C1[🧠 对话记忆检索]
+        B1 -->|情绪数据| D1[🎯 Agent核心引擎]
+        C1 -->|历史上下文| D1
         
-        D1 --> E1{决策类型}
-        E1 -->|工具使用| F1[工具执行层]
-        E1 -->|直接回复| G1[响应生成器]
-        E1 -->|人工转接| H1[升级处理器]
+        D1 -->|智能决策| E1{{🤔 决策类型}}
+        E1 ==>|🛠️ 工具使用| F1[⚙️ 工具执行层]
+        E1 ==>|💬 直接回复| G1[📝 响应生成器]
+        E1 ==>|👨‍💼 人工转接| H1[🚀 升级处理器]
         
-        F1 --> I1[账单系统API]
-        F1 --> J1[知识库检索]
-        F1 --> K1[工单系统API]
+        F1 -.->|API调用| I1[💰 账单系统API]
+        F1 -.->|检索| J1[📚 知识库检索]
+        F1 -.->|创建| K1[🎫 工单系统API]
         
-        G1 --> L1[对话记忆更新]
-        L1 --> M1[用户响应]
-        H1 --> M1
-        
-        style A1 fill:#e3f2fd
-        style D1 fill:#fff3e0
-        style M1 fill:#c8e6c9
-        style F1 fill:#f3e5f5
+        G1 -->|更新| L1[💾 对话记忆更新]
+        L1 -->|响应| M1[✅ 用户响应]
+        H1 -->|转接| M1
     end
     
-    subgraph "案例2: 代码调试Agent系统架构"
-        A2[代码问题输入] --> B2[静态分析器]
-        A2 --> C2[Agent核心引擎]
-        B2 --> C2
+    subgraph DEBUG ["💻 案例2: 代码调试Agent系统架构"]
+        direction TB
+        A2[🐛 代码问题输入] -.->|静态分析| B2[🔍 静态分析器]
+        A2 -->|问题输入| C2[🧠 Agent核心引擎]
+        B2 -->|分析结果| C2
         
-        C2 --> D2{调试策略}
-        D2 -->|执行测试| E2[测试运行器]
-        D2 -->|代码分析| F2[代码执行器]
-        D2 -->|文件修改| G2[文件编辑器]
+        C2 -->|策略选择| D2{{🎯 调试策略}}
+        D2 ==>|🧪 执行测试| E2[⚡ 测试运行器]
+        D2 ==>|📊 代码分析| F2[💻 代码执行器]
+        D2 ==>|✏️ 文件修改| G2[📝 文件编辑器]
         
-        E2 --> H2[结果分析]
-        F2 --> H2
-        G2 --> H2
+        E2 -->|测试结果| H2[📊 结果分析]
+        F2 -->|执行结果| H2
+        G2 -->|修改结果| H2
         
-        H2 --> I2{问题解决?}
-        I2 -->|否| J2[策略调整]
-        J2 --> C2
-        I2 -->|是| K2[解决方案输出]
-        
-        style A2 fill:#e3f2fd
-        style C2 fill:#fff3e0
-        style K2 fill:#c8e6c9
-        style H2 fill:#f3e5f5
+        H2 -->|评估| I2{{✅ 问题解决?}}
+        I2 ==>|❌ 否| J2[🔄 策略调整]
+        J2 ==>|重新规划| C2
+        I2 ==>|✅ 是| K2[🎉 解决方案输出]
     end
+    
+    %% 客服Agent样式
+    style A1 fill:#e3f2fd,stroke:#1976d2,stroke-width:3px,color:#000
+    style D1 fill:#fff3e0,stroke:#f57c00,stroke-width:3px,color:#000
+    style E1 fill:#fff3e0,stroke:#f57c00,stroke-width:2px,color:#000
+    style F1 fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px,color:#000
+    style G1 fill:#e8f5e8,stroke:#4caf50,stroke-width:2px,color:#000
+    style H1 fill:#ffebee,stroke:#f44336,stroke-width:2px,color:#000
+    style M1 fill:#c8e6c9,stroke:#388e3c,stroke-width:3px,color:#000
+    
+    %% 调试Agent样式
+    style A2 fill:#e3f2fd,stroke:#1976d2,stroke-width:3px,color:#000
+    style C2 fill:#fff3e0,stroke:#f57c00,stroke-width:3px,color:#000
+    style D2 fill:#fff3e0,stroke:#f57c00,stroke-width:2px,color:#000
+    style H2 fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px,color:#000
+    style I2 fill:#fff3e0,stroke:#f57c00,stroke-width:2px,color:#000
+    style K2 fill:#c8e6c9,stroke:#388e3c,stroke-width:3px,color:#000
+    style J2 fill:#ffebee,stroke:#f44336,stroke-width:2px,color:#000
+    
+    %% 工具层样式
+    style I1 fill:#f1f8e9,stroke:#689f38,stroke-width:1px,color:#666
+    style J1 fill:#f1f8e9,stroke:#689f38,stroke-width:1px,color:#666
+    style K1 fill:#f1f8e9,stroke:#689f38,stroke-width:1px,color:#666
+    style E2 fill:#f1f8e9,stroke:#689f38,stroke-width:1px,color:#666
+    style F2 fill:#f1f8e9,stroke:#689f38,stroke-width:1px,color:#666
+    style G2 fill:#f1f8e9,stroke:#689f38,stroke-width:1px,color:#666
+    
+    %% 子图样式
+    style CUSTOMER fill:#f8f9fa,stroke:#007bff,stroke-width:3px
+    style DEBUG fill:#fff8f0,stroke:#fd7e14,stroke-width:3px
 ```
 
 ### 案例1：AI客服Agent
@@ -1821,25 +1864,52 @@ class ContentCreationAgent:
 | **Microsoft Semantic Kernel** | 企业级，集成度高 | 学习曲线陡峭 | 企业应用，微软生态 |
 | **Anthropic MCP** | 工具标准化，轻量级 | 相对新颖，生态较小 | 工具集成，自定义Agent |
 
-#### 框架能力雷达图对比
+#### 框架能力象限对比图
 
 ```mermaid
-%%{init: {'theme':'base', 'themeVariables': {'primaryColor': '#ff6b6b', 'primaryTextColor': '#000', 'primaryBorderColor': '#7C0000', 'lineColor': '#00ff00'}}}%%
+%%{init: {'theme':'base', 'themeVariables': {'primaryColor': '#2196f3', 'primaryTextColor': '#333', 'primaryBorderColor': '#1976d2', 'lineColor': '#666', 'secondaryColor': '#fff', 'background': '#f8f9fa'}}}%%
 quadrantChart
-    title Agent框架能力对比
-    x-axis 低学习成本 --> 高学习成本
-    y-axis 低定制性 --> 高定制性
+    title 🏗️ Agent框架能力定位象限图
+    x-axis 💡 易上手 --> 📚 高门槛
+    y-axis 🔧 标准化 --> 🎯 高定制
     
-    quadrant-1 高定制性 & 高学习成本
-    quadrant-2 高定制性 & 低学习成本
-    quadrant-3 低定制性 & 低学习成本
-    quadrant-4 低定制性 & 高学习成本
+    quadrant-1 🎯 高定制性 & 📚 高学习门槛
+    quadrant-2 🚀 高定制性 & 💡 易于上手  
+    quadrant-3 ⚡ 标准化 & 💡 快速上手
+    quadrant-4 📋 标准化 & 📚 复杂学习
     
-    LangGraph: [0.6, 0.7]
-    AutoGPT: [0.3, 0.8]
-    Semantic Kernel: [0.8, 0.6]
-    MCP: [0.4, 0.9]
-    自建方案: [0.9, 0.95]
+    LangGraph🔗: [0.65, 0.75]
+    AutoGPT🤖: [0.25, 0.85]
+    SemanticKernel🏢: [0.85, 0.65]
+    MCP🔧: [0.35, 0.92]
+    自建方案💻: [0.95, 0.98]
+```
+
+#### 框架技术路径演进图
+
+```mermaid
+gitgraph
+    commit id: "💡 简单提示"
+    commit id: "📝 增强提示"
+    
+    branch "🔗 Workflow路径"
+    commit id: "🚀 LangGraph"
+    commit id: "⚙️ 复杂工作流"
+    
+    checkout main
+    branch "🤖 Agent路径"  
+    commit id: "🎯 AutoGPT"
+    commit id: "🧠 自主决策"
+    
+    checkout main
+    branch "🏢 企业路径"
+    commit id: "🔧 SemanticKernel"
+    commit id: "🏛️ 企业级集成"
+    
+    checkout main
+    branch "🛠️ 定制路径"
+    commit id: "⚡ MCP工具标准"
+    commit id: "💻 完全自建"
 ```
 
 #### 框架特征对比表
