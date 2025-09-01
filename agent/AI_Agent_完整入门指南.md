@@ -684,9 +684,7 @@ class LearningAgent:
 
 虽然本文重点介绍Agent，但理解Workflow模式对于做出正确的架构选择至关重要。以下是常见的Workflow模式：
 
-### 五种核心Workflow模式详解
-
-#### 1. 提示链模式 (Prompt Chaining)
+### 1. 提示链模式 (Prompt Chaining)
 
 **顺序执行的线性处理模式**
 
@@ -703,102 +701,6 @@ graph LR
     style C fill:#f1f8e9,stroke:#689f38,stroke-width:2px
     style D fill:#f1f8e9,stroke:#689f38,stroke-width:2px
 ```
-
-#### 2. 路由模式 (Routing)
-
-**智能分流的专家处理模式**
-
-```mermaid
-graph LR
-    A[❓ 用户查询] --> B{🧠 分类器LLM}
-    B --> C[💻 技术专家LLM]
-    B --> D[💰 计费专家LLM]
-    B --> E[📞 通用支持LLM]
-    C --> F[📋 专门回答]
-    D --> F
-    E --> F
-    
-    style A fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
-    style B fill:#fff3e0,stroke:#f57c00,stroke-width:2px
-    style F fill:#c8e6c9,stroke:#388e3c,stroke-width:2px
-    style C fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px
-    style D fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px
-    style E fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px
-```
-
-#### 3. 并行化模式 (Parallelization)
-
-**同时执行的多任务处理模式**
-
-```mermaid
-graph LR
-    A[📊 输入数据] --> B[😊 情感分析]
-    A --> C[🔍 关键词提取]
-    A --> D[📈 主题建模]
-    A --> E[📖 可读性分析]
-    B --> F[🔄 结果聚合器]
-    C --> F
-    D --> F
-    E --> F
-    F --> G[📊 综合报告]
-    
-    style A fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
-    style F fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px
-    style G fill:#c8e6c9,stroke:#388e3c,stroke-width:2px
-    style B fill:#e0f2f1,stroke:#009688,stroke-width:2px
-    style C fill:#e0f2f1,stroke:#009688,stroke-width:2px
-    style D fill:#e0f2f1,stroke:#009688,stroke-width:2px
-    style E fill:#e0f2f1,stroke:#009688,stroke-width:2px
-```
-
-#### 4. 编排器-工作者模式 (Orchestrator-Workers)
-
-**中央调度的分工协作模式**
-
-```mermaid
-graph LR
-    A[📋 项目描述] --> B{🎭 中央编排器}
-    B --> C[💻 代码分析工作者]
-    B --> D[📝 文档工作者]
-    B --> E[🧪 测试工作者]
-    B --> F[🚀 部署工作者]
-    C --> G[🔄 结果整合]
-    D --> G
-    E --> G
-    F --> G
-    
-    style A fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
-    style B fill:#fff3e0,stroke:#f57c00,stroke-width:2px
-    style G fill:#c8e6c9,stroke:#388e3c,stroke-width:2px
-    style C fill:#f1f8e9,stroke:#689f38,stroke-width:2px
-    style D fill:#f1f8e9,stroke:#689f38,stroke-width:2px
-    style E fill:#f1f8e9,stroke:#689f38,stroke-width:2px
-    style F fill:#f1f8e9,stroke:#689f38,stroke-width:2px
-```
-
-#### 5. 评估器-优化器模式 (Evaluator-Optimizer)
-
-**迭代改进的反馈循环模式**
-
-```mermaid
-graph LR
-    A[❓ 初始问题] --> B[⚡ 生成器LLM]
-    B --> C[📄 初始解决方案]
-    C --> D[⚖️ 评估器LLM]
-    D --> E{✅ 满意?}
-    E -->|❌ 否| F[🔧 优化器LLM]
-    F --> C
-    E -->|✅ 是| G[🎉 最终方案]
-    
-    style A fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
-    style E fill:#fff3e0,stroke:#f57c00,stroke-width:2px
-    style G fill:#c8e6c9,stroke:#388e3c,stroke-width:2px
-    style B fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px
-    style D fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px
-    style F fill:#ffebee,stroke:#f44336,stroke-width:2px
-```
-
-### 1. 提示链（Prompt Chaining）
 
 将复杂任务分解为顺序执行的简单子任务。
 
@@ -831,7 +733,27 @@ def document_processing_chain(raw_text):
 - 无法处理异常情况
 - 不能根据中间结果调整策略
 
-### 2. 路由（Routing）
+### 2. 路由模式 (Routing)
+
+**智能分流的专家处理模式**
+
+```mermaid
+graph LR
+    A[❓ 用户查询] --> B{🧠 分类器LLM}
+    B --> C[💻 技术专家LLM]
+    B --> D[💰 计费专家LLM]
+    B --> E[📞 通用支持LLM]
+    C --> F[📋 专门回答]
+    D --> F
+    E --> F
+    
+    style A fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    style B fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    style F fill:#c8e6c9,stroke:#388e3c,stroke-width:2px
+    style C fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px
+    style D fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px
+    style E fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px
+```
 
 根据输入类型将任务分配给专门的处理器。
 
@@ -856,7 +778,30 @@ def intelligent_routing(user_query):
 - 多领域问答系统
 - 智能分流系统
 
-### 3. 并行化（Parallelization）
+### 3. 并行化模式 (Parallelization)
+
+**同时执行的多任务处理模式**
+
+```mermaid
+graph LR
+    A[📊 输入数据] --> B[😊 情感分析]
+    A --> C[🔍 关键词提取]
+    A --> D[📈 主题建模]
+    A --> E[📖 可读性分析]
+    B --> F[🔄 结果聚合器]
+    C --> F
+    D --> F
+    E --> F
+    F --> G[📊 综合报告]
+    
+    style A fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    style F fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px
+    style G fill:#c8e6c9,stroke:#388e3c,stroke-width:2px
+    style B fill:#e0f2f1,stroke:#009688,stroke-width:2px
+    style C fill:#e0f2f1,stroke:#009688,stroke-width:2px
+    style D fill:#e0f2f1,stroke:#009688,stroke-width:2px
+    style E fill:#e0f2f1,stroke:#009688,stroke-width:2px
+```
 
 同时执行多个任务，然后聚合结果。
 
@@ -884,7 +829,30 @@ async def parallel_analysis(data):
 - 性能优化
 - 冗余验证
 
-### 4. 编排器-工作者（Orchestrator-Workers）
+### 4. 编排器-工作者模式 (Orchestrator-Workers)
+
+**中央调度的分工协作模式**
+
+```mermaid
+graph LR
+    A[📋 项目描述] --> B{🎭 中央编排器}
+    B --> C[💻 代码分析工作者]
+    B --> D[📝 文档工作者]
+    B --> E[🧪 测试工作者]
+    B --> F[🚀 部署工作者]
+    C --> G[🔄 结果整合]
+    D --> G
+    E --> G
+    F --> G
+    
+    style A fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    style B fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    style G fill:#c8e6c9,stroke:#388e3c,stroke-width:2px
+    style C fill:#f1f8e9,stroke:#689f38,stroke-width:2px
+    style D fill:#f1f8e9,stroke:#689f38,stroke-width:2px
+    style E fill:#f1f8e9,stroke:#689f38,stroke-width:2px
+    style F fill:#f1f8e9,stroke:#689f38,stroke-width:2px
+```
 
 中央编排器动态分配任务给多个工作者。
 
@@ -916,7 +884,27 @@ class TaskOrchestrator:
         return self.integrate_results(results)
 ```
 
-### 5. 评估器-优化器（Evaluator-Optimizer）
+### 5. 评估器-优化器模式 (Evaluator-Optimizer)
+
+**迭代改进的反馈循环模式**
+
+```mermaid
+graph LR
+    A[❓ 初始问题] --> B[⚡ 生成器LLM]
+    B --> C[📄 初始解决方案]
+    C --> D[⚖️ 评估器LLM]
+    D --> E{✅ 满意?}
+    E -->|❌ 否| F[🔧 优化器LLM]
+    F --> C
+    E -->|✅ 是| G[🎉 最终方案]
+    
+    style A fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    style E fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    style G fill:#c8e6c9,stroke:#388e3c,stroke-width:2px
+    style B fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px
+    style D fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px
+    style F fill:#ffebee,stroke:#f44336,stroke-width:2px
+```
 
 一个组件生成解决方案，另一个组件评估并优化。
 
@@ -945,6 +933,11 @@ def iterative_improvement(initial_problem):
     
     return current_solution
 ```
+
+**适用场景：**
+- 复杂问题求解
+- 内容质量优化
+- 创意设计迭代
 
 ---
 
