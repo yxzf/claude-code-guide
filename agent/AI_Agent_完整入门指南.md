@@ -746,32 +746,26 @@ class DataAnalysisAgent:
 #### 架构图
 
 ```mermaid
-graph TD
-    A[👥 用户查询] --> B[🧠 情绪分析模块]
-    B --> C[📚 历史记录检索]
-    C --> D{🎯 策略选择器}
+graph LR
+    A[👥 查询] --> B[🧠 分析]
+    B --> C{🎯 策略}
     
-    D -->|账单问题| E[💳 账单系统API]
-    D -->|技术支持| F[🔧 知识库查询]
-    D -->|复杂问题| G[🎫 工单系统]
-    D -->|情绪异常| H[👨‍💼 人工转接]
+    C --> D[💳 账单]
+    C --> E[🔧 知识库]
+    C --> F[🎫 工单]
+    C --> G[👨‍💼 转接]
     
-    E --> I[📝 响应生成]
-    F --> I
-    G --> I
-    H --> J[🤝 人工客服]
+    D --> H[📝 响应]
+    E --> H
+    F --> H
     
-    I --> K[💾 记忆更新]
-    K --> L[✅ 用户反馈]
+    H --> I[💾 记忆]
+    G --> J[🤝 人工]
     
-    style A fill:#e3f2fd,stroke:#1976d2,stroke-width:3px,stroke-dasharray: 5 5
-    style D fill:#fff3e0,stroke:#f57c00,stroke-width:3px
-    style I fill:#c8e6c9,stroke:#388e3c,stroke-width:3px
-    style J fill:#ffebee,stroke:#d32f2f,stroke-width:3px
-    style E fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px
-    style F fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px
-    style G fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px
-    style H fill:#ffebee,stroke:#d32f2f,stroke-width:2px
+    style A fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    style C fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    style H fill:#c8e6c9,stroke:#388e3c,stroke-width:2px
+    style J fill:#ffebee,stroke:#d32f2f,stroke-width:2px
 ```
 
 #### 工作流程
@@ -793,39 +787,30 @@ graph TD
 #### 架构图
 
 ```mermaid
-graph TB
-    A[💻 代码输入] --> B[🔍 初始诊断]
-    B --> C{🎯 问题分类器}
+graph LR
+    A[💻 代码] --> B[🔍 诊断]
+    B --> C{🎯 分类}
     
-    C -->|语法错误| D[📝 语法检查器]
-    C -->|逻辑错误| E[🧪 测试运行器]
-    C -->|性能问题| F[📊 性能分析器]
-    C -->|运行时错误| G[🐛 调试器]
+    C --> D[📝 语法]
+    C --> E[🧪 测试]
+    C --> F[📊 性能]
+    C --> G[🐛 调试]
     
-    D --> H[⚡ 修复生成器]
+    D --> H[⚡ 修复]
     E --> H
     F --> H
     G --> H
     
-    H --> I[✅ 验证器]
-    I --> J{🔄 验证通过?}
+    H --> I[✅ 验证]
+    I --> J{🔄 通过?}
+    J -->|是| K[🎉 完成]
+    J -->|否| C
     
-    J -->|是| K[🎉 修复完成]
-    J -->|否| L[📈 反馈学习]
-    L --> C
-    
-    K --> M[📋 修复报告]
-    
-    style A fill:#e3f2fd,stroke:#1976d2,stroke-width:3px,stroke-dasharray: 5 5
-    style C fill:#fff3e0,stroke:#f57c00,stroke-width:3px
-    style H fill:#f3e5f5,stroke:#9c27b0,stroke-width:3px
-    style I fill:#c8e6c9,stroke:#388e3c,stroke-width:3px
-    style K fill:#c8e6c9,stroke:#388e3c,stroke-width:3px
-    style J fill:#fff3e0,stroke:#f57c00,stroke-width:2px
-    style D fill:#e8f5e8,stroke:#4caf50,stroke-width:2px
-    style E fill:#e8f5e8,stroke:#4caf50,stroke-width:2px
-    style F fill:#e8f5e8,stroke:#4caf50,stroke-width:2px
-    style G fill:#e8f5e8,stroke:#4caf50,stroke-width:2px
+    style A fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    style C fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    style H fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px
+    style I fill:#c8e6c9,stroke:#388e3c,stroke-width:2px
+    style K fill:#c8e6c9,stroke:#388e3c,stroke-width:2px
 ```
 
 #### 工作流程
