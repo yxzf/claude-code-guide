@@ -25,7 +25,7 @@ AI Agent（智能体）是一种能够**自主决策**的AI系统，不像传统
 ### 工作原理
 
 ```mermaid
-%%{init: {'theme':'base', 'themeVariables': {'primaryColor':'#f0f9ff'}}}%%
+%%{init: {'flowchart': {'nodeSpacing': 30, 'rankSpacing': 40}}}%%
 flowchart LR
     A[📋 任务] --> B{🔍 分析}
     B --> C[🎯 选择行动]
@@ -39,8 +39,6 @@ flowchart LR
     style E fill:#fff3e0,stroke:#f57c00,stroke-width:2px
     style B fill:#fff3e0,stroke:#f57c00,stroke-width:2px
     style D fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
-    
-    classDef default font-size:14px
 ```
 
 简单说，Agent就是"在循环中基于反馈选择工具的大模型"。关键在于这个反馈循环让它能处理复杂、不确定的任务。
@@ -168,7 +166,7 @@ def document_agent(doc, goal):
 将复杂任务分解为顺序执行的简单子任务，每个LLM调用处理前一步的输出。
 
 ```mermaid
-%%{init: {'theme':'base', 'themeVariables': {'primaryColor':'#f0f9ff'}}}%%
+%%{init: {'flowchart': {'nodeSpacing': 25, 'rankSpacing': 35}}}%%
 graph LR
     A[📥 输入] --> B[🔍 LLM调用1<br/>提取信息]
     B --> C[⚙️ LLM调用2<br/>整理结构]
@@ -180,8 +178,6 @@ graph LR
     style B fill:#f1f8e9,stroke:#689f38,stroke-width:2px
     style C fill:#f1f8e9,stroke:#689f38,stroke-width:2px
     style D fill:#f1f8e9,stroke:#689f38,stroke-width:2px
-    
-    classDef default font-size:14px
 ```
 
 **适用场景：**
@@ -210,7 +206,7 @@ def document_processing_chain(raw_text):
 根据输入类型将任务分配给专门的处理器，实现分工协作。
 
 ```mermaid
-%%{init: {'theme':'base', 'themeVariables': {'primaryColor':'#f0f9ff'}}}%%
+%%{init: {'flowchart': {'nodeSpacing': 25, 'rankSpacing': 35}}}%%
 graph LR
     A[❓ 用户查询] --> B{🧠 分类器LLM}
     B --> C[💻 技术专家LLM]
@@ -226,8 +222,6 @@ graph LR
     style C fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px
     style D fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px
     style E fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px
-    
-    classDef default font-size:14px
 ```
 
 **适用场景：**
@@ -258,7 +252,7 @@ def intelligent_routing(user_query):
 同时执行多个独立任务，然后聚合结果，提升处理效率。
 
 ```mermaid
-%%{init: {'theme':'base', 'themeVariables': {'primaryColor':'#f0f9ff'}}}%%
+%%{init: {'flowchart': {'nodeSpacing': 20, 'rankSpacing': 30}}}%%
 graph LR
     A[📊 输入数据] --> B[😊 情感分析]
     A --> C[🔍 关键词提取]
@@ -277,8 +271,6 @@ graph LR
     style C fill:#e0f2f1,stroke:#009688,stroke-width:2px
     style D fill:#e0f2f1,stroke:#009688,stroke-width:2px
     style E fill:#e0f2f1,stroke:#009688,stroke-width:2px
-    
-    classDef default font-size:14px
 ```
 
 **适用场景：**
@@ -310,7 +302,7 @@ async def parallel_analysis(data):
 **中央调度的分工协作模式**
 
 ```mermaid
-%%{init: {'theme':'base', 'themeVariables': {'primaryColor':'#f0f9ff'}}}%%
+%%{init: {'flowchart': {'nodeSpacing': 20, 'rankSpacing': 30}}}%%
 graph LR
     A[📋 项目描述] --> B{🎭 中央编排器}
     B --> C[💻 代码分析工作者]
@@ -329,8 +321,6 @@ graph LR
     style D fill:#f1f8e9,stroke:#689f38,stroke-width:2px
     style E fill:#f1f8e9,stroke:#689f38,stroke-width:2px
     style F fill:#f1f8e9,stroke:#689f38,stroke-width:2px
-    
-    classDef default font-size:14px
 ```
 
 **使用场景：**
@@ -374,7 +364,7 @@ class TaskOrchestrator:
 **迭代改进的反馈循环模式**
 
 ```mermaid
-%%{init: {'theme':'base', 'themeVariables': {'primaryColor':'#f0f9ff'}}}%%
+%%{init: {'flowchart': {'nodeSpacing': 25, 'rankSpacing': 35}}}%%
 graph LR
     A[❓ 初始问题] --> B[⚡ 生成器LLM]
     B --> C[📄 初始解决方案]
@@ -390,8 +380,6 @@ graph LR
     style B fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px
     style D fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px
     style F fill:#ffebee,stroke:#f44336,stroke-width:2px
-    
-    classDef default font-size:14px
 ```
 
 **使用场景：**
@@ -441,7 +429,7 @@ def iterative_improvement(initial_problem):
 #### 解决方案选择决策树
 
 ```mermaid
-%%{init: {'theme':'base', 'themeVariables': {'primaryColor':'#f0f9ff'}}}%%
+%%{init: {'flowchart': {'nodeSpacing': 15, 'rankSpacing': 25}}}%%
 flowchart TD
     A[🎯 用户需求<br/>问题分析] --> B{{📊 任务是否复杂?}}
     
@@ -484,8 +472,6 @@ flowchart TD
     style O fill:#fce4ec,stroke:#e91e63,stroke-width:4px,color:#000
     style P fill:#e8f5e8,stroke:#4caf50,stroke-width:3px,color:#000
     style N fill:#ffebee,stroke:#f44336,stroke-width:2px,color:#000
-    
-    classDef default font-size:12px
 ```
 
 ### 递增复杂度策略
