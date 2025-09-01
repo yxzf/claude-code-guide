@@ -46,7 +46,7 @@ Agent可以调用各种外部工具，如搜索引擎、数据库、API等。
 这个简洁的定义揭示了Agent的核心工作机制：
 
 ```mermaid
-flowchart TD
+flowchart LR
     A[📋 接收任务] --> B{🔍 状态评估}
     B --> C[⚙️ 分析选项]
     C --> D[🎯 选择行动]
@@ -696,7 +696,7 @@ class LearningAgent:
 **顺序执行的线性处理模式**
 
 ```mermaid
-graph TD
+graph LR
     A[📥 输入] --> B[🔍 LLM调用1<br/>提取信息]
     B --> C[⚙️ LLM调用2<br/>整理结构]
     C --> D[📝 LLM调用3<br/>格式化输出]
@@ -714,7 +714,7 @@ graph TD
 **智能分流的专家处理模式**
 
 ```mermaid
-graph TD
+graph LR
     A[❓ 用户查询] --> B{🧠 分类器LLM}
     B --> C[💻 技术专家LLM]
     B --> D[💰 计费专家LLM]
@@ -736,7 +736,7 @@ graph TD
 **同时执行的多任务处理模式**
 
 ```mermaid
-graph TD
+graph LR
     A[📊 输入数据] --> B[😊 情感分析]
     A --> C[🔍 关键词提取]
     A --> D[📈 主题建模]
@@ -761,7 +761,7 @@ graph TD
 **中央调度的分工协作模式**
 
 ```mermaid
-graph TD
+graph LR
     A[📋 项目描述] --> B{🎭 中央编排器}
     B --> C[💻 代码分析工作者]
     B --> D[📝 文档工作者]
@@ -786,7 +786,7 @@ graph TD
 **迭代改进的反馈循环模式**
 
 ```mermaid
-graph TD
+graph LR
     A[❓ 初始问题] --> B[⚡ 生成器LLM]
     B --> C[📄 初始解决方案]
     C --> D[⚖️ 评估器LLM]
