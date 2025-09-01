@@ -51,14 +51,14 @@ flowchart LR
 在对比Agent和Workflow之前，先理解AI系统的演进路径：
 
 ```mermaid
-graph LR
+graph TD
     A[🤖 基础LLM] --> B[🔧 增强LLM]
     B --> C[🧠 Agent系统]
-    C --> D[🔄 Workflow编排]
+    B --> D[🔄 Workflow编排]
     
     A1[单次问答] --> B1[工具调用]
-    B1 --> C1[自主决策] 
-    C1 --> D1[流程编排]
+    B1 --> C1[自主决策]
+    B1 --> D1[预定义流程]
     
     A --> A1
     B --> B1  
@@ -71,12 +71,17 @@ graph LR
     style D fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px
 ```
 
-**演进层次说明：**
+**技术路径说明：**
 
 - **基础LLM**：纯文本问答，无外部交互
-- **增强LLM**：具备工具调用能力，但仍是单轮交互
-- **Agent系统**：多轮循环，自主规划和决策
-- **Workflow编排**：将Agent能力组织成可预测的流程
+- **增强LLM**：具备工具调用能力，单轮交互
+- **Agent系统**：基于增强LLM，增加多轮循环和自主决策
+- **Workflow编排**：基于增强LLM，增加预定义的执行流程
+
+**两条技术路径：**
+从增强LLM出发，有两个不同方向：
+- **Agent路径**：追求自主性和灵活性，适合复杂未知问题
+- **Workflow路径**：追求可控性和可预测性，适合确定性任务
 
 **常见误解澄清：**
 很多人以为有了Function Calling就是Agent，其实那只是增强LLM。真正的Agent需要在多个回合中保持状态、记忆和策略。
