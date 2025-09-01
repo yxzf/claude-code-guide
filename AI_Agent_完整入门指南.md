@@ -47,20 +47,37 @@ Agent可以调用各种外部工具，如搜索引擎、数据库、API等。
 
 ```mermaid
 flowchart TD
-    A[接收任务/目标] --> B{评估当前状态}
-    B --> C[分析可用选项]
-    C --> D[选择下一步行动]
-    D --> E[执行工具调用]
-    E --> F[获取环境反馈]
-    F --> G{目标是否完成?}
-    G -->|否| H[更新状态和策略]
-    H --> B
-    G -->|是| I[返回最终结果]
+    A[📋 接收任务/目标] -->|启动| B{🔍 评估当前状态}
+    B -->|分析| C[⚙️ 分析可用选项]
+    C -->|规划| D[🎯 选择下一步行动]
+    D -->|执行| E[🔧 执行工具调用]
+    E -->|反馈| F[📊 获取环境反馈]
+    F -->|检查| G{✅ 目标是否完成?}
+    G ==>|❌ 否| H[🔄 更新状态和策略]
+    H ==>|循环| B
+    G ==>|✅ 是| I[🎉 返回最终结果]
     
-    style A fill:#e1f5fe
-    style I fill:#c8e6c9
-    style G fill:#fff3e0
-    style E fill:#f3e5f5
+    %% 样式定义
+    style A fill:#e3f2fd,stroke:#1976d2,stroke-width:3px,color:#000
+    style I fill:#e8f5e8,stroke:#388e3c,stroke-width:3px,color:#000
+    style G fill:#fff3e0,stroke:#f57c00,stroke-width:2px,color:#000
+    style B fill:#fff3e0,stroke:#f57c00,stroke-width:2px,color:#000
+    style E fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px,color:#000
+    style H fill:#ffebee,stroke:#d32f2f,stroke-width:2px,color:#000
+    style C fill:#f1f8e9,stroke:#689f38,stroke-width:2px,color:#000
+    style D fill:#f1f8e9,stroke:#689f38,stroke-width:2px,color:#000
+    style F fill:#e0f2f1,stroke:#00796b,stroke-width:2px,color:#000
+    
+    %% 连接线样式
+    linkStyle 0 stroke:#1976d2,stroke-width:2px
+    linkStyle 1 stroke:#f57c00,stroke-width:2px
+    linkStyle 2 stroke:#689f38,stroke-width:2px
+    linkStyle 3 stroke:#7b1fa2,stroke-width:3px
+    linkStyle 4 stroke:#00796b,stroke-width:2px
+    linkStyle 5 stroke:#f57c00,stroke-width:2px
+    linkStyle 6 stroke:#d32f2f,stroke-width:4px
+    linkStyle 7 stroke:#ff5722,stroke-width:4px
+    linkStyle 8 stroke:#388e3c,stroke-width:4px
 ```
 
 **Agent核心工作循环说明：**
@@ -90,43 +107,57 @@ flowchart TD
 #### 架构对比可视化
 
 ```mermaid
-graph TB
-    subgraph "Workflow编排式架构"
-        A1[用户输入] --> B1[步骤1: 数据验证]
-        B1 --> C1[步骤2: 业务逻辑]
-        C1 --> D1[步骤3: 结果处理]
-        D1 --> E1[固定输出]
+graph TD
+    subgraph WF ["🔄 Workflow编排式架构"]
+        direction TD
+        A1[📥 用户输入] -->|预定义路径| B1[🔍 步骤1: 数据验证]
+        B1 -->|固定流程| C1[⚙️ 步骤2: 业务逻辑]
+        C1 -->|确定顺序| D1[📊 步骤3: 结果处理]
+        D1 -->|输出| E1[📤 固定输出]
         
-        F1[检查点1] -.-> B1
-        G1[检查点2] -.-> C1
-        H1[检查点3] -.-> D1
-        
-        style B1 fill:#e3f2fd
-        style C1 fill:#e3f2fd
-        style D1 fill:#e3f2fd
-        style A1 fill:#f3e5f5
-        style E1 fill:#e8f5e8
+        F1[✓ 检查点1] -.-|监控| B1
+        G1[✓ 检查点2] -.-|监控| C1
+        H1[✓ 检查点3] -.-|监控| D1
     end
     
-    subgraph "Agent自主决策架构"
-        A2[用户目标] --> B2{LLM规划器}
-        B2 --> C2[工具选择]
-        C2 --> D2[执行行动]
-        D2 --> E2{结果评估}
-        E2 -->|继续| F2[策略调整]
-        F2 --> B2
-        E2 -->|完成| G2[达成目标]
+    subgraph AG ["🤖 Agent自主决策架构"]
+        direction TD
+        A2[🎯 用户目标] -->|目标分析| B2{🧠 LLM规划器}
+        B2 -->|智能选择| C2[🛠️ 工具选择]
+        C2 -->|执行| D2[⚡ 执行行动]
+        D2 -->|反馈| E2{📋 结果评估}
+        E2 ==>|❌ 继续| F2[🔄 策略调整]
+        F2 ==>|循环优化| B2
+        E2 ==>|✅ 完成| G2[🎉 达成目标]
         
-        H2[环境反馈] -.-> E2
-        I2[上下文记忆] -.-> B2
-        
-        style B2 fill:#fff3e0
-        style E2 fill:#fff3e0
-        style C2 fill:#e8f5e8
-        style D2 fill:#e8f5e8
-        style A2 fill:#f3e5f5
-        style G2 fill:#c8e6c9
+        H2[🌍 环境反馈] -.-|实时输入| E2
+        I2[🧠 上下文记忆] -.-|历史信息| B2
     end
+    
+    %% Workflow样式
+    style A1 fill:#e3f2fd,stroke:#1976d2,stroke-width:3px,color:#000
+    style B1 fill:#e8f5e8,stroke:#4caf50,stroke-width:2px,color:#000
+    style C1 fill:#e8f5e8,stroke:#4caf50,stroke-width:2px,color:#000
+    style D1 fill:#e8f5e8,stroke:#4caf50,stroke-width:2px,color:#000
+    style E1 fill:#c8e6c9,stroke:#388e3c,stroke-width:3px,color:#000
+    style F1 fill:#fff3e0,stroke:#ff9800,stroke-width:1px,color:#666
+    style G1 fill:#fff3e0,stroke:#ff9800,stroke-width:1px,color:#666
+    style H1 fill:#fff3e0,stroke:#ff9800,stroke-width:1px,color:#666
+    
+    %% Agent样式
+    style A2 fill:#f3e5f5,stroke:#9c27b0,stroke-width:3px,color:#000
+    style B2 fill:#fff3e0,stroke:#ff9800,stroke-width:3px,color:#000
+    style C2 fill:#e0f2f1,stroke:#009688,stroke-width:2px,color:#000
+    style D2 fill:#e0f2f1,stroke:#009688,stroke-width:2px,color:#000
+    style E2 fill:#fff3e0,stroke:#ff9800,stroke-width:3px,color:#000
+    style F2 fill:#ffebee,stroke:#f44336,stroke-width:2px,color:#000
+    style G2 fill:#c8e6c9,stroke:#388e3c,stroke-width:3px,color:#000
+    style H2 fill:#f1f8e9,stroke:#8bc34a,stroke-width:1px,color:#666
+    style I2 fill:#f1f8e9,stroke:#8bc34a,stroke-width:1px,color:#666
+    
+    %% 子图样式
+    style WF fill:#f8f9fa,stroke:#6c757d,stroke-width:2px
+    style AG fill:#fff8f0,stroke:#fd7e14,stroke-width:2px
 ```
 
 ### Workflow：编排式系统
@@ -230,36 +261,47 @@ def customer_service_agent(query):
 
 ```mermaid
 flowchart TD
-    A[用户需求] --> B{任务是否复杂?}
+    A[🎯 用户需求<br/>问题分析] --> B{{📊 任务是否复杂?}}
     
-    B -->|简单| C{单次LLM调用能解决?}
-    C -->|是| D[使用简单提示<br/>💡 Direct Prompting]
-    C -->|否| E{步骤是否固定?}
+    B ==>|✅ 简单| C{{🔍 单次LLM调用能解决?}}
+    C ==>|✅ 是| D[💡 使用简单提示<br/>Direct Prompting<br/>⚡ 快速解决]
+    C ==>|❌ 否| E{{📋 步骤是否固定?}}
     
-    E -->|是| F[使用增强提示<br/>📋 Enhanced Prompting<br/>+ Chain-of-Thought]
-    E -->|否| G[使用简单Workflow<br/>⚙️ Sequential Processing]
+    E ==>|✅ 是| F[📝 使用增强提示<br/>Enhanced Prompting<br/>+ Chain-of-Thought<br/>🧠 思维链推理]
+    E ==>|❌ 否| G[⚙️ 使用简单Workflow<br/>Sequential Processing<br/>🔄 流程化处理]
     
-    B -->|复杂| H{步骤是否可预测?}
-    H -->|是| I{是否需要工具?}
-    H -->|否| J{需要动态决策?}
+    B ==>|⚠️ 复杂| H{{🔮 步骤是否可预测?}}
+    H ==>|✅ 是| I{{🛠️ 是否需要工具?}}
+    H ==>|❌ 否| J{{🎮 需要动态决策?}}
     
-    I -->|否| K[使用复杂Workflow<br/>🔄 Multi-step Pipeline]
-    I -->|是| L[使用工具Workflow<br/>🛠️ Tool-enhanced Pipeline]
+    I ==>|❌ 否| K[🔄 使用复杂Workflow<br/>Multi-step Pipeline<br/>📊 多步骤编排]
+    I ==>|✅ 是| L[🛠️ 使用工具Workflow<br/>Tool-enhanced Pipeline<br/>⚡ 工具增强流程]
     
-    J -->|是| M{是否有容错要求?}
-    J -->|否| N[重新评估需求<br/>🤔 Simplify Problem]
+    J ==>|✅ 是| M{{⚖️ 是否有容错要求?}}
+    J ==>|❌ 否| N[🤔 重新评估需求<br/>Simplify Problem<br/>🔍 简化问题]
     
-    M -->|高容错| O[使用Agent<br/>🤖 Autonomous Agent]
-    M -->|低容错| P[使用监督Workflow<br/>👁️ Supervised Pipeline]
+    M ==>|🎯 高容错| O[🤖 使用Agent<br/>Autonomous Agent<br/>🧠 自主决策系统]
+    M ==>|⚠️ 低容错| P[👁️ 使用监督Workflow<br/>Supervised Pipeline<br/>🔒 严格控制流程]
     
-    style D fill:#c8e6c9
-    style F fill:#e1f5fe
-    style G fill:#fff3e0
-    style K fill:#fff3e0
-    style L fill:#f3e5f5
-    style O fill:#fce4ec
-    style P fill:#f1f8e9
-    style N fill:#ffebee
+    %% 样式定义
+    style A fill:#e3f2fd,stroke:#1976d2,stroke-width:4px,color:#000
+    style B fill:#fff3e0,stroke:#f57c00,stroke-width:3px,color:#000
+    style C fill:#fff3e0,stroke:#f57c00,stroke-width:2px,color:#000
+    style E fill:#fff3e0,stroke:#f57c00,stroke-width:2px,color:#000
+    style H fill:#fff3e0,stroke:#f57c00,stroke-width:2px,color:#000
+    style I fill:#fff3e0,stroke:#f57c00,stroke-width:2px,color:#000
+    style J fill:#fff3e0,stroke:#f57c00,stroke-width:2px,color:#000
+    style M fill:#fff3e0,stroke:#f57c00,stroke-width:2px,color:#000
+    
+    %% 解决方案样式
+    style D fill:#c8e6c9,stroke:#388e3c,stroke-width:3px,color:#000
+    style F fill:#e1f5fe,stroke:#1976d2,stroke-width:3px,color:#000
+    style G fill:#f1f8e9,stroke:#689f38,stroke-width:3px,color:#000
+    style K fill:#fff3e0,stroke:#ff9800,stroke-width:3px,color:#000
+    style L fill:#f3e5f5,stroke:#9c27b0,stroke-width:3px,color:#000
+    style O fill:#fce4ec,stroke:#e91e63,stroke-width:4px,color:#000
+    style P fill:#e8f5e8,stroke:#4caf50,stroke-width:3px,color:#000
+    style N fill:#ffebee,stroke:#f44336,stroke-width:2px,color:#000
 ```
 
 ### Agent适用场景判断清单
@@ -405,55 +447,71 @@ class DataAnalysisAgent:
 
 ```mermaid
 graph TB
-    subgraph "Agent完整架构"
-        subgraph "增强型LLM核心"
-            A[基础语言模型<br/>GPT-4, Claude等]
-            B[推理引擎<br/>Planning & Decision Making]
-            C[上下文管理器<br/>Context & Memory]
-        end
-        
-        subgraph "能力增强层"
-            D[检索系统<br/>RAG & Vector Search]
-            E[工具集成层<br/>Tool Registry & Execution]
-            F[记忆系统<br/>Short & Long-term Memory]
-        end
-        
-        subgraph "接口适配层"
-            G[输入处理器<br/>Query Understanding]
-            H[输出生成器<br/>Response Formatting]
-            I[错误处理器<br/>Error Recovery]
-        end
-        
-        subgraph "外部环境"
-            J[API服务<br/>External APIs]
-            K[数据源<br/>Databases & Files]
-            L[执行环境<br/>Code Execution]
-        end
+    subgraph CORE ["🧠 增强型LLM核心层"]
+        direction LR
+        A[🤖 基础语言模型<br/>GPT-4, Claude等]
+        B[⚙️ 推理引擎<br/>Planning & Decision Making]
+        C[💭 上下文管理器<br/>Context & Memory]
     end
     
-    A --> B
-    B --> C
-    B --> E
-    E --> J
-    E --> L
-    D --> K
-    F --> C
-    G --> A
-    B --> H
-    I --> B
+    subgraph ENHANCE ["🚀 能力增强层"]
+        direction LR
+        D[🔍 检索系统<br/>RAG & Vector Search]
+        E[🛠️ 工具集成层<br/>Tool Registry & Execution]
+        F[🧠 记忆系统<br/>Short & Long-term Memory]
+    end
     
-    style A fill:#e3f2fd
-    style B fill:#fff3e0
-    style C fill:#f3e5f5
-    style D fill:#e8f5e8
-    style E fill:#e8f5e8
-    style F fill:#e8f5e8
-    style G fill:#fce4ec
-    style H fill:#fce4ec
-    style I fill:#fce4ec
-    style J fill:#f1f8e9
-    style K fill:#f1f8e9
-    style L fill:#f1f8e9
+    subgraph INTERFACE ["🔌 接口适配层"]
+        direction LR
+        G[📥 输入处理器<br/>Query Understanding]
+        H[📤 输出生成器<br/>Response Formatting]
+        I[⚠️ 错误处理器<br/>Error Recovery]
+    end
+    
+    subgraph EXTERNAL ["🌍 外部环境层"]
+        direction LR
+        J[🔗 API服务<br/>External APIs]
+        K[💾 数据源<br/>Databases & Files]
+        L[⚡ 执行环境<br/>Code Execution]
+    end
+    
+    %% 层间连接
+    INTERFACE -->|请求解析| CORE
+    CORE -->|能力调用| ENHANCE
+    ENHANCE -->|外部交互| EXTERNAL
+    CORE -->|响应生成| INTERFACE
+    
+    %% 内部连接
+    A -.->|模型调用| B
+    B -.->|上下文| C
+    B -.->|工具选择| E
+    E -.->|API调用| J
+    E -.->|代码执行| L
+    D -.->|数据检索| K
+    F -.->|记忆管理| C
+    G -.->|输入| A
+    B -.->|输出| H
+    I -.->|错误恢复| B
+    
+    %% 样式定义
+    style A fill:#e3f2fd,stroke:#1976d2,stroke-width:3px,color:#000
+    style B fill:#fff3e0,stroke:#f57c00,stroke-width:3px,color:#000
+    style C fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px,color:#000
+    style D fill:#e8f5e8,stroke:#388e3c,stroke-width:2px,color:#000
+    style E fill:#e8f5e8,stroke:#388e3c,stroke-width:3px,color:#000
+    style F fill:#e8f5e8,stroke:#388e3c,stroke-width:2px,color:#000
+    style G fill:#fce4ec,stroke:#e91e63,stroke-width:2px,color:#000
+    style H fill:#fce4ec,stroke:#e91e63,stroke-width:2px,color:#000
+    style I fill:#ffebee,stroke:#f44336,stroke-width:2px,color:#000
+    style J fill:#f1f8e9,stroke:#689f38,stroke-width:2px,color:#000
+    style K fill:#f1f8e9,stroke:#689f38,stroke-width:2px,color:#000
+    style L fill:#f1f8e9,stroke:#689f38,stroke-width:2px,color:#000
+    
+    %% 子图样式
+    style CORE fill:#f8f9fa,stroke:#007bff,stroke-width:3px
+    style ENHANCE fill:#fff8f0,stroke:#fd7e14,stroke-width:2px
+    style INTERFACE fill:#f8f0ff,stroke:#6610f2,stroke-width:2px
+    style EXTERNAL fill:#f0fff4,stroke:#28a745,stroke-width:2px
 ```
 
 ### Agent设计的三个核心原则
