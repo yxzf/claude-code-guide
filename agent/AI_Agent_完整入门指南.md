@@ -24,7 +24,7 @@ AI Agent（智能体）是一种能够**自主决策**的AI系统，不像传统
 
 ### 工作原理
 
-<div style="width: 70%; margin: 0 auto;">
+<div style="width: 50%; margin: 0 auto;">
 
 ```mermaid
 flowchart LR
@@ -168,7 +168,7 @@ def document_agent(doc, goal):
 
 将复杂任务分解为顺序执行的简单子任务，每个LLM调用处理前一步的输出。
 
-<div style="width: 70%; margin: 0 auto;">
+<div style="width: 50%; margin: 0 auto;">
 
 ```mermaid
 graph LR
@@ -211,7 +211,7 @@ def document_processing_chain(raw_text):
 
 根据输入类型将任务分配给专门的处理器，实现分工协作。
 
-<div style="width: 70%; margin: 0 auto;">
+<div style="width: 50%; margin: 0 auto;">
 
 ```mermaid
 graph LR
@@ -260,7 +260,7 @@ def intelligent_routing(user_query):
 
 同时执行多个独立任务，然后聚合结果，提升处理效率。
 
-<div style="width: 70%; margin: 0 auto;">
+<div style="width: 50%; margin: 0 auto;">
 
 ```mermaid
 graph LR
@@ -313,7 +313,7 @@ async def parallel_analysis(data):
 
 **中央调度的分工协作模式**
 
-<div style="width: 70%; margin: 0 auto;">
+<div style="width: 50%; margin: 0 auto;">
 
 ```mermaid
 graph LR
@@ -378,7 +378,7 @@ class TaskOrchestrator:
 
 **迭代改进的反馈循环模式**
 
-<div style="width: 70%; margin: 0 auto;">
+<div style="width: 50%; margin: 0 auto;">
 
 ```mermaid
 graph LR
@@ -446,7 +446,7 @@ def iterative_improvement(initial_problem):
 
 #### 解决方案选择决策树
 
-<div style="width: 60%; margin: 0 auto;">
+<div style="width: 45%; margin: 0 auto;">
 
 ```mermaid
 flowchart TD
