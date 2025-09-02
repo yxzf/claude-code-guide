@@ -24,8 +24,9 @@ AI Agent（智能体）是一种能够**自主决策**的AI系统，不像传统
 
 ### 工作原理
 
+<div style="width: 70%; margin: 0 auto;">
+
 ```mermaid
-%%{init: {'flowchart': {'nodeSpacing': 15, 'rankSpacing': 20}}}%%
 flowchart LR
     A[📋 任务] --> B{🔍 分析}
     B --> C[🎯 选择行动]
@@ -40,6 +41,8 @@ flowchart LR
     style B fill:#fff3e0,stroke:#f57c00,stroke-width:2px
     style D fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
 ```
+
+</div>
 
 简单说，Agent就是"在循环中基于反馈选择工具的大模型"。关键在于这个反馈循环让它能处理复杂、不确定的任务。
 
@@ -165,8 +168,9 @@ def document_agent(doc, goal):
 
 将复杂任务分解为顺序执行的简单子任务，每个LLM调用处理前一步的输出。
 
+<div style="width: 70%; margin: 0 auto;">
+
 ```mermaid
-%%{init: {'flowchart': {'nodeSpacing': 15, 'rankSpacing': 20}}}%%
 graph LR
     A[📥 输入] --> B[🔍 LLM调用1<br/>提取信息]
     B --> C[⚙️ LLM调用2<br/>整理结构]
@@ -179,6 +183,8 @@ graph LR
     style C fill:#f1f8e9,stroke:#689f38,stroke-width:2px
     style D fill:#f1f8e9,stroke:#689f38,stroke-width:2px
 ```
+
+</div>
 
 **适用场景：**
 - 文档处理流水线
@@ -205,8 +211,9 @@ def document_processing_chain(raw_text):
 
 根据输入类型将任务分配给专门的处理器，实现分工协作。
 
+<div style="width: 70%; margin: 0 auto;">
+
 ```mermaid
-%%{init: {'flowchart': {'nodeSpacing': 15, 'rankSpacing': 20}}}%%
 graph LR
     A[❓ 用户查询] --> B{🧠 分类器LLM}
     B --> C[💻 技术专家LLM]
@@ -223,6 +230,8 @@ graph LR
     style D fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px
     style E fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px
 ```
+
+</div>
 
 **适用场景：**
 - 客户服务系统
@@ -251,8 +260,9 @@ def intelligent_routing(user_query):
 
 同时执行多个独立任务，然后聚合结果，提升处理效率。
 
+<div style="width: 70%; margin: 0 auto;">
+
 ```mermaid
-%%{init: {'flowchart': {'nodeSpacing': 15, 'rankSpacing': 20}}}%%
 graph LR
     A[📊 输入数据] --> B[😊 情感分析]
     A --> C[🔍 关键词提取]
@@ -272,6 +282,8 @@ graph LR
     style D fill:#e0f2f1,stroke:#009688,stroke-width:2px
     style E fill:#e0f2f1,stroke:#009688,stroke-width:2px
 ```
+
+</div>
 
 **适用场景：**
 - 多角度分析
@@ -301,8 +313,9 @@ async def parallel_analysis(data):
 
 **中央调度的分工协作模式**
 
+<div style="width: 70%; margin: 0 auto;">
+
 ```mermaid
-%%{init: {'flowchart': {'nodeSpacing': 15, 'rankSpacing': 20}}}%%
 graph LR
     A[📋 项目描述] --> B{🎭 中央编排器}
     B --> C[💻 代码分析工作者]
@@ -322,6 +335,8 @@ graph LR
     style E fill:#f1f8e9,stroke:#689f38,stroke-width:2px
     style F fill:#f1f8e9,stroke:#689f38,stroke-width:2px
 ```
+
+</div>
 
 **使用场景：**
 - 大型项目分工
@@ -363,8 +378,9 @@ class TaskOrchestrator:
 
 **迭代改进的反馈循环模式**
 
+<div style="width: 70%; margin: 0 auto;">
+
 ```mermaid
-%%{init: {'flowchart': {'nodeSpacing': 15, 'rankSpacing': 20}}}%%
 graph LR
     A[❓ 初始问题] --> B[⚡ 生成器LLM]
     B --> C[📄 初始解决方案]
@@ -381,6 +397,8 @@ graph LR
     style D fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px
     style F fill:#ffebee,stroke:#f44336,stroke-width:2px
 ```
+
+</div>
 
 **使用场景：**
 - 复杂问题求解
@@ -428,8 +446,9 @@ def iterative_improvement(initial_problem):
 
 #### 解决方案选择决策树
 
+<div style="width: 60%; margin: 0 auto;">
+
 ```mermaid
-%%{init: {'flowchart': {'nodeSpacing': 15, 'rankSpacing': 25}}}%%
 flowchart TD
     A[🎯 用户需求<br/>问题分析] --> B{{📊 任务是否复杂?}}
     
@@ -473,6 +492,8 @@ flowchart TD
     style P fill:#e8f5e8,stroke:#4caf50,stroke-width:3px,color:#000
     style N fill:#ffebee,stroke:#f44336,stroke-width:2px,color:#000
 ```
+
+</div>
 
 ### 递增复杂度策略
 
