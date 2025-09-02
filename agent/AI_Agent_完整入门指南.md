@@ -223,7 +223,6 @@ def document_processing_chain(raw_text):
 - **分类依据**：基于**输入内容类型**的静态分配
 - **决策主体**：简单的**分类器**（LLM或传统算法）
 - **处理方式**：专门化的**领域专家**独立处理
-- **vs 并行化**：路由是"选择一个专家"，并行化是"全部同时执行"
 
 <div style="transform: scale(0.7); transform-origin: center; margin: 0 auto;">
 
@@ -278,7 +277,7 @@ def intelligent_routing(user_query):
 - **数据关系**：**相同输入**数据，不同维度分析
 - **工作方式**：各处理器**完全独立**，无需协调
 - **聚合逻辑**：**程序化聚合**（如求平均、投票、拼接）
-- **vs 编排器-工作者**：并行化是"同一数据的多角度分析"，编排器-工作者是"复杂项目的分工协作"
+- **vs 路由模式**：路由是"选择一个专家"，并行化是"全部同时执行"
 
 <div style="transform: scale(0.7); transform-origin: center; margin: 0 auto;">
 
@@ -338,7 +337,7 @@ async def parallel_analysis(data):
 - **决策主体**：**智能编排器**（通常是LLM）动态规划
 - **工作方式**：需要**中央协调**，可能有任务依赖关系
 - **聚合逻辑**：**智能合成**，而非简单拼接
-- **vs 并行化**：编排器-工作者是"复杂项目的分工协作"，并行化是"同一数据的多角度分析"
+- **vs 并行化模式**：编排器-工作者是"复杂项目的分工协作"，并行化是"同一数据的多角度分析"
 
 <div style="transform: scale(0.7); transform-origin: center; margin: 0 auto;">
 
