@@ -13,7 +13,7 @@
 
 ## 什么是AI Agent
 
-AI Agent（智能体）是一种能够**自主决策**的AI系统，不像传统程序按固定步骤执行，而是根据情况动态选择行动路径。
+AI Agent（智能体）是一种基于大语言模型（LLM）、能够**自主决策**的AI系统，不像传统程序按固定步骤执行，而是根据情况动态选择行动路径。
 
 ### 核心特征
 
@@ -378,7 +378,7 @@ class TaskOrchestrator:
 
 **迭代改进的反馈循环模式**
 
-<div style="transform: scale(0.7); transform-origin: center; margin: 0 auto;">
+<div style="transform: scale(0.5); transform-origin: center; margin: 0 auto;">
 
 ```mermaid
 graph LR
