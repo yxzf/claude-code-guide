@@ -236,6 +236,50 @@ tools: Read, Edit, Bash  # 只给必需的工具
 
 ---
 
+## SubAgent开源资源
+
+### 🎯 官方和社区资源
+
+#### 开源SubAgent集合
+1. **claude-code-subagents-collection** 
+   - 📍 GitHub: `davepoon/claude-code-subagents-collection`
+   - 🎯 特色：包含36个专业领域SubAgent
+   - 💡 优势：涵盖特定领域专业知识，提升开发工作流效率
+
+2. **awesome-claude-code-agents**
+   - 🎯 特色：精选的Claude Code SubAgent文件集合
+   - 💡 优势：丰富的预构建专业代理，降低使用门槛
+
+3. **claude_code_agent_farm**
+   - 📍 GitHub: `Dicklesworthstone/claude_code_agent_farm`
+   - 🎯 特色：支持50个SubAgent并行运行，34种技术栈
+   - 💡 优势：大规模重构，复杂架构变更，冲突预防
+   - 🔥 亮点：最实惠的多Agent工具解决方案
+
+4. **ruvnet/claude-flow**
+   - 🎯 特色：支持多达64个Agent，提供分层、网状、自适应协调模式
+   - 💡 优势：灵活的代理协调，适应动态复杂工作负载
+
+#### 使用方式
+```bash
+# 下载开源SubAgent配置
+git clone https://github.com/davepoon/claude-code-subagents-collection
+
+# 复制到项目目录
+cp -r claude-code-subagents-collection/agents .claude/
+
+# 或复制到用户目录
+cp -r claude-code-subagents-collection/agents ~/.claude/
+```
+
+### 🔥 成本考虑
+**重要提醒**：SubAgent虽然强大，但成本不菲
+- **高并发成本**：50个代理并行运行，1小时消耗200美元是常见情况
+- **Token倍数**：SubAgent使用的Token约为普通聊天的15倍
+- **适合场景**：有预算的团队和企业级项目
+
+---
+
 ## 示例SubAgent
 
 ### 📝 代码审查员
@@ -301,6 +345,48 @@ tools: Read, Write, Bash
 4. 结果解释和建议
 ```
 
+### 📝 PRD文档生成器
+```markdown
+---
+name: prd-writer
+description: 专业产品需求文档生成专家。当需要PRD文档、产品规格书、需求分析时必须使用
+tools: Read, Write, Edit, WebFetch
+---
+
+你是专业产品经理和PRD文档专家，专门负责：
+- 产品需求文档编写
+- 用户故事创建
+- 功能规格定义
+- 验收标准制定
+
+工作流程：
+1. 需求收集和分析
+2. 用户画像和场景设计
+3. 功能规格详细定义
+4. 验收标准和测试计划
+```
+
+### 🏗️ 规范驱动架构师
+```markdown
+---
+name: strategic-planner
+description: 专家级软件架构师。负责功能需求分析、技术设计和任务规划。绝对不编写代码，只做规划设计
+tools: Read, Write, Edit, WebFetch
+---
+
+你是专家级软件架构师和协作规划师，专门负责：
+- 功能需求分析
+- 技术架构设计
+- 任务分解规划
+- 技术方案评估
+
+规划模式：只进行Q&A和规划，绝不编写代码
+工作流程：
+1. 需求定义（Requirements）
+2. 技术设计（Design）
+3. 任务生成（Tasks）
+```
+
 ---
 
 ## 最佳实践
@@ -340,6 +426,45 @@ Claude分析：需要前端、后端、数据库专家
 Claude整合：将各部分结果智能组合
 ```
 
+### 🚀 Spec-Driven开发工作流
+基于Kiro启发的规范驱动开发模式：
+
+#### 两阶段工作流
+1. **规划阶段（Planning Phase）**
+   - AI角色：初级架构师
+   - 任务：通过交互式问答创建完整技术规范
+   - 输出：requirements.md, design.md, tasks.md
+
+2. **执行阶段（Execution Phase）**  
+   - AI角色：细致工程师
+   - 任务：严格按照规范逐个执行任务
+
+#### 项目结构
+```
+.
+├── .ai-rules/           # 全局上下文
+│   ├── product.md       # 项目愿景（为什么）
+│   ├── tech.md         # 技术栈（用什么）
+│   └── structure.md    # 文件结构（在哪里）
+└── specs/              # 功能规范
+    └── feature-name/
+        ├── requirements.md  # 用户故事（什么）
+        ├── design.md       # 技术架构（如何）
+        └── tasks.md        # 实施计划（待办）
+```
+
+#### 使用流程
+```bash
+# 1. 项目分析和初始化
+@steering-architect 分析现有代码库并创建项目指导文件
+
+# 2. 功能规划
+@strategic-planner 规划用户认证功能
+
+# 3. 逐步实现
+@task-executor 执行 specs/user-authentication/tasks.md 中的任务
+```
+
 ### 🎯 动态SubAgent选择
 Claude Code基于上下文智能选择SubAgent。使您的description字段具体且面向行动，以获得最佳结果。
 
@@ -348,6 +473,11 @@ Claude Code基于上下文智能选择SubAgent。使您的description字段具�
 - ✅ 具体：`description: React/TypeScript专家，当需要创建组件、状态管理、性能优化时调用`
 
 ### ⚡ 性能考虑
+
+#### 并行处理能力
+- **并行上限**：当前实现约为10个同时任务
+- **批量执行**：超过限制时会排队批量处理
+- **大规模应用**：可实现49+个SubAgent并行工作2.5小时以上
 
 #### 上下文效率
 Agent帮助保护主上下文，实现更长的整体会话
@@ -360,6 +490,7 @@ SubAgent每次被调用时都从干净的状态开始，可能会增加延迟，
 2. **精准描述**：description字段决定自动调用的准确性  
 3. **工具最小化**：只给必需的工具权限
 4. **定期优化**：根据使用情况调整配置
+5. **成本控制**：监控Token使用，合理安排并行数量
 
 ---
 
@@ -377,7 +508,38 @@ SubAgent代表了AI助手技术的重要进步，通过专业化分工和智能�
 
 ---
 
-**文档版本**：v3.0  
+---
+
+## 参考资源
+
+### 📚 官方文档
+- [Anthropic Claude Code SubAgent官方文档](https://docs.anthropic.com/en/docs/claude-code/sub-agents)
+- [Claude Code快速开始指南](https://docs.anthropic.com/en/docs/claude-code/quickstart)
+- [MCP (Model Context Protocol)文档](https://docs.anthropic.com/en/docs/claude-code/mcp)
+
+### 🔗 开源项目
+- [claude-code-subagents-collection](https://github.com/davepoon/claude-code-subagents-collection) - 36个专业SubAgent
+- [claude_code_agent_farm](https://github.com/Dicklesworthstone/claude_code_agent_farm) - 50并发Agent工具
+- [ruvnet/claude-flow](https://github.com/ruvnet/claude-flow) - 64Agent协调框架
+
+### 📖 深度文章
+- [知乎：Claude SubAgent 10人团队效果](https://zhuanlan.zhihu.com/p/1934299700619641104)
+- [AI超元域：SubAgent规范驱动开发](https://www.aivi.fyi/aiagents/introduce-Sub-agents)
+- [Ernest Chiang：Claude Code学习笔记](https://www.ernestchiang.com/zh/notes/ai/claude-code/)
+
+### 🏢 企业案例
+- **橋水基金**：AI投资分析师助理
+- **Ramp**：30天产生100万行AI代码，事故调查时间减少80%
+- **Anthropic内部**：从基础设施到法务的全面应用
+
+---
+
+**文档版本**：v4.0  
 **创建时间**：2025年8月30日  
 **更新时间**：2025年9月3日  
 **适用范围**：Claude Code用户、AI技术研究者、企业决策者
+
+**更新日志**：
+- v4.0: 新增开源资源、Spec-Driven工作流、成本分析、企业案例
+- v3.0: 重构结构，对齐官方文档
+- v2.0: 完善配置指南和最佳实践
