@@ -233,15 +233,6 @@ tools: Read, Edit, Bash  # 只给必需的工具
 | **[claude-agents](https://github.com/iannuttall/claude-agents)** | 7个定制 | 精简实用 | 小团队快速上手 | Web开发 |
 | **[agents](https://github.com/wshobson/agents)** | 76个 | 生产级 + 模型分配 | 企业级开发流程 | 全栈开发 |
 
-#### 项目详细分析
-
-| 维度 | [claude-code-subagents-collection](https://github.com/davepoon/claude-code-subagents-collection) | [claude_code_agent_farm](https://github.com/Dicklesworthstone/claude_code_agent_farm) | [claude-flow](https://github.com/ruvnet/claude-flow) |
-|------|----------------------------------|------------------------|-------------------|
-| **专业化程度** | ⭐⭐⭐⭐⭐ 高度专业化 | ⭐⭐⭐⭐ 工具导向 | ⭐⭐⭐⭐⭐ 架构级设计 |
-| **学习曲线** | ⭐⭐⭐ 中等 | ⭐⭐ 较难 | ⭐⭐ 较难 |
-| **维护活跃度** | ⭐⭐⭐⭐ 活跃 | ⭐⭐⭐⭐⭐ 非常活跃 | ⭐⭐⭐ 一般 |
-| **文档完善度** | ⭐⭐⭐⭐ 详细 | ⭐⭐⭐⭐⭐ 非常详细 | ⭐⭐⭐ 中等 |
-| **企业适用性** | ⭐⭐⭐⭐ 适合 | ⭐⭐⭐⭐⭐ 非常适合 | ⭐⭐⭐⭐ 适合 |
 
 #### 使用方式
 ```bash
