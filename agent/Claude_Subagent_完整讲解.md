@@ -226,25 +226,64 @@ tools: Read, Edit, Bash  # 只给必需的工具
 #### 开源Subagent项目对比
 
 | 项目名称 | Agent数量 | Star数 | 主要特色 | 适用场景 | 技术栈支持 |
-|---------|----------|--------|----------|----------|-----------|
+|---------|----------|---------|----------|----------|-----------|
 | **[agents](https://github.com/wshobson/agents)** | 76个 | ⭐ 11.4k | 生产级 + 模型分配 | 企业级开发流程 | 全栈开发 |
 | **[claude-flow](https://github.com/ruvnet/claude-flow)** | 87个工具 | ⭐ 7.1k | AI协调平台 + MCP集成 | 分布式团队、高可用系统 | AI/ML项目 |
 | **[claude-code-subagents-collection](https://github.com/davepoon/claude-code-subagents-collection)** | 43个 | ⭐ 1.7k | 专业领域深度覆盖 + CLI工具 | 特定技术栈开发 | 前端、后端、DevOps |
 | **[claude-agents](https://github.com/iannuttall/claude-agents)** | 7个定制 | ⭐ 1.7k | 精简实用 | 小团队快速上手 | Web开发 |
 
 
-#### 使用方式
+#### 安装方式
 ```bash
-# 方法1: 使用CLI工具 (推荐)
-npm install -g bwc-cli
-bwc add --agent python-pro
+# 推荐安装方式：克隆到Claude agents目录
+cd ~/.claude
+git clone https://github.com/wshobson/agents.git
 
-# 方法2: 手动下载
-git clone https://github.com/davepoon/claude-code-subagents-collection
-cp -r claude-code-subagents-collection/subagents/*.md ~/.claude/agents/
+# 或者手动复制单个Subagent文件
+cp path/to/subagent.md ~/.claude/agents/
+```
 
-# 方法3: 大规模并行处理
-git clone https://github.com/Dicklesworthstone/claude_code_agent_farm
+#### 使用方式
+
+##### 🔄 自动调用
+Claude Code会根据任务上下文和Subagent描述自动选择合适的专家：
+
+```
+用户请求：优化数据库查询性能
+↓
+自动调用：database-optimizer (Sonnet模型)
+```
+
+##### 🎯 显式调用
+通过名称明确指定Subagent：
+
+```bash
+# 代码质量检查
+"使用 code-reviewer 检查我的最新修改"
+"让 security-auditor 扫描安全漏洞"
+
+# 开发任务
+"让 backend-architect 设计用户认证API"
+"使用 frontend-developer 创建响应式仪表板"
+
+# 基础设施和运维
+"让 devops-troubleshooter 分析这些生产日志"
+"使用 cloud-architect 设计可扩展的AWS架构"
+```
+
+##### 🚀 多Agent协作工作流
+```bash
+# 功能开发工作流
+"实现用户认证功能"
+# 自动协调：backend-architect → frontend-developer → test-automator → security-auditor
+
+# 性能优化工作流
+"优化结账流程性能"
+# 自动协调：performance-engineer → database-optimizer → frontend-developer
+
+# 生产事故响应
+"调试生产环境高内存使用"
+# 自动协调：incident-responder → devops-troubleshooter → error-detective → performance-engineer
 ```
 
 ### 🔥 成本考虑
