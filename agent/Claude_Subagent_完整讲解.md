@@ -65,6 +65,8 @@ Subagent存储为带有YAML前置元数据的Markdown文件，位于两个可能
 ---
 name: unique-identifier        # 必需：使用小写字母和连字符的唯一标识符
 description: 功能描述          # 必需：Subagent目的的自然语言描述
+model: sonnet                  # 可选：指定模型 (haiku/sonnet/opus)
+color: blue                    # 可选：界面显示颜色
 tools: tool1, tool2, tool3    # 可选：特定工具的逗号分隔列表
 ---
 
@@ -78,7 +80,11 @@ tools: tool1, tool2, tool3    # 可选：特定工具的逗号分隔列表
 |------|------|------|
 | `name` | 是 | 使用小写字母和连字符的唯一标识符 |
 | `description` | 是 | Subagent目的的自然语言描述 |
+| `model` | 否 | 指定使用的Claude模型：`haiku`(快速)、`sonnet`(平衡)、`opus`(最强) |
+| `color` | 否 | 界面显示颜色，用于区分不同Subagent |
 | `tools` | 否 | 特定工具的逗号分隔列表。如果省略，从主线程继承所有工具 |
+
+> **📝 注意**：`model`和`color`字段在实际使用中有效，但目前官方文档尚未更新说明。这些是Claude Code的较新功能，建议使用以获得更好的体验。
 
 ### 🔧 可用工具
 Subagent可以被授予访问Claude Code的任何内部工具。您有两个配置工具的选项：
