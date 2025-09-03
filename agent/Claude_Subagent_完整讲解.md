@@ -16,7 +16,7 @@
 
 ### 基本概念
 
-**Subagent（子智能体）**是Claude Code中的专门AI助手，就像给Claude组建了一个专业团队。
+**Subagent (子智能体)** 是Claude Code中的专门AI助手，就像给Claude组建了一个专业团队。
 
 想象一下：
 - **主Claude** = 项目经理，负责理解需求和任务分配
