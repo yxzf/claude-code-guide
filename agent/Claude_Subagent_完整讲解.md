@@ -243,48 +243,6 @@ git clone https://github.com/wshobson/agents.git
 cp path/to/subagent.md ~/.claude/agents/
 ```
 
-#### 使用方式
-
-##### 🔄 自动调用
-Claude Code会根据任务上下文和Subagent描述自动选择合适的专家：
-
-```
-用户请求：优化数据库查询性能
-↓
-自动调用：database-optimizer (Sonnet模型)
-```
-
-##### 🎯 显式调用
-通过名称明确指定Subagent：
-
-```bash
-# 代码质量检查
-"使用 code-reviewer 检查我的最新修改"
-"让 security-auditor 扫描安全漏洞"
-
-# 开发任务
-"让 backend-architect 设计用户认证API"
-"使用 frontend-developer 创建响应式仪表板"
-
-# 基础设施和运维
-"让 devops-troubleshooter 分析这些生产日志"
-"使用 cloud-architect 设计可扩展的AWS架构"
-```
-
-##### 🚀 多Agent协作工作流
-```bash
-# 功能开发工作流
-"实现用户认证功能"
-# 自动协调：backend-architect → frontend-developer → test-automator → security-auditor
-
-# 性能优化工作流
-"优化结账流程性能"
-# 自动协调：performance-engineer → database-optimizer → frontend-developer
-
-# 生产事故响应
-"调试生产环境高内存使用"
-# 自动协调：incident-responder → devops-troubleshooter → error-detective → performance-engineer
-```
 
 ### 🔥 成本考虑
 **重要提醒**：Subagent虽然强大，但成本不菲
