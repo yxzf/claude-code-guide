@@ -225,13 +225,13 @@ tools: Read, Edit, Bash  # 只给必需的工具
 
 #### 开源Subagent项目对比
 
-| 项目名称 | Agent数量 | 主要特色 | 适用场景 | 技术栈支持 |
-|---------|----------|----------|----------|-----------|
-| **[claude-code-subagents-collection](https://github.com/davepoon/claude-code-subagents-collection)** | 43个 | 专业领域深度覆盖 + CLI工具 | 特定技术栈开发 | 前端、后端、DevOps |
-| **[claude_code_agent_farm](https://github.com/Dicklesworthstone/claude_code_agent_farm)** | 50个并行 | 大规模并行处理 | 复杂架构变更、大型重构 | 34种技术栈 |
-| **[claude-flow](https://github.com/ruvnet/claude-flow)** | 87个工具 | AI协调平台 + MCP集成 | 分布式团队、高可用系统 | AI/ML项目 |
-| **[claude-agents](https://github.com/iannuttall/claude-agents)** | 7个定制 | 精简实用 | 小团队快速上手 | Web开发 |
-| **[agents](https://github.com/wshobson/agents)** | 76个 | 生产级 + 模型分配 | 企业级开发流程 | 全栈开发 |
+| 项目名称 | Agent数量 | Star数 | 主要特色 | 适用场景 | 技术栈支持 |
+|---------|----------|--------|----------|----------|-----------|
+| **[claude-code-subagents-collection](https://github.com/davepoon/claude-code-subagents-collection)** | 43个 | ⭐ 1.7k | 专业领域深度覆盖 + CLI工具 | 特定技术栈开发 | 前端、后端、DevOps |
+| **[claude_code_agent_farm](https://github.com/Dicklesworthstone/claude_code_agent_farm)** | 50个并行 | ⭐ 514 | 大规模并行处理 | 复杂架构变更、大型重构 | 34种技术栈 |
+| **[claude-flow](https://github.com/ruvnet/claude-flow)** | 87个工具 | ⭐ 7.1k | AI协调平台 + MCP集成 | 分布式团队、高可用系统 | AI/ML项目 |
+| **[claude-agents](https://github.com/iannuttall/claude-agents)** | 7个定制 | ⭐ 1.7k | 精简实用 | 小团队快速上手 | Web开发 |
+| **[agents](https://github.com/wshobson/agents)** | 76个 | ⭐ 11.4k | 生产级 + 模型分配 | 企业级开发流程 | 全栈开发 |
 
 
 #### 使用方式
