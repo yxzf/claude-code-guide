@@ -444,249 +444,37 @@ async def log_operation(operation: str, result: str):
 
 ---
 
-## 4. 工作原理深度解析
+## 4. 核心工作原理
 
-### 4.1 工具选择机制
+### 4.1 工具调用流程
 
-#### 🧠 基于 Prompt Engineering 的智能选择
+MCP 的核心是让 AI 模型智能选择和调用工具：
 
-MCP 的核心创新在于通过**结构化的提示工程**让 AI 模型智能选择合适的工具：
-
-```python
-async def build_system_prompt(available_tools: List[Tool]) -> str:
-    """构建包含工具信息的系统提示"""
-    
-    # 1. 格式化工具描述
-    tools_descriptions = []
-    for tool in available_tools:
-        desc = f"""
-🔧 **{tool.name}**
-📝 功能: {tool.description}
-📥 参数: {format_tool_schema(tool.input_schema)}
-💡 示例: {tool.usage_examples}
-"""
-        tools_descriptions.append(desc)
-    
-    # 2. 构建系统提示
-    system_prompt = f"""
-你是一个智能助手，可以使用以下工具来帮助用户：
-
-{chr(10).join(tools_descriptions)}
-
-## 工具调用规则
-
-1. **分析用户需求**: 仔细理解用户的具体需求
-2. **选择合适工具**: 选择最适合的工具，避免过度使用
-3. **验证参数**: 确保传递的参数符合工具要求
-4. **错误处理**: 如果工具调用失败，尝试其他方案
-
-## 响应格式
-
-当需要使用工具时，返回以下 JSON 格式：
-```json
-{{
-  "tool": "工具名称",
-  "arguments": {{
-    "参数名": "参数值"
-  }},
-  "reasoning": "选择此工具的原因"
-}}
+```
+用户输入 → AI分析需求 → 选择工具 → 执行操作 → 返回结果
 ```
 
-当不需要工具时，直接用自然语言回复。
-"""
-    
-    return system_prompt
-```
+**关键技术要点**：
+- AI 通过工具描述理解功能和参数
+- 使用 JSON-RPC 2.0 协议进行通信
+- 支持参数验证和错误处理
 
-#### 🔄 完整的工具调用流程
+### 4.2 连接生命周期
 
-```mermaid
-sequenceDiagram
-    participant User as 👤 用户
-    participant Host as 🖥️ MCP Host
-    participant LLM as 🧠 AI模型
-    participant Client as 🔌 MCP Client
-    participant Server as ⚙️ MCP Server
-    
-    User->>Host: 💬 "帮我整理桌面文件"
-    
-    Host->>LLM: 📝 发送 (用户问题 + 工具描述)
-    LLM->>Host: 🔧 返回工具调用JSON
-    
-    Note over Host: 解析工具调用请求
-    
-    Host->>Client: 📤 转发工具调用
-    Client->>Server: 🌐 JSON-RPC请求
-    
-    Note over Server: 执行文件整理操作
-    
-    Server->>Client: ✅ 返回执行结果
-    Client->>Host: 📥 转发结果
-    
-    Host->>LLM: 📊 发送 (原问题 + 工具结果)
-    LLM->>Host: 💭 生成最终回答
-    
-    Host->>User: ✨ 显示结果
-```
+MCP 连接遵循标准的三阶段流程：
 
-### 4.2 生命周期管理
+1. **初始化阶段**：客户端和服务器协商协议版本和支持的功能
+2. **工作阶段**：发现和调用工具、获取资源、使用提示模板
+3. **终止阶段**：清理连接和释放资源
 
-#### 🚀 初始化序列
+### 4.3 实时通知机制
 
-```json
-// 1. 客户端发起初始化
-{
-  "jsonrpc": "2.0",
-  "method": "initialize", 
-  "params": {
-    "protocolVersion": "2024-11-05",
-    "capabilities": {
-      "roots": { "listChanged": true },
-      "sampling": {},
-      "logging": {}
-    },
-    "clientInfo": {
-      "name": "Claude Desktop",
-      "version": "1.0.0"
-    }
-  },
-  "id": 1
-}
+MCP 支持服务器主动推送更新：
+- **工具/资源变更通知**：当可用工具或资源发生变化时自动通知
+- **进度更新**：长时间操作的实时进度反馈
+- **状态同步**：保持客户端和服务器状态一致
 
-// 2. 服务器响应能力
-{
-  "jsonrpc": "2.0", 
-  "result": {
-    "protocolVersion": "2024-11-05",
-    "capabilities": {
-      "tools": { "listChanged": true },
-      "resources": { 
-        "subscribe": true,
-        "listChanged": true 
-      },
-      "prompts": {}
-    },
-    "serverInfo": {
-      "name": "filesystem-server",
-      "version": "2.0.0"
-    }
-  },
-  "id": 1
-}
-```
-
-#### 🔧 工具发现和调用
-
-```python
-class MCPWorkflow:
-    """MCP 工作流程管理"""
-    
-    async def discover_tools(self) -> List[Tool]:
-        """发现可用工具"""
-        response = await self.client.request(
-            method="tools/list",
-            params={}
-        )
-        
-        tools = []
-        for tool_info in response["tools"]:
-            tool = Tool.from_mcp_format(tool_info)
-            tools.append(tool)
-            
-        return tools
-    
-    async def call_tool(self, tool_name: str, arguments: dict) -> str:
-        """调用指定工具"""
-        try:
-            # 1. 参数验证
-            tool = self.get_tool(tool_name)
-            validated_args = tool.validate_arguments(arguments)
-            
-            # 2. 发送调用请求
-            response = await self.client.request(
-                method="tools/call",
-                params={
-                    "name": tool_name,
-                    "arguments": validated_args
-                }
-            )
-            
-            # 3. 处理响应
-            if response.get("isError"):
-                raise ToolCallError(response["content"])
-                
-            return response["content"][0]["text"]
-            
-        except Exception as e:
-            # 4. 错误处理和重试
-            return await self.handle_tool_error(tool_name, arguments, e)
-```
-
-### 4.3 通知和实时更新
-
-#### 📡 服务器主动通知机制
-
-```python
-class MCPServer:
-    """支持通知的 MCP 服务器"""
-    
-    def __init__(self):
-        self.subscribers = set()
-        self.file_watcher = FileWatcher()
-        
-    async def start_file_monitoring(self):
-        """启动文件监控"""
-        async for event in self.file_watcher.watch("/watched/directory"):
-            if event.type in ["created", "modified", "deleted"]:
-                await self.notify_file_change(event)
-    
-    async def notify_file_change(self, event):
-        """通知客户端文件变化"""
-        notification = {
-            "jsonrpc": "2.0",
-            "method": "notifications/resources/list_changed",
-            "params": {
-                "resource_uri": f"file://{event.path}",
-                "change_type": event.type,
-                "timestamp": event.timestamp
-            }
-        }
-        
-        # 向所有订阅的客户端发送通知
-        for client in self.subscribers:
-            await client.send_notification(notification)
-
-    @mcp.tool()
-    async def watch_directory(self, path: str) -> str:
-        """开始监控目录变化"""
-        self.file_watcher.add_path(path)
-        return f"开始监控目录: {path}"
-```
-
-#### 🔄 客户端处理通知
-
-```python
-class MCPClient:
-    """处理通知的 MCP 客户端"""
-    
-    async def handle_notification(self, notification: dict):
-        """处理服务器通知"""
-        method = notification["method"]
-        params = notification["params"]
-        
-        if method == "notifications/resources/list_changed":
-            # 资源列表变化，重新获取
-            await self.refresh_resources()
-            
-        elif method == "notifications/tools/list_changed":
-            # 工具列表变化，重新获取
-            await self.refresh_tools()
-            
-        elif method == "notifications/progress":
-            # 进度更新
-            await self.update_progress(params)
-```
+这使得 MCP 应用能够动态响应环境变化，提供更好的用户体验。
 
 ---
 
