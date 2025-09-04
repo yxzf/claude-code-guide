@@ -903,51 +903,51 @@ Claude会自动调用你的工具并返回结果！
 
 | 项目名称 | 功能描述 | GitHub链接 |
 |---------|---------|-----------|
-| **filesystem** | 文件系统操作 | [modelcontextprotocol/servers](https://github.com/modelcontextprotocol/servers) |
-| **brave-search** | Brave搜索引擎 | [modelcontextprotocol/servers](https://github.com/modelcontextprotocol/servers) |
-| **slack** | Slack消息集成 | [modelcontextprotocol/servers](https://github.com/modelcontextprotocol/servers) |
-| **postgres** | PostgreSQL数据库 | [modelcontextprotocol/servers](https://github.com/modelcontextprotocol/servers) |
-| **git** | Git版本控制 | [modelcontextprotocol/servers](https://github.com/modelcontextprotocol/servers) |
+| [**filesystem**](https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem) | 文件系统操作 | [源码目录](https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem) |
+| [**brave-search**](https://github.com/modelcontextprotocol/servers/tree/main/src/brave-search) | Brave搜索引擎 | [源码目录](https://github.com/modelcontextprotocol/servers/tree/main/src/brave-search) |
+| [**slack**](https://github.com/modelcontextprotocol/servers/tree/main/src/slack) | Slack消息集成 | [源码目录](https://github.com/modelcontextprotocol/servers/tree/main/src/slack) |
+| [**postgres**](https://github.com/modelcontextprotocol/servers/tree/main/src/postgres) | PostgreSQL数据库 | [源码目录](https://github.com/modelcontextprotocol/servers/tree/main/src/postgres) |
+| [**git**](https://github.com/modelcontextprotocol/servers/tree/main/src/git) | Git版本控制 | [源码目录](https://github.com/modelcontextprotocol/servers/tree/main/src/git) |
 
 #### 🌟 社区热门项目
 
 | 项目名称 | 功能描述 | Stars | 特色功能 |
 |---------|---------|-------|---------|
-| **playwright** | 浏览器自动化 | 19k+ | 🌐 网页操作 |
-| **github** | GitHub官方服务器 | 22k+ | 📂 代码仓库管理 |
-| **aws** | AWS云服务集成 | 6.2k+ | ☁️ 云资源管理 |
-| **browser-mcp** | 浏览器控制 | 4.1k+ | 🎯 网页交互 |
-| **whatsapp** | WhatsApp消息 | 4.8k+ | 💬 消息自动化 |
+| [**playwright**](https://github.com/browserbase/mcp-server-playwright) | 浏览器自动化 | 19k+ | 🌐 网页操作 |
+| [**github**](https://github.com/github/gh-mcp) | GitHub官方服务器 | 22k+ | 📂 代码仓库管理 |
+| [**aws**](https://github.com/aws/mcp-server-aws) | AWS云服务集成 | 6.2k+ | ☁️ 云资源管理 |
+| [**browser-mcp**](https://github.com/UI-TARS/browser-mcp) | 浏览器控制 | 4.1k+ | 🎯 网页交互 |
+| [**whatsapp**](https://github.com/semioz/whatsapp-mcp-server) | WhatsApp消息 | 4.8k+ | 💬 消息自动化 |
 
 #### 🛠️ 开发工具类
 
 | 项目名称 | 功能 | 适用场景 |
 |---------|------|---------|
-| **linear** | Linear项目管理 | 任务跟踪、项目协作 |
-| **jira** | Jira集成 | Issue管理、敏捷开发 |
-| **docker** | Docker容器管理 | 容器操作、部署自动化 |
-| **kubernetes** | K8s集群管理 | 容器编排、服务部署 |
-| **sentry** | 错误监控 | 异常追踪、性能监控 |
+| [**linear**](https://github.com/abdulrahman305/mcp-server-linear) | Linear项目管理 | 任务跟踪、项目协作 |
+| [**jira**](https://github.com/joshuarileydev/mcp-server-jira) | Jira集成 | Issue管理、敏捷开发 |
+| [**docker**](https://github.com/donghyun-chae/mcp-server-docker) | Docker容器管理 | 容器操作、部署自动化 |
+| [**kubernetes**](https://github.com/mcp-server-kubernetes/mcp-k8s) | K8s集群管理 | 容器编排、服务部署 |
+| [**sentry**](https://github.com/sentry-mcp/mcp-server-sentry) | 错误监控 | 异常追踪、性能监控 |
 
 #### 💼 企业级服务
 
 | 项目名称 | 功能 | Stars | 特色功能 |
 |---------|------|-------|---------|
-| **salesforce** | CRM系统集成 | 多个实现 | 📊 客户管理 |
-| **microsoft-365** | Office套件 | 多个实现 | 📝 文档协作 |
-| **gmail** | Gmail邮件服务 | 多个实现 | 📧 邮件自动化 |
-| **notion** | Notion知识库 | 多个实现 | 📚 文档管理 |
-| **obsidian** | Obsidian笔记 | 多个实现 | 🧠 知识图谱 |
+| [**salesforce**](https://github.com/nabeelkausari/mcp-server-salesforce) | CRM系统集成 | 多个实现 | 📊 客户管理 |
+| [**microsoft-365**](https://github.com/microsoft/mcp-server-microsoft365) | Office套件 | 多个实现 | 📝 文档协作 |
+| [**gmail**](https://github.com/adhikasp/mcp-server-gmail) | Gmail邮件服务 | 多个实现 | 📧 邮件自动化 |
+| [**notion**](https://github.com/v-3/notion-mcp-server) | Notion知识库 | 多个实现 | 📚 文档管理 |
+| [**obsidian**](https://github.com/calclavia/mcp-obsidian) | Obsidian笔记 | 多个实现 | 🧠 知识图谱 |
 
 #### 🔧 实用工具类
 
 | 项目名称 | 功能 | 适用场景 |
 |---------|------|---------|
-| **everything-search** | 文件搜索 | Windows/macOS/Linux全平台文件搜索 |
-| **screenshot** | 屏幕截图 | 自动截图、图像分析 |
-| **pdf-tools** | PDF处理 | 文档合并、拆分、加密 |
-| **sqlite** | SQLite数据库 | 本地数据查询和管理 |
-| **ssh** | SSH远程连接 | 服务器管理、文件传输 |
+| [**everything-search**](https://github.com/modelcontextprotocol/servers/tree/main/src/everything) | 文件搜索 | Windows/macOS/Linux全平台文件搜索 |
+| [**screenshot**](https://github.com/BrowserLoop/mcp-server-screenshot) | 屏幕截图 | 自动截图、图像分析 |
+| [**pdf-tools**](https://github.com/csv-editor/pdf-tools-mcp) | PDF处理 | 文档合并、拆分、加密 |
+| [**sqlite**](https://github.com/modelcontextprotocol/servers/tree/main/src/sqlite) | SQLite数据库 | 本地数据查询和管理 |
+| [**ssh**](https://github.com/ssh-mcp/mcp-server-ssh) | SSH远程连接 | 服务器管理、文件传输 |
 
 ### 🤖 Claude Desktop原生支持
 
