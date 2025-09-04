@@ -375,371 +375,158 @@ await transport.run(server, host="0.0.0.0", port=8080)
 
 ## 3. 协议与标准
 
-### 3.1 MCP 原语 (Primitives)
+### 3.1 MCP 三大核心原语
 
-MCP 定义了三种核心原语，覆盖 AI 与外部系统交互的主要场景：
+MCP 定义了三种核心原语，涵盖 AI 与外部系统交互的主要场景：
 
-#### 🔧 Tools (工具)
-**可执行的函数，AI 可以调用来执行操作**
+#### 🔧 Tools (工具) - 让AI执行操作
 
+**概念**：可执行的函数，AI 可以调用来执行具体操作
+
+**特点**：
+- ✅ **需要用户授权**：确保安全性
+- ✅ **可以修改状态**：能够执行写操作  
+- ✅ **支持复杂参数**：类型检查和验证
+- ✅ **返回结构化数据**：JSON 或文本格式
+
+**示例场景**：
 ```python
-from mcp.server.fastmcp import FastMCP
-
-mcp = FastMCP("文件管理工具")
-
 @mcp.tool()
 def search_files(pattern: str, directory: str = ".") -> str:
-    """在指定目录中搜索文件
-    
-    Args:
-        pattern: 搜索模式，支持通配符 (如 *.py, test_*)
-        directory: 搜索目录，默认为当前目录
-        
-    Returns:
-        str: 找到的文件列表，每行一个文件路径
-        
-    Examples:
-        搜索Python文件: search_files("*.py", "/home/project")
-        搜索测试文件: search_files("test_*", "./tests")
-    """
-    import glob
-    import os
-    
-    search_path = os.path.join(directory, pattern)
-    files = glob.glob(search_path, recursive=True)
-    
-    if not files:
-        return f"未在 {directory} 中找到匹配 '{pattern}' 的文件"
-    
-    return "\n".join(sorted(files))
+    """在指定目录中搜索文件"""
+    # 实际搜索逻辑...
+    return "找到的文件列表"
 ```
 
-**特点**:
-- ✅ **需要用户授权**: 确保安全性
-- ✅ **可以修改状态**: 能够执行写操作
-- ✅ **支持复杂参数**: 类型检查和验证
-- ✅ **返回结构化数据**: JSON 或文本格式
+#### 📄 Resources (资源) - 为AI提供上下文
 
-#### 📄 Resources (资源)
-**为 AI 提供上下文信息的数据源**
+**概念**：为 AI 提供上下文信息的只读数据源
 
+**特点**：
+- 📖 **只读访问**：不能修改数据
+- 🏷️ **标准化URI**：如 `config://app-settings`
+- 🔄 **支持订阅**：可以监听资源变化
+- 📊 **结构化数据**：通常返回 JSON 格式
+
+**示例场景**：
 ```python
 @mcp.resource("config://app-settings")
 def get_app_settings() -> str:
     """获取应用程序配置信息"""
-    import json
-    
-    config = {
-        "database": {
-            "host": "localhost",
-            "port": 5432,
-            "name": "myapp_db"
-        },
-        "features": {
-            "authentication": True,
-            "logging": True,
-            "cache": False
-        },
-        "api_limits": {
-            "requests_per_minute": 1000,
-            "max_file_size": "10MB"
-        }
-    }
-    
-    return json.dumps(config, indent=2, ensure_ascii=False)
-
-@mcp.resource("logs://recent-errors")  
-def get_recent_errors() -> str:
-    """获取最近的错误日志"""
-    # 模拟读取日志文件
-    errors = [
-        "2025-01-15 10:30:15 ERROR: Database connection timeout",
-        "2025-01-15 11:45:22 ERROR: Invalid API key for user 12345", 
-        "2025-01-15 14:20:33 ERROR: File upload size exceeded limit"
-    ]
-    
-    return "\n".join(errors)
+    return json.dumps(config_data)
 ```
 
-**特点**:
-- 📖 **只读访问**: 不能修改数据
-- 🏷️ **标准化URI**: 使用统一的资源标识符
-- 🔄 **支持订阅**: 可以监听资源变化
-- 📊 **结构化数据**: 通常返回 JSON 格式
+#### 💬 Prompts (提示模板) - 标准化交互
 
-#### 💬 Prompts (提示模板)
-**可重用的交互模板，帮助构建标准化的提示**
+**概念**：可重用的交互模板，帮助构建标准化的提示
 
+**特点**：
+- 🎯 **参数化模板**：支持动态参数
+- 🔄 **可重用性**：标准化的提示格式
+- 📝 **最佳实践**：集成专业知识
+- 🎨 **自定义格式**：灵活的输出要求
+
+**示例场景**：
 ```python
 @mcp.prompt()
-def code_review_prompt(code: str, language: str, focus: str = "质量") -> str:
-    """代码审查提示模板
-    
-    Args:
-        code: 要审查的代码
-        language: 编程语言
-        focus: 审查重点 (质量/安全/性能)
-    """
-    
-    focus_guidelines = {
-        "质量": [
-            "代码可读性和维护性",
-            "命名规范和注释质量", 
-            "代码重复和复杂度",
-            "错误处理和边界情况"
-        ],
-        "安全": [
-            "输入验证和过滤",
-            "权限检查和访问控制",
-            "敏感信息泄露风险",
-            "常见安全漏洞 (XSS, SQL注入等)"
-        ],
-        "性能": [
-            "算法复杂度分析",
-            "资源使用优化",
-            "并发和异步处理",
-            "缓存和数据结构选择"
-        ]
-    }
-    
-    guidelines = focus_guidelines.get(focus, focus_guidelines["质量"])
-    
-    return f"""
-请对以下 {language} 代码进行专业审查，重点关注{focus}：
-
-```{language}
-{code}
+def code_review_prompt(code: str, language: str) -> str:
+    """代码审查提示模板"""
+    return f"请审查以下{language}代码：\n{code}"
 ```
 
-审查指南：
-{chr(10).join(f'• {item}' for item in guidelines)}
+### 3.2 协议核心特性
 
-请提供：
-1. **代码质量评分** (1-10分)
-2. **主要问题清单** (按优先级排序)
-3. **具体改进建议** (包含代码示例)
-4. **最佳实践建议**
+#### 🔄 双向通信
+- **客户端→服务器**：调用工具、获取资源
+- **服务器→客户端**：AI推理请求、进度通知
 
-审查格式要求：
-- 问题描述要具体，指出具体的行号
-- 提供可操作的改进方案
-- 如有必要，提供重构后的代码示例
-"""
-```
+#### 🎛️ 传输层抽象
+| 传输方式 | 适用场景 | 性能 | 安全性 |
+|---------|---------|------|--------|
+| **STDIO** | 本地工具 | 最优 | 高 |
+| **HTTP/SSE** | 远程服务 | 一般 | 需认证 |
 
-### 3.2 客户端原语
-
-MCP 还定义了客户端可以提供的原语，使服务器能够反向调用客户端能力：
-
-#### 🎯 Sampling (采样)
-```python
-# 服务器可以请求客户端的 AI 模型进行推理
-async def generate_summary(data: str) -> str:
-    """让 AI 生成数据摘要"""
-    prompt = f"请为以下数据生成简洁的摘要:\n\n{data}"
-    
-    response = await client.sample_completion(
-        prompt=prompt,
-        max_tokens=200,
-        temperature=0.3
-    )
-    
-    return response
-```
-
-#### ❓ Elicitation (请求用户输入)
-```python
-# 服务器可以请求用户确认或输入额外信息
-async def confirm_deletion(file_path: str) -> bool:
-    """请求用户确认删除操作"""
-    response = await client.request_user_input(
-        prompt=f"确认删除文件 '{file_path}' 吗？此操作不可撤销。",
-        input_type="confirmation"
-    )
-    
-    return response.lower() in ['yes', 'y', '确认', '是']
-```
-
-#### 📝 Logging (日志记录)
-```python
-# 服务器可以发送日志到客户端
-async def log_operation(operation: str, result: str):
-    """记录操作日志"""
-    await client.log_message(
-        level="info",
-        message=f"操作完成: {operation}",
-        data={
-            "operation": operation,
-            "result": result,
-            "timestamp": datetime.now().isoformat()
-        }
-    )
+#### 📋 标准化消息格式
+基于 JSON-RPC 2.0，确保跨平台兼容：
+```json
+{
+  "jsonrpc": "2.0",
+  "method": "tools/call", 
+  "params": {"name": "search_files", "arguments": {"pattern": "*.py"}},
+  "id": 1
+}
 ```
 
 ---
 
 ## 4. 核心工作原理
 
-### 4.1 AI如何智能选择工具？核心机制深度解析
+### 4.1 AI如何智能选择工具？
 
-#### 🧠 工具选择的基本原理
+#### 🧠 工具选择的本质
 
-**核心机制**: AI模型通过 **Prompt Engineering** 来理解和选择工具，而非魔法！
+**核心机制**：AI通过 **Prompt Engineering** 理解工具功能，而非魔法！
 
-```python
-# 1. 系统收集所有可用工具的描述
-all_tools = []
-for server in mcp_servers:
-    tools = await server.list_tools()
-    all_tools.extend(tools)
+**简化流程**：
+1. **工具发现** → MCP收集所有可用工具描述
+2. **信息整合** → 将工具转换为AI可理解的文本  
+3. **智能匹配** → AI基于用户请求选择合适工具
+4. **执行调用** → 发送结构化请求并获取结果
 
-# 2. 将工具信息格式化为文本描述
-tools_description = "\n".join([
-    f"Tool: {tool.name}\n"
-    f"Description: {tool.description}\n" 
-    f"Arguments: {tool.format_arguments()}"
-    for tool in all_tools
-])
-
-# 3. 构造系统提示，告诉AI有哪些工具可用
-system_message = f"""
-You are a helpful assistant with access to these tools:
-
-{tools_description}
-
-Choose the appropriate tool based on the user's question.
-When you need to use a tool, respond with JSON format:
-{{"tool": "tool-name", "arguments": {{"param": "value"}}}}
-"""
-```
-
-#### 🔄 完整的工具调用流程
+#### 🔄 具体工作流程
 
 ```
-步骤1: 工具发现阶段
-┌─────────────────────────────────────────────┐
-│ MCP Client 向所有 Server 请求工具列表        │
-│ └─ await server.list_tools()                │
-└─────────────────────────────────────────────┘
-                    ↓
-步骤2: 工具描述生成
-┌─────────────────────────────────────────────┐
-│ 将工具信息转换为LLM可理解的文本描述          │
-│ ├─ 工具名称 (from function name)             │
-│ ├─ 功能描述 (from docstring)                │
-│ └─ 参数说明 (from type annotations)         │
-└─────────────────────────────────────────────┘
-                    ↓
-步骤3: AI决策阶段  
-┌─────────────────────────────────────────────┐
-│ AI基于用户请求 + 工具描述做出选择决策         │
-│ ├─ 分析用户意图                             │
-│ ├─ 匹配合适工具                             │
-│ └─ 生成结构化调用请求                        │
-└─────────────────────────────────────────────┘
-                    ↓
-步骤4: 工具执行阶段
-┌─────────────────────────────────────────────┐
-│ MCP Client 执行选定的工具                   │
-│ ├─ JSON解析和参数验证                        │
-│ ├─ 调用对应的MCP Server                     │
-│ └─ 获取执行结果                             │
-└─────────────────────────────────────────────┘
-                    ↓
-步骤5: 结果处理阶段
-┌─────────────────────────────────────────────┐
-│ 将工具执行结果反馈给AI生成最终回复           │
-│ └─ AI将原始数据转换为自然语言回复            │
-└─────────────────────────────────────────────┘
+用户提问："帮我统计桌面文件数量"
+        ↓
+📋 工具发现: 系统找到 count_files 工具
+        ↓  
+🧠 AI分析: "用户想统计文件" → 选择 count_files
+        ↓
+⚙️ 执行工具: count_files(directory="Desktop")  
+        ↓
+📊 返回结果: "桌面有15个文件，3个文件夹"
 ```
 
-#### 🛠️ 工具描述是如何生成的？
+#### ✨ 关键特性
 
-从Python代码角度看，工具的描述信息来源于：
+**🎯 智能匹配**：
+- AI根据工具的**文档字符串**理解功能
+- 支持**模糊匹配**和**意图推理**
+- 能够**组合多个工具**完成复杂任务
 
-```python
-@mcp.tool()
-def search_files(pattern: str, directory: str = ".") -> str:
-    """在指定目录中搜索文件模式
-    
-    Args:
-        pattern: 搜索模式，支持通配符
-        directory: 搜索目录，默认当前目录
-        
-    Returns:
-        找到的文件列表，每行一个文件路径
-    """
-    import glob
-    files = glob.glob(f"{directory}/{pattern}")
-    return "\n".join(sorted(files))
+**🔒 安全机制**：
+- 用户需要**授权**每个工具调用
+- 工具有**明确的权限边界**
+- 支持**操作审计**和**回滚机制**
 
-# 自动转换为工具描述：
-# Tool: search_files
-# Description: 在指定目录中搜索文件模式
-# Arguments:
-# - pattern: 搜索模式，支持通配符 (required)  
-# - directory: 搜索目录，默认当前目录 (optional)
-```
-
-#### ⚠️ 错误处理：AI幻觉怎么办？
-
-```python
-async def process_llm_response(llm_response: str):
-    try:
-        # 尝试解析JSON格式的工具调用
-        tool_call = json.loads(llm_response)
-        tool_name = tool_call.get("tool")
-        arguments = tool_call.get("arguments", {})
-        
-        # 验证工具是否存在
-        if tool_name not in available_tools:
-            return "Error: Tool not found, please use available tools only"
-            
-        # 执行工具调用
-        result = await execute_tool(tool_name, arguments)
-        return result
-        
-    except json.JSONDecodeError:
-        # 不是工具调用，直接返回自然语言回复
-        return llm_response
-    except Exception as e:
-        # 工具执行失败，返回错误信息
-        return f"Tool execution failed: {str(e)}"
-```
+### 4.2 MCP的核心优势
 
 #### 🎯 为什么Claude特别适合MCP？
 
-**专门训练的优势**：
+**专门优化**：
 - Anthropic专门训练Claude理解工具描述格式
-- 更准确的工具选择和JSON格式输出
+- 更准确的工具选择和参数传递
 - 更少的幻觉和无效调用
 
-**其他模型也能用MCP吗？**
-```python
-# 理论上任何模型都支持，但效果差异很大
-models_compatibility = {
-    "Claude": "🟢 原生优化，体验最佳",
-    "GPT-4": "🟡 可用，需要更细致的prompt调优", 
-    "开源模型": "🟠 可用，但可能需要额外的微调"
-}
-```
+**兼容性**：
+| AI模型 | MCP支持程度 | 说明 |
+|--------|-------------|------|
+| **Claude** | 🟢 原生优化 | 体验最佳 |
+| **GPT-4** | 🟡 基本可用 | 需prompt调优 |
+| **开源模型** | 🟠 部分支持 | 可能需微调 |
 
-### 4.2 连接生命周期
+#### 🔄 连接生命周期
 
-MCP 连接遵循标准的三阶段流程：
+**三阶段流程**：
+1. **初始化** → 协商协议版本和功能
+2. **工作阶段** → 工具调用、资源获取  
+3. **终止** → 清理连接释放资源
 
-1. **初始化阶段**：客户端和服务器协商协议版本和支持的功能
-2. **工作阶段**：发现和调用工具、获取资源、使用提示模板
-3. **终止阶段**：清理连接和释放资源
+#### 📡 实时通知机制
 
-### 4.3 实时通知机制
-
-MCP 支持服务器主动推送更新：
-- **工具/资源变更通知**：当可用工具或资源发生变化时自动通知
-- **进度更新**：长时间操作的实时进度反馈
-- **状态同步**：保持客户端和服务器状态一致
-
-这使得 MCP 应用能够动态响应环境变化，提供更好的用户体验。
+- **动态更新**：工具/资源变更自动通知
+- **进度反馈**：长时间操作的实时进度
+- **状态同步**：保持客户端和服务器一致性
 
 ---
 
