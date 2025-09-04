@@ -46,23 +46,16 @@
 
 ### MCP 核心架构
 
-MCP 采用三层架构设计：
+MCP 采用客户端-服务器架构设计，AI应用通过MCP客户端与多个MCP服务器建立一对一连接：
 
-```
-🤖 MCP Hosts (AI应用层)
-    ├── Claude Desktop
-    ├── VS Code + Cursor  
-    └── 自定义AI应用
+![MCP核心架构图](images/mcp_official_architecture.png)
 
-🔗 MCP Protocol (协议层)
-    └── JSON-RPC 2.0 标准化接口
+**架构说明**：
+- **MCP Host (AI应用)**：如Claude Desktop、VS Code等，负责协调管理多个MCP客户端
+- **MCP Client**：每个客户端维护与一个MCP服务器的专用连接
+- **MCP Server**：提供具体功能的服务端，如Sentry、文件系统、数据库等
 
-⚙️ MCP Servers (服务层)
-    ├── 文件系统服务器
-    ├── 数据库服务器
-    ├── API集成服务器
-    └── 第三方服务接口
-```
+**连接模式**：采用一对一连接模式，确保每个MCP客户端与对应的MCP服务器建立独立的通信通道。
 
 #### 💡 核心类比：AI 世界的 USB-C
 就像 USB-C 为各种设备提供了统一的连接标准，MCP 为 AI 模型与外部资源提供了统一的交互协议。
