@@ -28,11 +28,12 @@
    - 1.2 核心架构设计
    - 1.3 MCP vs Function Call
 2. [MCP 怎么工作](#2-mcp-怎么工作)
-   - 2.1 三大核心原语详解
-   - 2.2 客户端原语和通知机制
-   - 2.3 通知机制
-   - 2.4 双向通信机制
-   - 2.5 AI工具选择机制详解
+   - 2.1 从实际场景理解MCP工作流程
+   - 2.2 三大核心原语详解
+   - 2.3 客户端原语
+   - 2.4 通知机制
+   - 2.5 双向通信机制
+   - 2.6 AI工具选择机制详解
 
 ### 第二部分：安装配置（怎么用MCP）
 3. [MCP 安装配置指南](#3-mcp-安装配置指南)
@@ -247,7 +248,49 @@ MCP方案:
 
 ## 2. MCP 怎么工作
 
-### 2.1 三大核心原语（Primitives）
+### 2.1 从实际场景理解MCP工作流程
+
+让我们通过一个实际场景来理解MCP是如何工作的：
+
+#### 场景：你问Claude "我桌面上有哪些文档？"
+
+**完整的交互流程**：
+
+```
+你的问题：
+"我桌面上有哪些文档？"
+       ↓
+Claude Desktop (MCP Host)：
+接收问题，启动Claude模型分析
+       ↓
+Claude模型分析：
+"需要访问文件系统来获取桌面文件信息"
+       ↓
+MCP Client激活：
+连接到文件系统MCP Server
+       ↓
+文件系统MCP Server：
+扫描桌面目录，返回文件列表
+       ↓
+结果返回：
+"找到以下文档：报告.docx, 笔记.txt, 项目.pdf"
+       ↓
+Claude整合信息：
+生成自然语言回复
+       ↓
+显示给你：
+"您的桌面上有3个文档：报告.docx、笔记.txt和项目.pdf"
+```
+
+**关键洞察**：
+- **智能决策**：Claude自动判断需要调用文件系统工具
+- **安全授权**：系统会请求你的权限才能访问文件
+- **实时数据**：获取的是当前真实的文件信息，不是预设数据
+- **自然交互**：整个过程对用户透明，就像Claude"真的看到了"你的桌面
+
+这就是MCP的魅力：**让AI能够像人一样，在需要时主动获取实时信息来回答问题**。
+
+### 2.2 三大核心原语（Primitives）
 
 MCP 定义了三种**核心原语**，这些原语指定了可以与AI应用共享的上下文信息类型和可执行的操作范围：
 
@@ -393,11 +436,11 @@ def code_review_prompt(code: str, language: str, focus: str = "general") -> str:
 """
 ```
 
-### 2.2 客户端原语（Client Primitives）
+### 2.3 客户端原语（Client Primitives）
 
 除了服务器提供的三大原语，MCP还定义了客户端向服务器发送的原语：
 
-#### 2.2.1 Sampling（采样请求）
+#### 2.3.1 Sampling（采样请求）
 
 客户端可以请求服务器生成内容：
 
@@ -415,7 +458,7 @@ async def handle_sampling(request):
     return await llm.generate(request.prompt)
 ```
 
-#### 2.2.2 Elicitation（引导对话）
+#### 2.3.2 Elicitation（引导对话）
 
 客户端请求服务器引导特定类型的对话：
 
@@ -424,7 +467,7 @@ async def handle_sampling(request):
 - 多轮交互支持
 - 上下文保持
 
-#### 2.2.3 Logging（日志记录）
+#### 2.3.3 Logging（日志记录）
 
 客户端可以向服务器发送日志信息：
 
@@ -433,7 +476,7 @@ async def handle_sampling(request):
 - 分级日志支持
 - 调试和监控
 
-### 2.3 通知机制（Notifications）
+### 2.4 通知机制（Notifications）
 
 MCP支持双向通知，实现实时状态同步：
 
@@ -459,7 +502,7 @@ async def handle_update(notification):
     await refresh_resources()
 ```
 
-### 2.4 双向通信机制
+### 2.5 双向通信机制
 
 #### 分层架构设计
 
@@ -537,11 +580,20 @@ MCP采用**双层架构（Layers）**设计，将协议逻辑与传输方式完�
 MCP方式：运行时动态加载新工具，无需重启
 ```
 
-### 2.5 AI工具选择机制详解
+### 2.6 AI工具选择机制详解
 
 #### 工具选择的基本原理
 
 **核心机制**: AI模型通过 **Prompt Engineering** 来理解和选择工具，而非魔法！
+
+让我们深入理解：当你问"我桌面上有哪些文档？"时，AI是如何知道要调用文件系统工具的？
+
+**关键洞察**: AI并不是"天生"知道有哪些工具可用，而是通过以下机制：
+
+1. **工具发现**: 系统自动收集所有可用工具的描述信息
+2. **文本转换**: 将工具信息转换为AI可理解的文本描述  
+3. **智能匹配**: AI基于问题内容和工具描述进行智能选择
+4. **结构化调用**: AI输出标准JSON格式的工具调用请求
 
 <details>
 <summary>点击查看：工具发现的代码实现</summary>
@@ -571,6 +623,13 @@ Choose the appropriate tool based on the user's question.
 When you need to use a tool, respond with JSON format:
 {{"tool": "tool-name", "arguments": {{"param": "value"}}}}
 """
+
+# 工具描述示例：
+# Tool: list_desktop_files
+# Description: 获取桌面上所有文件的列表
+# Arguments: 
+# - include_details: 是否包含详细信息 (可选)
+# - file_type: 文件类型过滤 (可选)
 ```
 </details>
 
@@ -644,6 +703,16 @@ def search_files(pattern: str, directory: str = ".") -> str:
 # - pattern: 搜索模式，支持通配符 (required)  
 # - directory: 搜索目录，默认当前目录 (optional)
 ```
+
+**关键技术细节**：
+- **函数名** → 工具名称 (`search_files`)
+- **docstring** → 工具描述 (`在指定目录中搜索文件模式`)
+- **类型注解** → 参数类型和验证 (`str`, `int`, `bool`等)
+- **默认值** → 可选参数标识 (`directory: str = "."`)
+- **参数文档** → 参数说明 (从docstring的Args部分提取)
+
+这就是为什么**文档字符串质量直接影响AI工具选择准确性**的原因！
+
 </details>
 
 #### 错误处理：AI幻觉怎么办？
@@ -675,6 +744,27 @@ async def process_llm_response(llm_response: str):
         return f"Tool execution failed: {str(e)}"
 ```
 </details>
+
+#### 为什么Claude在MCP中表现更好？
+
+**技术原因**：
+1. **专门训练**：Anthropic对Claude进行了专门的MCP协议训练
+2. **结构化输出**：Claude更擅长生成标准JSON格式的工具调用
+3. **工具理解**：对工具描述的语义理解更准确
+4. **错误处理**：更好的错误恢复和重试机制
+
+**实际表现**：
+- **选择准确性**：基于工具描述选择正确工具的成功率更高
+- **参数传递**：更准确地从用户输入中提取工具参数
+- **结果整合**：更自然地将工具执行结果转换为用户友好的回复
+
+**开放性**：虽然任何AI模型都可以使用MCP（因为基于标准Prompt），但未经过专门训练的模型在实际使用中可能出现：
+- 工具选择不准确
+- JSON格式错误
+- 参数传递错误
+- 结果理解偏差
+
+这也解释了为什么MCP虽然是开放协议，但Claude Desktop的MCP体验目前是最好的。
 
 ---
 
