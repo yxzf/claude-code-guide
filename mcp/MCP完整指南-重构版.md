@@ -471,7 +471,7 @@ claude mcp reset-project-choices  # 重置项目范围的批准选择
 #### 常用命令参数详解
 
 <details>
-<summary>📋 点击查看：命令参数完整说明</summary>
+<summary>点击查看：命令参数完整说明</summary>
 
 **claude mcp add 参数**：
 ```bash
@@ -555,7 +555,7 @@ MCP 服务器可以在三个不同的范围级别配置，了解这些范围有�
 - **访问权限**：用户所有项目可用
 - **命令示例**：`claude mcp add -s user dev-tools`
 
-#### 🌐 环境变量扩展支持
+#### 环境变量扩展支持
 
 Claude Code 在配置文件中支持环境变量扩展，提供灵活的配置管理：
 
@@ -588,7 +588,7 @@ ${VAR:-default}     # VAR的值，如果未设置则使用default
 }
 ```
 
-#### 🔄 范围优先级和冲突解决
+#### 范围优先级和冲突解决
 
 当多个范围中存在同名服务器时，系统按以下优先级解决冲突：
 
@@ -603,7 +603,7 @@ Local (本地) > Project (项目) > User (用户)
 **适用场景**：已在 Claude Desktop 中配置了 MCP 服务器，希望在 Claude Code 中复用
 
 <details>
-<summary>📋 点击查看：Claude Desktop导入详细步骤</summary>
+<summary>点击查看：Claude Desktop导入详细步骤</summary>
 
 **Step 1: 检查 Claude Desktop 配置**
 ```bash
@@ -652,7 +652,7 @@ claude mcp get filesystem
 **适用场景**：批量配置、团队协作、配置文件管理
 
 <details>
-<summary>📋 点击查看：JSON配置详细方法</summary>
+<summary>点击查看：JSON配置详细方法</summary>
 
 **方法一：从JSON文件导入**
 ```bash
@@ -744,7 +744,7 @@ claude mcp add-from-json https://example.com/team-mcp-config.json
 **适用场景**：需要直接系统访问或自定义脚本的工具
 
 <details>
-<summary>📋 点击查看：STDIO服务器配置详解</summary>
+<summary>点击查看：STDIO服务器配置详解</summary>
 
 **基本语法**：
 ```bash
@@ -785,7 +785,7 @@ claude mcp add -s user dev-tools -- npx -y @personal/dev-server
 **适用场景**：需要实时更新的云服务
 
 <details>
-<summary>📋 点击查看：SSE服务器配置详解</summary>
+<summary>点击查看：SSE服务器配置详解</summary>
 
 **基本语法**：
 ```bash
@@ -832,7 +832,7 @@ claude mcp add -s project --transport sse linear https://mcp.linear.app/sse
 **适用场景**：REST API和标准Web服务
 
 <details>
-<summary>📋 点击查看：HTTP服务器配置详解</summary>
+<summary>点击查看：HTTP服务器配置详解</summary>
 
 **基本语法**：
 ```bash
@@ -964,7 +964,7 @@ touch src/server/__init__.py
 touch src/tools/__init__.py
 ```
 
-#### 📁 推荐的项目结构
+#### 推荐的项目结构
 
 ```
 my-mcp-server/
@@ -1012,7 +1012,7 @@ touch file_counter.py
 **Step 2: 核心代码**
 
 <details>
-<summary>📄 点击展开完整代码 (file_counter.py)</summary>
+<summary>点击展开完整代码 (file_counter.py)</summary>
 
 ```python
 import os
@@ -1042,7 +1042,7 @@ def count_files(directory: str = "Desktop") -> str:
     file_count = len([f for f in files if f.is_file()])
     folder_count = len([f for f in files if f.is_dir()])
     
-    return f"{directory} 目录统计:\n📄 文件: {file_count} 个\n📁 文件夹: {folder_count} 个"
+    return f"{directory} 目录统计:\n文件: {file_count} 个\n文件夹: {folder_count} 个"
 
 if __name__ == "__main__":
     mcp.run()
