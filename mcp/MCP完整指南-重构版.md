@@ -507,153 +507,356 @@ my-mcp-server/
     └── examples.md
 ```
 
-### 3.1 Claude Desktop 安装和配置 MCP
+### 3.1 Claude Code 安装和配置 MCP
 
-#### 📱 方法一：Claude Desktop + 文件系统服务器（推荐新手）
+#### 💻 方法一：Claude Code Chat 插件（推荐新手）
 
-**适用场景**：让Claude能够访问和管理本地文件
+**适用场景**：最简单的一键安装，类似Cursor体验
 
 <details>
 <summary>📋 点击查看：完整安装步骤</summary>
 
-**Step 1: 安装 Claude Desktop**
+**Step 1: 安装 Claude Code Chat 插件**
 ```bash
-# 1. 下载 Claude Desktop（macOS/Windows）
-# 访问：https://claude.ai/download
-# 2. 安装并启动应用
-# 3. 确保是最新版本（检查更新）
+# 1. 在VS Code插件市场搜索"Claude Code Chat"
+# 2. 安装官方插件：https://github.com/andrepimenta/claude-code-chat
+# 3. 确保Claude Code已激活运行
 ```
 
-**Step 2: 安装 Node.js**
+**Step 2: 打开MCP管理界面**
 ```bash
-# 验证 Node.js 版本
-node --version
-# 如未安装，访问 https://nodejs.org 下载 LTS 版本
+# 1. 在VS Code侧边栏打开Claude Code Chat
+# 2. 点击对话框底部的"MCP选项"
+# 3. 查看内置的MCP服务器列表
 ```
 
-**Step 3: 配置 Claude Desktop**
+**Step 3: 一键添加MCP服务器**
 ```bash
-# macOS 配置文件路径
-~/Library/Application Support/Claude/claude_desktop_config.json
-
-# Windows 配置文件路径  
-%APPDATA%/Claude/claude_desktop_config.json
+# 内置服务器（直接点击即可）：
+✅ Context7 - 上下文增强
+✅ Sequential Thinking - 思维链
+✅ Memory - 记忆存储  
+✅ Puppeteer - 网页自动化
+✅ Fetch - API调用
+✅ Filesystem - 文件系统访问
 ```
 
-**Step 4: 创建配置文件**
+**Step 4: 添加自定义MCP服务器**
+```bash
+# 点击 [+Add MCP Servers]
+# 配置以下字段：
+- Server Name: 服务器名称
+- Server Type: Stdio/SSE/HTTP
+- Command/URL: 对应的命令或URL
+- Arguments: 参数配置
+```
+
+</details>
+
+#### ⚡ 方法二：命令行配置（官方原生方法）
+
+**适用场景**：Claude Code官方推荐方法，功能最强大
+
+<details>
+<summary>📋 点击查看：官方命令行配置详解</summary>
+
+**🔧 三种官方配置选项**：
+
+**选项1：添加本地 STDIO 服务器**
+```bash
+# 基本语法
+claude mcp add <name> <command> [args...]
+
+# 示例：添加文件系统访问（官方推荐）
+claude mcp add filesystem -- npx -y @modelcontextprotocol/server-filesystem ~/Documents
+
+# 带环境变量的配置
+claude mcp add github --env GITHUB_TOKEN=your-token -- npx -y @modelcontextprotocol/server-github
+
+# 指定作用域
+claude mcp add -s local filesystem -- npx -y @modelcontextprotocol/server-filesystem ~/Documents     # 本地（默认）
+claude mcp add -s project shared-tools -- npx -y @your-team/mcp-tools                              # 项目级 
+claude mcp add -s user personal-tools -- npx -y @personal/mcp-tools                                # 用户级
+```
+
+**选项2：添加远程 SSE 服务器**
+```bash
+# 基本语法
+claude mcp add --transport sse <name> <url>
+
+# 官方示例：Sentry错误监控
+claude mcp add --transport sse sentry https://mcp.sentry.dev/sse
+
+# 带作用域的SSE配置
+claude mcp add -s user --transport sse asana https://mcp.asana.com/sse
+```
+
+**选项3：添加远程 HTTP 服务器**
+```bash
+# 基本语法  
+claude mcp add --transport http <name> <url>
+
+# 官方示例：Notion集成
+claude mcp add --transport http notion https://mcp.notion.com/mcp
+
+# 带Headers的HTTP配置
+claude mcp add --transport http figma http://127.0.0.1:3845/mcp
+```
+
+**📊 MCP安装范围详解**：
+
+**本地范围（Local）** - 默认范围
+```bash
+# 存储位置：项目特定用户设置
+# 适用场景：个人开发、实验配置、敏感凭据
+claude mcp add -s local my-server -- npx -y @example/server
+```
+
+**项目范围（Project）** - 团队协作
+```bash
+# 存储位置：项目根目录的 .mcp.json 文件
+# 适用场景：团队共享、项目特定工具
+claude mcp add -s project team-tools -- npx -y @team/tools
+
+# 重置项目选择
+claude mcp reset-project-choices
+```
+
+**用户范围（User）** - 跨项目
+```bash
+# 存储位置：用户配置
+# 适用场景：个人工具、开发环境、常用服务
+claude mcp add -s user dev-tools -- npx -y @dev/tools
+```
+
+**🔍 官方管理命令**：
+```bash
+# 列出所有MCP服务器
+claude mcp list
+
+# 查看特定服务器详情
+claude mcp get my-server
+
+# 删除MCP服务器（指定范围）
+claude mcp remove my-server -s local
+claude mcp remove team-tools -s project  
+claude mcp remove dev-tools -s user
+
+# 在Claude Code中检查MCP状态
+/mcp
+
+# 重置项目范围的批准选择
+claude mcp reset-project-choices
+```
+
+**🌐 环境变量扩展支持**：
+```bash
+# 官方支持的语法
+${VAR}           # 环境变量VAR的值
+${VAR:-default}  # VAR的值，如果未设置则使用default
+
+# 可扩展的位置
+- command: 服务器可执行文件路径
+- args: 命令行参数  
+- env: 环境变量
+- url: SSE/HTTP服务器URL
+- headers: 身份验证Headers
+```
+
+</details>
+
+#### 📝 方法三：直接编辑配置文件（适合批量配置）
+
+**适用场景**：批量配置多个MCP服务器，团队协作
+
+<details>
+<summary>📋 点击查看：配置文件编辑方法</summary>
+
+**配置文件位置**：
+```bash
+# macOS/Linux
+~/.claude.json
+
+# Windows  
+%USERPROFILE%\.claude.json
+```
+
+**配置文件格式**：
 ```json
 {
   "mcpServers": {
     "filesystem": {
+      "type": "stdio",
       "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-filesystem",
-        "/Users/your-username"
-      ]
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "${HOME}/Documents"],
+      "env": {}
+    },
+    "github": {
+      "type": "stdio", 
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_TOKEN": "${GITHUB_TOKEN}"
+      }
+    },
+    "sentry": {
+      "type": "http",
+      "url": "https://mcp.sentry.dev/mcp",
+      "headers": {
+        "Authorization": "Bearer ${SENTRY_TOKEN}"
+      }
     }
   }
 }
 ```
 
-**Step 5: 重启 Claude Desktop**
-- 重启应用
-- 查看"搜索和工具"图标是否出现
-- 确认文件系统工具已加载
-
-</details>
-
-#### ⚙️ 方法二：自定义 MCP 服务器（适合开发者）
-
-**适用场景**：开发特定业务功能的MCP工具
-
-<details>
-<summary>📋 点击查看：开发者配置步骤</summary>
-
-**Step 1: 创建自定义服务器**
-```python
-# weather_server.py
-from fastmcp import FastMCP
-import httpx
-
-mcp = FastMCP("weather")
-
-@mcp.tool()
-async def get_weather(city: str) -> str:
-    """获取城市天气信息"""
-    # 天气API调用逻辑
-    return f"{city}的天气信息"
-
-if __name__ == "__main__":
-    mcp.run(transport='stdio')
-```
-
-**Step 2: 配置 Claude Desktop**
+**项目级配置（.mcp.json）**：
 ```json
 {
   "mcpServers": {
-    "weather": {
-      "command": "uv",
-      "args": [
-        "--directory",
-        "/absolute/path/to/your/project",
-        "run",
-        "weather_server.py"
-      ]
+    "team-database": {
+      "command": "${PROJECT_PYTHON_PATH:-python}",
+      "args": ["-m", "custom_mcp_server"],
+      "env": {
+        "DATABASE_URL": "${DATABASE_URL}",
+        "API_KEY": "${API_KEY:-development-key}"
+      }
+    },
+    "local-tools": {
+      "command": "${HOME}/.local/bin/my-tool",
+      "args": ["--config", "${PROJECT_ROOT}/config.yaml"],
+      "env": {}
     }
   }
 }
 ```
 
-**Step 3: 测试和调试**
-```bash
-# 手动测试服务器
-python weather_server.py
-
-# 检查 Claude Desktop 日志
-# macOS: ~/Library/Logs/Claude/
-# Windows: %LOCALAPPDATA%/Claude/logs/
+**🌟 环境变量扩展示例**：
+```json
+{
+  "mcpServers": {
+    "custom-server": {
+      "command": "${PYTHON_PATH:-python3}",
+      "args": [
+        "${PROJECT_ROOT}/scripts/mcp_server.py",
+        "--port", "${MCP_PORT:-8080}",
+        "--db-url", "${DATABASE_URL}"
+      ],
+      "env": {
+        "API_TOKEN": "${API_TOKEN}",
+        "LOG_LEVEL": "${LOG_LEVEL:-info}",
+        "CUSTOM_PATH": "${HOME}/custom/${PROJECT_NAME}"
+      }
+    }
+  }
+}
 ```
 
 </details>
 
-#### 🔧 方法三：Extension 扩展（最简单）
-
-**适用场景**：一键安装社区MCP服务器
+#### 🚀 热门MCP服务器推荐（官方认证）
 
 <details>
-<summary>📋 点击查看：扩展安装方法</summary>
+<summary>📋 点击查看：官方推荐MCP服务器列表</summary>
 
-**Step 1: 进入 Claude Desktop 设置**
-```
-Claude Desktop → Settings → Extensions
-```
+**🔧 开发与测试工具**
 
-**Step 2: 启用开发者模式**
-```
-Advanced settings → Extension Developer section
+**1. Sentry - 错误监控与调试**
+```bash
+claude mcp add --transport http sentry https://mcp.sentry.dev/mcp
 ```
 
-**Step 3: 安装扩展**
-```
-Click "Install Extension…" → 选择 .mcpx 文件
+**2. HuggingFace - AI模型与Gradio应用**
+```bash
+claude mcp add --transport http hugging-face https://huggingface.co/mcp
 ```
 
-**常用扩展推荐**：
-- **Filesystem**: 文件系统访问
-- **Git**: Git 仓库管理  
-- **SQLite**: 数据库查询
-- **Web Search**: 网页搜索
-- **Slack**: Slack 集成
+**3. Socket - 依赖安全分析**
+```bash
+claude mcp add --transport http socket https://mcp.socket.dev/
+```
+
+**📋 项目管理与文档**
+
+**4. Notion - 文档管理与任务跟踪**
+```bash
+claude mcp add --transport http notion https://mcp.notion.com/mcp
+```
+
+**5. Linear - 问题跟踪与项目管理**
+```bash
+claude mcp add --transport sse linear https://mcp.linear.app/sse
+```
+
+**6. Asana - 工作空间项目管理**
+```bash
+claude mcp add --transport sse asana https://mcp.asana.com/sse
+```
+
+**💾 数据库与数据管理**
+
+**7. Airtable - 读写记录与数据管理**
+```bash
+claude mcp add airtable --env AIRTABLE_API_KEY=YOUR_KEY -- npx -y airtable-mcp-server
+```
+
+**8. HubSpot - CRM数据访问**
+```bash
+claude mcp add --transport http hubspot https://mcp.hubspot.com/anthropic
+```
+
+**💰 支付与商务**
+
+**9. Stripe - 支付处理与财务交易**
+```bash
+claude mcp add --transport http stripe https://mcp.stripe.com
+```
+
+**10. PayPal - 商务支付能力集成**
+```bash
+claude mcp add --transport http paypal https://mcp.paypal.com/mcp
+```
+
+**🎨 设计与媒体**
+
+**11. Figma - 设计访问与资源导出**
+```bash
+claude mcp add --transport http figma-dev-mode-mcp-server http://127.0.0.1:3845/mcp
+```
+
+**12. Canva - 浏览、总结与生成设计**
+```bash
+claude mcp add --transport http canva https://mcp.canva.com/mcp
+```
+
+**☁️ 基础设施与DevOps**
+
+**13. Vercel - 项目与部署管理**
+```bash
+claude mcp add --transport http vercel https://mcp.vercel.com/
+```
+
+**14. Netlify - 网站创建与部署**
+```bash
+claude mcp add --transport http netlify https://netlify-mcp.netlify.app/mcp
+```
+
+**🔄 自动化与集成**
+
+**15. Zapier - 8000+应用自动化平台**
+```bash
+# 需要在 mcp.zapier.com 生成用户专属URL
+claude mcp add --transport http zapier YOUR_ZAPIER_MCP_URL
+```
 
 </details>
 
 #### 🔍 配置验证和故障排查
 
 **验证配置成功**：
-```
-✅ Claude Desktop 右上角出现"搜索和工具"图标
-✅ 设置中可以看到已配置的MCP服务器
+```bash
+✅ claude mcp list 显示已配置的服务器
+✅ 在Claude Code中 /mcp 命令有响应
 ✅ 与Claude对话时可以调用MCP工具
 ```
 
@@ -662,29 +865,108 @@ Click "Install Extension…" → 选择 .mcpx 文件
 <details>
 <summary>🔧 点击查看：故障排查指南</summary>
 
-**问题1: 工具图标不显示**
+**问题1: 工具名称验证失败**
 ```bash
-# 检查配置文件语法
-cat ~/Library/Application\ Support/Claude/claude_desktop_config.json | jq .
-
-# 检查路径是否正确
-which node  # 验证Node.js路径
+# 错误：API Error 400: "tools.11.custom.name: String should match pattern"
+# 解决：确保服务器名称只包含字母、数字、下划线和连字符
+claude mcp add my_server -- npx -y @example/server  # ✅ 正确
+claude mcp add "my server" -- npx -y @example/server # ❌ 错误
 ```
 
-**问题2: 服务器启动失败**  
+**问题2: 找不到MCP服务器**
 ```bash
+# 检查作用域设置
+claude mcp list  # 查看所有服务器
+
 # 手动测试服务器
-cd /path/to/your/server
-python server.py
-
-# 检查依赖安装
-pip list | grep mcp
+npx -y @modelcontextprotocol/server-filesystem ~/Documents
 ```
 
-**问题3: 权限问题**
+**问题3: Windows路径问题**
 ```bash
-# macOS 给予文件访问权限
-System Preferences → Security & Privacy → Files and Folders
+# 使用正斜杠
+claude mcp add fs -- npx -y @modelcontextprotocol/server-filesystem C:/Users/username/Documents
+
+# 或使用双反斜杠  
+claude mcp add fs -- npx -y @modelcontextprotocol/server-filesystem C:\\\\Users\\\\username\\\\Documents
+```
+
+**问题4: 协议版本错误**
+```bash
+# 更新到最新版本的Claude Code
+# 使用包装脚本解决临时问题
+```
+
+</details>
+
+#### 🚀 高级配置方法
+
+<details>
+<summary>📋 点击查看：官方高级功能</summary>
+
+**📄 从JSON配置添加MCP服务器**
+```bash
+# 如果你有现成的JSON配置文件
+claude mcp add-from-json /path/to/your/mcp-config.json
+
+# 或者从URL添加
+claude mcp add-from-json https://example.com/mcp-config.json
+```
+
+**🔄 从Claude Desktop导入**
+```bash
+# 导入Claude Desktop的所有MCP配置
+claude mcp import-from-claude-desktop
+
+# 选择性导入特定服务器
+claude mcp import-from-claude-desktop --server filesystem --server github
+```
+
+**🖥️ 将Claude Code用作MCP服务器**
+```bash
+# 启动Claude Code作为MCP服务器
+claude mcp serve --host localhost --port 3000
+
+# 在其他应用中使用（如Claude Desktop）
+# 添加到 claude_desktop_config.json：
+{
+  "mcpServers": {
+    "claude-code": {
+      "command": "claude",
+      "args": ["mcp", "serve", "--stdio"]
+    }
+  }
+}
+```
+
+**🔐 OAuth 2.0身份验证**
+```bash
+# 对于需要OAuth的服务器
+claude mcp add --transport http --auth oauth github https://api.github.com/mcp
+
+# Claude Code会自动处理OAuth流程
+```
+
+**⚙️ 输出限制配置**
+```bash
+# 设置MCP输出令牌限制（默认25,000）
+export MAX_MCP_OUTPUT_TOKENS=50000
+
+# 启动Claude Code
+claude
+```
+
+**📚 使用MCP资源和提示**
+```bash
+# 在Claude Code中引用MCP资源
+@resource-name
+
+# 使用MCP提示作为斜杠命令
+/prompt-name
+
+# 列出可用资源和提示
+/mcp resources
+/mcp prompts
 ```
 
 </details>
@@ -692,14 +974,22 @@ System Preferences → Security & Privacy → Files and Folders
 #### 🎯 推荐学习路径
 
 **新手推荐**：
-1. 先用方法一体验文件系统功能
-2. 尝试方法三安装现成的扩展
-3. 最后学习方法二开发自定义工具
+1. 先用方法一（Claude Code Chat插件）体验一键安装
+2. 尝试方法二学习命令行配置（从本地范围开始）
+3. 学习方法三批量配置管理
+4. 探索高级功能（OAuth、资源引用等）
 
 **开发者推荐**：
-1. 直接从方法二开始
-2. 学习FastMCP框架
-3. 贡献开源MCP服务器
+1. 直接从方法二开始，掌握三种配置选项
+2. 学习环境变量扩展和项目范围配置
+3. 尝试将Claude Code用作MCP服务器
+4. 开发自定义MCP服务器
+
+**团队协作推荐**：
+1. 使用项目范围配置共享MCP服务器
+2. 利用环境变量扩展保护敏感信息
+3. 建立团队MCP服务器最佳实践
+4. 定期更新和维护共享配置
 
 ### 3.2 快速实践：5分钟创建你的第一个MCP工具
 
