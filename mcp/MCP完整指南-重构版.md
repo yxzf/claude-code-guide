@@ -509,101 +509,165 @@ my-mcp-server/
 
 ### 3.1 Claude Code 安装和配置 MCP
 
-#### 💻 方法一：Claude Code Chat 插件（推荐新手）
+#### 💻 方法一：本地 STDIO 服务器（官方推荐）
 
-**适用场景**：最简单的一键安装，类似Cursor体验
-
-<details>
-<summary>📋 点击查看：完整安装步骤</summary>
-
-**Step 1: 安装 Claude Code Chat 插件**
-```bash
-# 1. 在VS Code插件市场搜索"Claude Code Chat"
-# 2. 安装官方插件：https://github.com/andrepimenta/claude-code-chat
-# 3. 确保Claude Code已激活运行
-```
-
-**Step 2: 打开MCP管理界面**
-```bash
-# 1. 在VS Code侧边栏打开Claude Code Chat
-# 2. 点击对话框底部的"MCP选项"
-# 3. 查看内置的MCP服务器列表
-```
-
-**Step 3: 一键添加MCP服务器**
-```bash
-# 内置服务器（直接点击即可）：
-✅ Context7 - 上下文增强
-✅ Sequential Thinking - 思维链
-✅ Memory - 记忆存储  
-✅ Puppeteer - 网页自动化
-✅ Fetch - API调用
-✅ Filesystem - 文件系统访问
-```
-
-**Step 4: 添加自定义MCP服务器**
-```bash
-# 点击 [+Add MCP Servers]
-# 配置以下字段：
-- Server Name: 服务器名称
-- Server Type: Stdio/SSE/HTTP
-- Command/URL: 对应的命令或URL
-- Arguments: 参数配置
-```
-
-</details>
-
-#### ⚡ 方法二：命令行配置（官方原生方法）
-
-**适用场景**：Claude Code官方推荐方法，功能最强大
+**适用场景**：在本地运行的MCP服务器，适合需要直接系统访问或自定义脚本的工具
 
 <details>
-<summary>📋 点击查看：官方命令行配置详解</summary>
+<summary>📋 点击查看：官方STDIO配置详解</summary>
 
-**🔧 三种官方配置选项**：
-
-**选项1：添加本地 STDIO 服务器**
+**基本语法**：
 ```bash
-# 基本语法
 claude mcp add <name> <command> [args...]
+```
 
-# 示例：添加文件系统访问（官方推荐）
+**常用示例**：
+```bash
+# 文件系统访问（最常用）
 claude mcp add filesystem -- npx -y @modelcontextprotocol/server-filesystem ~/Documents
 
 # 带环境变量的配置
 claude mcp add github --env GITHUB_TOKEN=your-token -- npx -y @modelcontextprotocol/server-github
 
-# 指定作用域
-claude mcp add -s local filesystem -- npx -y @modelcontextprotocol/server-filesystem ~/Documents     # 本地（默认）
-claude mcp add -s project shared-tools -- npx -y @your-team/mcp-tools                              # 项目级 
-claude mcp add -s user personal-tools -- npx -y @personal/mcp-tools                                # 用户级
+# Airtable数据库访问
+claude mcp add airtable --env AIRTABLE_API_KEY=YOUR_KEY -- npx -y airtable-mcp-server
+
+# ClickUp项目管理
+claude mcp add clickup --env CLICKUP_API_KEY=YOUR_KEY --env CLICKUP_TEAM_ID=YOUR_ID -- npx -y @hauptsache.net/clickup-mcp
 ```
 
-**选项2：添加远程 SSE 服务器**
+**作用域配置**：
 ```bash
-# 基本语法
+# 本地范围（默认）- 仅当前项目
+claude mcp add -s local filesystem -- npx -y @modelcontextprotocol/server-filesystem ~/Documents
+
+# 项目范围 - 团队共享，存储在.mcp.json
+claude mcp add -s project shared-tools -- npx -y @your-team/mcp-tools
+
+# 用户范围 - 跨项目可用
+claude mcp add -s user personal-tools -- npx -y @personal/mcp-tools
+```
+
+</details>
+
+#### 🌐 方法二：远程 SSE 服务器（实时流连接）
+
+**适用场景**：提供实时流连接，适合云服务的实时更新
+
+<details>
+<summary>📋 点击查看：官方SSE配置详解</summary>
+
+**基本语法**：
+```bash
 claude mcp add --transport sse <name> <url>
-
-# 官方示例：Sentry错误监控
-claude mcp add --transport sse sentry https://mcp.sentry.dev/sse
-
-# 带作用域的SSE配置
-claude mcp add -s user --transport sse asana https://mcp.asana.com/sse
 ```
 
-**选项3：添加远程 HTTP 服务器**
+**官方SSE服务器示例**：
 ```bash
-# 基本语法  
-claude mcp add --transport http <name> <url>
+# Asana工作空间项目管理
+claude mcp add --transport sse asana https://mcp.asana.com/sse
 
-# 官方示例：Notion集成
+# Atlassian Jira和Confluence管理
+claude mcp add --transport sse atlassian https://mcp.atlassian.com/v1/sse
+
+# Linear问题跟踪和项目管理
+claude mcp add --transport sse linear https://mcp.linear.app/sse
+
+# Monday.com看板管理
+claude mcp add --transport sse monday https://mcp.monday.com/sse
+
+# Plaid银行数据分析
+claude mcp add --transport sse plaid https://api.dashboard.plaid.com/mcp/sse
+
+# Square支付API构建
+claude mcp add --transport sse square https://mcp.squareup.com/sse
+
+# InVideo视频创建能力
+claude mcp add --transport sse invideo https://mcp.invideo.io/sse
+```
+
+**带作用域的SSE配置**：
+```bash
+# 用户范围的SSE服务器
+claude mcp add -s user --transport sse asana https://mcp.asana.com/sse
+
+# 项目范围的SSE服务器
+claude mcp add -s project --transport sse linear https://mcp.linear.app/sse
+```
+
+</details>
+
+#### 🔗 方法三：远程 HTTP 服务器（标准请求响应）
+
+**适用场景**：使用标准请求/响应模式，适合大多数REST API和Web服务
+
+<details>
+<summary>📋 点击查看：官方HTTP配置详解</summary>
+
+**基本语法**：
+```bash
+claude mcp add --transport http <name> <url>
+```
+
+**官方HTTP服务器示例**：
+```bash
+# Sentry错误监控和调试
+claude mcp add --transport http sentry https://mcp.sentry.dev/mcp
+
+# Socket依赖安全分析
+claude mcp add --transport http socket https://mcp.socket.dev/
+
+# HuggingFace AI模型和Gradio应用
+claude mcp add --transport http hugging-face https://huggingface.co/mcp
+
+# Jam调试记录访问
+claude mcp add --transport http jam https://mcp.jam.dev/mcp
+
+# Intercom客户对话和数据
+claude mcp add --transport http intercom https://mcp.intercom.com/mcp
+
+# Notion文档管理
 claude mcp add --transport http notion https://mcp.notion.com/mcp
 
-# 带Headers的HTTP配置
-claude mcp add --transport http figma http://127.0.0.1:3845/mcp
+# Box企业内容管理
+claude mcp add --transport http box https://mcp.box.com/
+
+# Fireflies会议转录洞察
+claude mcp add --transport http fireflies https://api.fireflies.ai/mcp
+
+# HubSpot CRM数据管理
+claude mcp add --transport http hubspot https://mcp.hubspot.com/anthropic
+
+# PayPal支付处理
+claude mcp add --transport http paypal https://mcp.paypal.com/mcp
+
+# Stripe财务交易
+claude mcp add --transport http stripe https://mcp.stripe.com
+
+# Figma设计访问（需要本地Dev Mode服务器）
+claude mcp add --transport http figma-dev-mode-mcp-server http://127.0.0.1:3845/mcp
+
+# Canva设计生成
+claude mcp add --transport http canva https://mcp.canva.com/mcp
+
+# Netlify网站部署
+claude mcp add --transport http netlify https://netlify-mcp.netlify.app/mcp
+
+# Stytch认证服务
+claude mcp add --transport http stytch http://mcp.stytch.dev/mcp
+
+# Vercel项目管理
+claude mcp add --transport http vercel https://mcp.vercel.com/
 ```
 
-**📊 MCP安装范围详解**：
+</details>
+
+#### 📝 MCP安装范围和管理
+
+**📊 三种安装范围**：
+
+<details>
+<summary>📋 点击查看：范围详解和管理命令</summary>
 
 **本地范围（Local）** - 默认范围
 ```bash
@@ -665,7 +729,7 @@ ${VAR:-default}  # VAR的值，如果未设置则使用default
 
 </details>
 
-#### 📝 方法三：直接编辑配置文件（适合批量配置）
+#### 📝 配置文件编辑（批量配置）
 
 **适用场景**：批量配置多个MCP服务器，团队协作
 
@@ -754,102 +818,6 @@ ${VAR:-default}  # VAR的值，如果未设置则使用default
 
 </details>
 
-#### 🚀 热门MCP服务器推荐（官方认证）
-
-<details>
-<summary>📋 点击查看：官方推荐MCP服务器列表</summary>
-
-**🔧 开发与测试工具**
-
-**1. Sentry - 错误监控与调试**
-```bash
-claude mcp add --transport http sentry https://mcp.sentry.dev/mcp
-```
-
-**2. HuggingFace - AI模型与Gradio应用**
-```bash
-claude mcp add --transport http hugging-face https://huggingface.co/mcp
-```
-
-**3. Socket - 依赖安全分析**
-```bash
-claude mcp add --transport http socket https://mcp.socket.dev/
-```
-
-**📋 项目管理与文档**
-
-**4. Notion - 文档管理与任务跟踪**
-```bash
-claude mcp add --transport http notion https://mcp.notion.com/mcp
-```
-
-**5. Linear - 问题跟踪与项目管理**
-```bash
-claude mcp add --transport sse linear https://mcp.linear.app/sse
-```
-
-**6. Asana - 工作空间项目管理**
-```bash
-claude mcp add --transport sse asana https://mcp.asana.com/sse
-```
-
-**💾 数据库与数据管理**
-
-**7. Airtable - 读写记录与数据管理**
-```bash
-claude mcp add airtable --env AIRTABLE_API_KEY=YOUR_KEY -- npx -y airtable-mcp-server
-```
-
-**8. HubSpot - CRM数据访问**
-```bash
-claude mcp add --transport http hubspot https://mcp.hubspot.com/anthropic
-```
-
-**💰 支付与商务**
-
-**9. Stripe - 支付处理与财务交易**
-```bash
-claude mcp add --transport http stripe https://mcp.stripe.com
-```
-
-**10. PayPal - 商务支付能力集成**
-```bash
-claude mcp add --transport http paypal https://mcp.paypal.com/mcp
-```
-
-**🎨 设计与媒体**
-
-**11. Figma - 设计访问与资源导出**
-```bash
-claude mcp add --transport http figma-dev-mode-mcp-server http://127.0.0.1:3845/mcp
-```
-
-**12. Canva - 浏览、总结与生成设计**
-```bash
-claude mcp add --transport http canva https://mcp.canva.com/mcp
-```
-
-**☁️ 基础设施与DevOps**
-
-**13. Vercel - 项目与部署管理**
-```bash
-claude mcp add --transport http vercel https://mcp.vercel.com/
-```
-
-**14. Netlify - 网站创建与部署**
-```bash
-claude mcp add --transport http netlify https://netlify-mcp.netlify.app/mcp
-```
-
-**🔄 自动化与集成**
-
-**15. Zapier - 8000+应用自动化平台**
-```bash
-# 需要在 mcp.zapier.com 生成用户专属URL
-claude mcp add --transport http zapier YOUR_ZAPIER_MCP_URL
-```
-
-</details>
 
 #### 🔍 配置验证和故障排查
 
