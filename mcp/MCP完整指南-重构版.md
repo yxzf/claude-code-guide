@@ -867,74 +867,134 @@ claude mcp add fs -- npx -y @modelcontextprotocol/server-filesystem C:\\\\Users\
 
 </details>
 
-#### 🚀 高级配置方法
+#### 🚀 高级配置方法（官方扩展功能）
 
 <details>
-<summary>📋 点击查看：官方高级功能</summary>
+<summary>📋 点击查看：官方高级功能完整列表</summary>
 
 **📄 从JSON配置添加MCP服务器**
 ```bash
-# 如果你有现成的JSON配置文件
+# 从本地JSON文件添加配置
 claude mcp add-from-json /path/to/your/mcp-config.json
 
-# 或者从URL添加
+# 从远程URL添加配置
 claude mcp add-from-json https://example.com/mcp-config.json
+
+# JSON配置文件格式示例
+{
+  "mcpServers": {
+    "my-server": {
+      "command": "npx",
+      "args": ["-y", "@my-org/mcp-server"],
+      "env": {
+        "API_KEY": "your-api-key"
+      }
+    }
+  }
+}
 ```
 
-**🔄 从Claude Desktop导入**
+**🔄 从Claude Desktop导入MCP配置**
 ```bash
-# 导入Claude Desktop的所有MCP配置
+# 导入所有Claude Desktop的MCP配置
 claude mcp import-from-claude-desktop
 
 # 选择性导入特定服务器
 claude mcp import-from-claude-desktop --server filesystem --server github
+
+# 导入时保持原有作用域设置
+claude mcp import-from-claude-desktop --preserve-scope
 ```
 
 **🖥️ 将Claude Code用作MCP服务器**
 ```bash
-# 启动Claude Code作为MCP服务器
-claude mcp serve --host localhost --port 3000
+# 以STDIO模式启动Claude Code作为MCP服务器
+claude mcp serve --stdio
 
-# 在其他应用中使用（如Claude Desktop）
+# 以HTTP模式启动（指定端口）
+claude mcp serve --http --port 3000 --host localhost
+
+# 在Claude Desktop中使用Claude Code作为MCP服务器
 # 添加到 claude_desktop_config.json：
 {
   "mcpServers": {
     "claude-code": {
-      "command": "claude",
+      "command": "claude", 
       "args": ["mcp", "serve", "--stdio"]
     }
   }
 }
 ```
 
-**🔐 OAuth 2.0身份验证**
+**🔐 OAuth 2.0身份验证（云服务器）**
 ```bash
-# 对于需要OAuth的服务器
-claude mcp add --transport http --auth oauth github https://api.github.com/mcp
+# Claude Code支持OAuth 2.0进行安全连接
+# 许多云MCP服务器需要认证，Claude Code会自动处理OAuth流程
 
-# Claude Code会自动处理OAuth流程
+# 示例：添加需要OAuth的服务器
+claude mcp add --transport http github-oauth https://api.github.com/mcp
+# 系统会自动打开浏览器进行OAuth授权
 ```
 
-**⚙️ 输出限制配置**
+**⚙️ MCP输出限制和警告配置**
 ```bash
-# 设置MCP输出令牌限制（默认25,000）
+# 设置MCP输出令牌限制（默认25,000，警告阈值10,000）
 export MAX_MCP_OUTPUT_TOKENS=50000
 
-# 启动Claude Code
+# 启动Claude Code（应用新的限制）
 claude
+
+# 特别适用于以下场景：
+# - 查询大型数据集或数据库
+# - 生成详细报告或文档  
+# - 处理大量日志文件或调试信息
 ```
 
-**📚 使用MCP资源和提示**
+**📚 使用MCP资源（@引用）**
 ```bash
-# 在Claude Code中引用MCP资源
+# 在Claude Code中引用MCP资源（类似文件引用）
 @resource-name
 
-# 使用MCP提示作为斜杠命令
+# 引用特定MCP服务器的资源
+@server-name/resource-path
+
+# 列出所有可用MCP资源
+/mcp resources
+
+# 实际使用示例：
+# "请基于 @notion/project-docs 创建项目摘要"
+# "分析 @database/user-metrics 中的用户行为"
+```
+
+**🎯 使用MCP提示作为斜杠命令**
+```bash
+# MCP服务器可以公开提示，在Claude Code中作为斜杠命令使用
 /prompt-name
 
-# 列出可用资源和提示
-/mcp resources
+# 列出所有可用MCP提示
 /mcp prompts
+
+# 执行特定提示命令
+/code-review "review this function"
+/data-analysis "analyze user engagement"
+
+# 实际使用示例：
+# /sentry-debug "查看最近的错误日志"
+# /notion-create "创建新的项目文档"
+```
+
+**🔧 实用示例：Sentry错误监控集成**
+```bash
+# 添加Sentry MCP服务器
+claude mcp add --transport http sentry https://mcp.sentry.dev/mcp
+
+# OAuth认证（如果需要）
+# Claude Code会自动引导你完成认证流程
+
+# 使用示例：
+# "检查最近24小时的错误报告"
+# "分析ENG-4521功能的错误趋势"  
+# "创建关于支付失败的错误摘要"
 ```
 
 </details>
