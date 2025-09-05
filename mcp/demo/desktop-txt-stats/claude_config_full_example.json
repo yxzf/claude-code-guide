@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "desktop-txt-stats-full": {
+      "command": "python",
+      "args": [
+        "/Users/scg/Documents/code/ai/claude-code-guide/mcp/demo/desktop-txt-stats/run_full.py"
+      ]
+    }
+  }
+}

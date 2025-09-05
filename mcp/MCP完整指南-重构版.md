@@ -1,15 +1,16 @@
 # Model Context Protocol (MCP) 完整指南
 
 > **作者**: Claude Code Assistant  
-> **版本**: 2.0  
+> **版本**: 2.1  
 > **最后更新**: 2025年01月  
-> **适用范围**: AI应用开发者、系统架构师、产品经理
+> **适用范围**: AI应用开发者、系统架构师、产品经理  
+> **更新内容**: 基于官方文档补充客户端原语、通知机制等核心概念
 
 ---
 
 ## 文档概览
 
-本指南为你提供 Model Context Protocol (MCP) 的全面理解，从基础概念到高级实现，涵盖理论与实践。无论你是初学者还是经验丰富的开发者，都能在这里找到所需的知识。
+本指南为你提供 Model Context Protocol (MCP) 的全面理解，从基础概念到高级实现，涵盖理论与实践。基于官方最新文档，深入解析MCP的完整架构体系，包括服务器原语、客户端原语、通知机制等核心概念。无论你是初学者还是经验丰富的开发者，都能在这里找到所需的知识。
 
 ### 学习路径  
 - **视频学习**: 按三段式观看：概念理解 → 快速实践 → 生态了解
@@ -27,9 +28,11 @@
    - 1.2 核心架构设计
    - 1.3 MCP vs Function Call
 2. [MCP 怎么工作](#2-mcp-怎么工作)
-   - 2.1 AI如何选择和调用工具
-   - 2.2 三大核心原语详解
-   - 2.3 双向通信机制
+   - 2.1 三大核心原语详解
+   - 2.2 客户端原语和通知机制
+   - 2.3 通知机制
+   - 2.4 双向通信机制
+   - 2.5 AI工具选择机制详解
 
 ### 第二部分：安装配置（怎么用MCP）
 3. [MCP 安装配置指南](#3-mcp-安装配置指南)
@@ -62,16 +65,40 @@
 
 ### MCP 核心架构
 
-MCP 采用客户端-服务器架构设计，AI应用通过MCP客户端与多个MCP服务器建立一对一连接：
+MCP 采用**客户端-服务器架构设计**，AI应用通过MCP客户端与多个MCP服务器建立一对一连接：
 
 ![MCP核心架构图](images/mcp_official_architecture.png)
 
-**架构说明**：
-- **MCP Host (AI应用)**：如Claude Desktop、VS Code等，负责协调管理多个MCP客户端
-- **MCP Client**：每个客户端维护与一个MCP服务器的专用连接
-- **MCP Server**：提供具体功能的服务端，如Sentry、文件系统、数据库等
+#### 架构参与者（Participants）
 
-**连接模式**：采用一对一连接模式，确保每个MCP客户端与对应的MCP服务器建立独立的通信通道。
+**MCP Host（AI应用）**：
+- **定义**：协调和管理一个或多个MCP客户端的AI应用
+- **示例**：Claude Code、Claude Desktop、Visual Studio Code
+- **职责**：创建客户端实例、协调多服务器通信、管理生命周期
+
+**MCP Client（客户端）**：
+- **定义**：维护与MCP服务器连接并获取上下文的组件
+- **特点**：与MCP服务器保持专用的一对一连接
+- **职责**：协议通信、消息传递、状态管理
+
+**MCP Server（服务器）**：
+- **定义**：向MCP客户端提供上下文的程序
+- **类型**：本地服务器（STDIO）、远程服务器（HTTP/SSE）
+- **示例**：Sentry服务器、文件系统服务器、数据库服务器
+
+#### 连接关系
+
+```
+MCP Host (AI应用)
+├─ MCP Client 1 ──(一对一连接)── MCP Server 1 (如 Sentry)
+├─ MCP Client 2 ──(一对一连接)── MCP Server 2 (如 文件系统)
+└─ MCP Client 3 ──(一对一连接)── MCP Server 3 (如 数据库)
+```
+
+**关键特性**：
+- **一对一映射**：每个客户端对应一个服务器
+- **独立通道**：避免服务器间相互干扰
+- **动态扩展**：运行时可增加新的服务器连接
 
 #### 核心类比：AI 世界的 USB-C
 就像 USB-C 为各种设备提供了统一的连接标准，MCP 为 AI 模型与外部资源提供了统一的交互协议。
@@ -118,7 +145,7 @@ MCP的出现是 **Prompt Engineering 发展的自然结果**。更结构化的�
 └─────────────────────────────────────────────┘
 ```
 
-#### 🚫 Function Call 的根本局限性
+#### Function Call 的根本局限性
 
 **平台依赖性问题**：
 ```python
@@ -220,73 +247,279 @@ MCP方案:
 
 ## 2. MCP 怎么工作
 
-### 2.1 三大核心原语
+### 2.1 三大核心原语（Primitives）
 
-MCP 定义了三种核心原语，涵盖 AI 与外部系统交互的主要场景：
+MCP 定义了三种**核心原语**，这些原语指定了可以与AI应用共享的上下文信息类型和可执行的操作范围：
+
+#### 原语工作机制：发现-获取-执行模式
+
+每种原语都遵循统一的**发现-获取-执行**模式：
+
+```
+发现阶段：  */list    → 列出可用的原语
+获取阶段：  */get     → 获取原语的详细信息  
+执行阶段：  */call    → 执行原语（仅Tools）
+```
+
+| 原语类型 | 发现方法 | 获取方法 | 执行方法 | 用途 |
+|---------|---------|---------|---------|------|
+| **Tools** | `tools/list` | `tools/get` | `tools/call` | 执行操作 |
+| **Resources** | `resources/list` | `resources/read` | - | 提供数据 |
+| **Prompts** | `prompts/list` | `prompts/get` | - | 生成模板 |
 
 #### Tools (工具) - 让AI执行操作
 
-**概念**：可执行的函数，AI 可以调用来执行具体操作
+**定义**：可执行的函数，AI应用可以调用来执行具体操作（如文件操作、API调用、数据库查询）
 
-**特点**：
-- **需要用户授权**：确保安全性
-- **可以修改状态**：能够执行写操作  
-- **支持复杂参数**：类型检查和验证
-- **返回结构化数据**：JSON 或文本格式
+**生命周期**：
+```
+1. 发现：tools/list → 获取所有可用工具
+2. 选择：AI基于工具描述选择合适工具  
+3. 执行：tools/call → 传入参数执行工具
+4. 返回：获取执行结果和状态信息
+```
 
-**示例场景**：
+**关键特点**：
+- **可执行函数**：能够执行实际操作和状态修改
+- **需要用户授权**：确保安全性，防止恶意操作
+- **支持复杂参数**：类型检查、参数验证、默认值
+- **返回结构化数据**：JSON或文本格式的执行结果
+
+**示例实现**：
 ```python
 @mcp.tool()
 def search_files(pattern: str, directory: str = ".") -> str:
-    """在指定目录中搜索文件"""
-    # 实际搜索逻辑...
-    return "找到的文件列表"
+    """在指定目录中搜索文件
+    
+    Args:
+        pattern: 搜索模式，支持通配符
+        directory: 搜索目录，默认当前目录
+        
+    Returns:
+        找到的文件列表，每行一个文件路径
+    """
+    import glob
+    files = glob.glob(f"{directory}/{pattern}")
+    return "\n".join(sorted(files))
 ```
 
 #### Resources (资源) - 为AI提供上下文
 
-**概念**：为 AI 提供上下文信息的只读数据源
+**定义**：为AI应用提供上下文信息的数据源（如文件内容、数据库记录、API响应）
 
-**特点**：
-- 📖 **只读访问**：不能修改数据
-- **标准化URI**：如 `config://app-settings`
-- **支持订阅**：可以监听资源变化
-- **结构化数据**：通常返回 JSON 格式
+**生命周期**：
+```
+1. 发现：resources/list → 获取所有可用资源URI
+2. 读取：resources/read → 通过URI读取资源内容
+3. 订阅：可选的资源变化通知机制
+```
 
-**示例场景**：
+**关键特点**：
+- **只读访问**：不能修改数据，确保数据完整性
+- **URI标识**：使用标准URI格式（如 `file:///path/to/file`, `config://app-settings`）
+- **支持订阅**：可以监听资源变化并实时通知
+- **结构化数据**：通常返回JSON格式的丰富数据
+
+**示例实现**：
 ```python
 @mcp.resource("config://app-settings")
 def get_app_settings() -> str:
     """获取应用程序配置信息"""
-    return json.dumps(config_data)
+    config_data = {
+        "version": "1.0.0",
+        "debug": True,
+        "database_url": "postgresql://localhost/myapp"
+    }
+    return json.dumps(config_data, indent=2)
+
+@mcp.resource("file://logs/latest.log") 
+def get_latest_log() -> str:
+    """获取最新日志文件内容"""
+    with open("/path/to/logs/latest.log", "r") as f:
+        return f.read()
 ```
 
-#### 💬 Prompts (提示模板) - 标准化交互
+#### Prompts (提示模板) - 标准化交互
 
-**概念**：可重用的交互模板，帮助构建标准化的提示
+**定义**：可重用的模板，帮助构建与语言模型的结构化交互（如系统提示、少样本示例）
 
-**特点**：
-- **参数化模板**：支持动态参数
-- **可重用性**：标准化的提示格式
-- **最佳实践**：集成专业知识
-- **自定义格式**：灵活的输出要求
+**生命周期**：
+```
+1. 发现：prompts/list → 获取所有可用提示模板
+2. 获取：prompts/get → 获取模板内容和参数定义
+3. 应用：客户端使用模板生成实际提示
+```
 
-**示例场景**：
+**关键特点**：
+- **参数化模板**：支持动态参数和条件逻辑
+- **可重用性**：标准化的提示格式和最佳实践
+- **集成专业知识**：封装领域专家的提示技巧
+- **灵活配置**：支持自定义输出格式和要求
+
+**示例实现**：
 ```python
 @mcp.prompt()
-def code_review_prompt(code: str, language: str) -> str:
-    """代码审查提示模板"""
-    return f"请审查以下{language}代码：\n{code}"
+def code_review_prompt(code: str, language: str, focus: str = "general") -> str:
+    """代码审查提示模板
+    
+    Args:
+        code: 要审查的代码
+        language: 编程语言
+        focus: 审查重点（security, performance, style, general）
+    """
+    focus_instructions = {
+        "security": "重点关注安全漏洞、输入验证、权限检查",
+        "performance": "重点关注性能优化、算法复杂度、资源使用",
+        "style": "重点关注代码风格、命名规范、可读性",
+        "general": "进行全面的代码质量评估"
+    }
+    
+    return f"""
+请对以下{language}代码进行专业审查：
+
+{code}
+
+审查要求：
+- {focus_instructions.get(focus, focus_instructions['general'])}
+- 提供具体的改进建议
+- 标注潜在问题的严重程度
+- 给出重构建议（如适用）
+
+请按照以下格式输出：
+1. 总体评价
+2. 发现的问题
+3. 改进建议
+4. 示例代码（如需要）
+"""
 ```
 
-### 2.2 双向通信机制
+### 2.2 客户端原语（Client Primitives）
+
+除了服务器提供的三大原语，MCP还定义了客户端向服务器发送的原语：
+
+#### 2.2.1 Sampling（采样请求）
+
+客户端可以请求服务器生成内容：
+
+**特点**：
+- 客户端主动请求LLM生成
+- 服务器代理执行采样
+- 支持复杂的生成任务
+
+**使用场景**：
+```python
+# 服务器处理采样请求
+@mcp.sampling_handler()
+async def handle_sampling(request):
+    # 服务器可以调用LLM生成内容
+    return await llm.generate(request.prompt)
+```
+
+#### 2.2.2 Elicitation（引导对话）
+
+客户端请求服务器引导特定类型的对话：
+
+**特点**：
+- 结构化的对话引导
+- 多轮交互支持
+- 上下文保持
+
+#### 2.2.3 Logging（日志记录）
+
+客户端可以向服务器发送日志信息：
+
+**特点**：
+- 实时日志传输
+- 分级日志支持
+- 调试和监控
+
+### 2.3 通知机制（Notifications）
+
+MCP支持双向通知，实现实时状态同步：
+
+**服务器通知**：
+- Resource更新通知
+- Tool状态变化
+- 系统事件
+
+**客户端通知**：
+- 连接状态变化
+- 用户行为事件
+- 配置更新
+
+**实现示例**：
+```python
+# 服务器发送通知
+await server.notify_resource_updated("desktop://files")
+
+# 客户端接收通知
+@client.notification_handler("resource_updated")
+async def handle_update(notification):
+    # 刷新相关资源
+    await refresh_resources()
+```
+
+### 2.4 双向通信机制
 
 #### 分层架构设计
 
-MCP采用**双层架构**设计，将协议逻辑与传输方式解耦：
+MCP采用**双层架构（Layers）**设计，将协议逻辑与传输方式完全解耦：
 
-**数据层（内层）**：定义消息结构（JSON-RPC 2.0）
-**传输层（外层）**：STDIO（本地）+ HTTP/SSE（远程）
+```
+┌─────────────────────────────────────────┐
+│            数据层 (Data Layer)            │  ← 内层
+│  ┌─────────────────────────────────────┐  │
+│  │      JSON-RPC 2.0 协议              │  │
+│  │  • 生命周期管理                     │  │
+│  │  • 工具/资源/提示 原语              │  │
+│  │  • 客户端原语（采样/用户交互）      │  │
+│  │  • 通知机制                         │  │
+│  └─────────────────────────────────────┘  │
+└─────────────────────────────────────────┘
+┌─────────────────────────────────────────┐
+│           传输层 (Transport Layer)        │  ← 外层
+│  ┌─────────────────────────────────────┐  │
+│  │  STDIO    │    HTTP    │    SSE     │  │
+│  │  (本地)   │  (远程)    │  (流式)   │  │
+│  │• 标准输入输出│• REST API  │• 实时推送│  │
+│  │• 进程通信    │• 无状态    │• 长连接  │  │
+│  └─────────────────────────────────────┘  │
+└─────────────────────────────────────────┘
+```
+
+#### 数据层（Data Layer）
+
+**核心功能**：
+- **生命周期管理**：连接初始化、能力协商、连接终止
+- **服务器原语**：工具、资源、提示的发现和执行
+- **客户端原语**：采样、用户交互、日志记录
+- **实用功能**：通知推送、进度跟踪
+
+**消息格式**：基于JSON-RPC 2.0标准
+```json
+{
+  "jsonrpc": "2.0",
+  "method": "tools/list",
+  "id": 1
+}
+```
+
+#### 传输层（Transport Layer）
+
+**STDIO传输**：
+- **适用场景**：本地进程间通信
+- **优势**：零网络开销、最佳性能
+- **使用方式**：标准输入输出流
+
+**HTTP传输**：
+- **适用场景**：远程服务器、REST API
+- **特点**：客户端到服务器的POST请求
+- **认证**：支持Bearer Token、API Key、自定义Headers
+
+**SSE传输（Server-Sent Events）**：
+- **适用场景**：需要实时推送的场景
+- **特点**：HTTP + SSE流式传输
+- **优势**：支持实时通知和长连接
 
 #### 客户端原语
 
@@ -304,7 +537,7 @@ MCP采用**双层架构**设计，将协议逻辑与传输方式解耦：
 MCP方式：运行时动态加载新工具，无需重启
 ```
 
-### 2.3 AI工具选择机制详解
+### 2.5 AI工具选择机制详解
 
 #### 工具选择的基本原理
 
@@ -537,19 +770,19 @@ claude mcp import-from-claude-desktop [选项]
 
 MCP 服务器可以在三个不同的范围级别配置，了解这些范围有助于选择最佳配置方式：
 
-**🏠 本地范围（Local）**：
+**本地范围（Local）**：
 - **存储位置**：项目特定用户设置  
 - **适用场景**：个人开发、实验配置、敏感凭据
 - **访问权限**：仅当前项目目录可用
 - **命令示例**：`claude mcp add -s local my-server`
 
-**👥 项目范围（Project）**：
+**项目范围（Project）**：
 - **存储位置**：项目根目录的 `.mcp.json` 文件
 - **适用场景**：团队共享、项目特定工具、版本控制
 - **访问权限**：所有团队成员（需要批准）
 - **命令示例**：`claude mcp add -s project team-tools`
 
-**👤 用户范围（User）**：
+**用户范围（User）**：
 - **存储位置**：用户级配置文件
 - **适用场景**：个人工具、开发环境、跨项目服务
 - **访问权限**：用户所有项目可用
@@ -945,7 +1178,7 @@ claude mcp reset-project-choices
 
 ### 4.1 开发环境配置
 
-#### 🐍 Python 开发环境
+#### Python 开发环境
 
 ```bash
 # 1. 安装现代 Python 包管理器
@@ -1079,6 +1312,88 @@ Claude会自动调用你的工具并返回结果！
 - **文档字符串**：AI理解工具功能的关键
 - **类型注解**：确保参数验证和错误处理
 
+### 4.3 进阶实践：完整MCP服务器
+
+#### 实际项目案例：桌面txt文件管理器
+
+基于前面的基础版本，我们创建一个包含Tools、Resources、Prompts的完整MCP服务器：
+
+**完整功能清单**：
+- **4个工具**：统计文件、列出文件、查找文件、获取系统信息
+- **2个资源**：系统信息和文件列表资源
+- **2个提示模板**：文件分析和清理建议
+
+**核心架构**：
+```python
+from mcp.server.fastmcp import FastMCP
+import os
+import platform
+from pathlib import Path
+
+# 初始化MCP服务器
+mcp = FastMCP("桌面txt文件管理器")
+
+# === Tools 实现 ===
+@mcp.tool()
+def count_desktop_txt_files() -> str:
+    """统计当前用户桌面上的txt文件数量"""
+    # 跨平台桌面路径检测
+    desktop_path = get_desktop_path()
+    if not desktop_path.exists():
+        return f"错误：无法找到桌面目录 {desktop_path}"
+    
+    txt_files = list(desktop_path.glob("*.txt"))
+    return f"桌面txt文件数量：{len(txt_files)} 个"
+
+@mcp.tool()
+def list_desktop_txt_files(include_details: bool = False) -> str:
+    """获取桌面上所有txt文件的名称列表"""
+    # 实现细节...
+
+# === Resources 实现 ===  
+@mcp.resource("desktop://system-info")
+def get_system_resource():
+    """提供系统信息资源"""
+    return json.dumps({
+        "platform": platform.system(),
+        "desktop_path": str(get_desktop_path()),
+        "python_version": platform.python_version()
+    })
+
+# === Prompts 实现 ===
+@mcp.prompt()
+def analyze_txt_files_prompt(file_count: int, file_list: str) -> str:
+    """文件分析提示模板"""
+    return f"""
+请分析以下桌面txt文件情况：
+- 文件数量：{file_count}
+- 文件列表：{file_list}
+
+请提供：
+1. 文件组织建议
+2. 可能的清理方案
+3. 备份建议
+"""
+```
+
+**配置和使用**：
+```bash
+# 添加到Claude Code
+claude mcp add desktop-txt-manager -- python desktop_txt_manager_full.py
+
+# 测试各种功能
+# Tools: "统计桌面txt文件"
+# Resources: "@desktop://system-info"  
+# Prompts: "/analyze-txt-files"
+```
+
+**实际效果演示**：
+1. **工具调用**：AI自动选择合适的工具执行任务
+2. **资源访问**：AI获取系统信息提供准确建议
+3. **提示模板**：AI使用标准化模板生成专业分析
+
+这个案例展示了MCP的核心价值：**一次开发，多种能力，标准化交互**。
+
 ---
 
 ## 5. MCP生态总览
@@ -1200,9 +1515,10 @@ Claude会自动调用你的工具并返回结果！
 ### 核心要点回顾
 
 1. **什么是MCP**：标准化AI与外部工具连接的开放协议
-2. **为什么需要**：解决Function Call平台依赖和重复开发问题  
-3. **如何使用**：装饰器 + 配置文件创建强大工具
-4. **生态现状**：1000+项目，企业级应用快速落地
+2. **完整架构**：服务器原语（Tools/Resources/Prompts）+ 客户端原语（Sampling/Elicitation/Logging）+ 双向通知机制
+3. **为什么需要**：解决Function Call平台依赖和重复开发问题  
+4. **如何使用**：装饰器 + 配置文件创建强大工具，支持跨平台标准化交互
+5. **生态现状**：1000+项目，企业级应用快速落地
 
 ### MCP的价值
 
