@@ -259,33 +259,35 @@ MCP方案:
 
 #### 场景：你问Claude "我桌面上有哪些文档？"
 
+**MCP交互流程图**：
+
+```mermaid
+sequenceDiagram
+    participant U as 用户
+    participant H as Claude Desktop<br/>(MCP Host)
+    participant C as MCP Client
+    participant S as 文件系统<br/>MCP Server
+    
+    U->>H: "我桌面上有哪些文档？"
+    H->>H: Claude模型分析需求
+    Note over H: 识别需要文件系统访问
+    H->>C: 激活MCP Client
+    C->>S: 连接文件系统服务器
+    S->>S: 扫描桌面目录
+    S-->>C: 返回文件列表
+    C-->>H: 传递文件信息
+    H->>H: 生成自然语言回复
+    H-->>U: "您的桌面上有3个文档：<br/>报告.docx、笔记.txt和项目.pdf"
+```
+
 **完整的交互流程**：
 
-```
-你的问题：
-"我桌面上有哪些文档？"
-       ↓
-Claude Desktop (MCP Host)：
-接收问题，启动Claude模型分析
-       ↓
-Claude模型分析：
-"需要访问文件系统来获取桌面文件信息"
-       ↓
-MCP Client激活：
-连接到文件系统MCP Server
-       ↓
-文件系统MCP Server：
-扫描桌面目录，返回文件列表
-       ↓
-结果返回：
-"找到以下文档：报告.docx, 笔记.txt, 项目.pdf"
-       ↓
-Claude整合信息：
-生成自然语言回复
-       ↓
-显示给你：
-"您的桌面上有3个文档：报告.docx、笔记.txt和项目.pdf"
-```
+1. **用户提问** → "我桌面上有哪些文档？"
+2. **AI分析** → 识别需要文件系统访问权限  
+3. **MCP连接** → 激活文件系统MCP服务器
+4. **执行操作** → 扫描桌面目录，获取文件列表
+5. **返回结果** → 整合文件信息生成自然回复
+6. **用户获得答案** → 看到真实的桌面文件清单
 
 **关键特点**：
 - **智能决策**：AI自动判断需要调用文件系统工具
@@ -296,6 +298,41 @@ Claude整合信息：
 这就是MCP的魅力：**让AI能够像人一样，在需要时主动获取实时信息来回答问题**。
 
 ### 2.2 MCP双层架构
+
+**MCP架构分层图**：
+
+```mermaid
+graph TB
+    subgraph "数据层 (Data Layer)"
+        DL1[JSON-RPC 2.0 协议]
+        DL2[生命周期管理]
+        DL3[核心原语: Tools/Resources/Prompts]
+        DL4[消息语义规范]
+    end
+    
+    subgraph "传输层 (Transport Layer)"
+        TL1[STDIO传输<br/>本地进程通信]
+        TL2[HTTP传输<br/>远程服务器通信]
+        TL3[连接建立与管理]
+        TL4[安全通信机制]
+    end
+    
+    DL1 --> TL1
+    DL1 --> TL2
+    DL2 --> TL3
+    DL3 --> TL1
+    DL3 --> TL2
+    DL4 --> TL4
+    
+    style DL1 fill:#e1f5fe
+    style DL2 fill:#e1f5fe
+    style DL3 fill:#e1f5fe
+    style DL4 fill:#e1f5fe
+    style TL1 fill:#f3e5f5
+    style TL2 fill:#f3e5f5
+    style TL3 fill:#f3e5f5
+    style TL4 fill:#f3e5f5
+```
 
 MCP采用分层设计，包含两个核心层次：
 
@@ -318,9 +355,41 @@ MCP采用分层设计，包含两个核心层次：
 
 ### 2.3 三大核心能力概述
 
+**MCP三大核心能力关系图**：
+
+```mermaid
+graph LR
+    subgraph "AI处理流程"
+        A[用户需求] --> B{AI分析}
+        B --> C[选择合适能力]
+        C --> D[执行操作]
+        D --> E[整合结果]
+        E --> F[生成回复]
+    end
+    
+    subgraph "MCP三大核心能力"
+        T[Tools 工具<br/>执行具体操作]
+        R[Resources 资源<br/>提供上下文数据] 
+        P[Prompts 提示模板<br/>标准化处理]
+    end
+    
+    C --> T
+    C --> R  
+    C --> P
+    T --> D
+    R --> D
+    P --> D
+    
+    style T fill:#e8f5e8
+    style R fill:#fff2cc
+    style P fill:#f0f8ff
+    style A fill:#ffe6e6
+    style F fill:#ffe6e6
+```
+
 现在我们了解了MCP的实际效果，让我们快速认识支撑这一切的三大核心能力：
 
-#### Tools (工具) - 让AI执行操作
+#### Tools (工具) - 让AI执行操作 (使用率: 90%+)
 
 **作用**：就像桌面文档查询中的`list_files`工具一样，让AI能够执行具体操作。
 
@@ -331,7 +400,7 @@ MCP采用分层设计，包含两个核心层次：
 
 当你问"桌面上有哪些文档？"时，AI就是通过Tools来扫描你的文件系统的。
 
-#### Resources (资源) - 为AI提供数据
+#### Resources (资源) - 为AI提供数据 (使用率: <20%)
 
 **作用**：就像系统信息、文件列表这样的数据源，为AI提供上下文信息。
 
@@ -342,7 +411,7 @@ MCP采用分层设计，包含两个核心层次：
 
 Resources让AI能够了解当前环境的详细情况，做出更准确的判断。
 
-#### Prompts (提示模板) - 标准化交互
+#### Prompts (提示模板) - 标准化交互 (使用率: <5%)
 
 **作用**：就像文件整理建议这样的专业模板，为特定任务提供结构化指导。
 
@@ -363,41 +432,47 @@ Prompts确保AI能够以专业、一致的方式处理复杂任务。
 
 ### 2.4 MCP交互流程总览
 
+**完整交互流程图**：
+
+```mermaid
+flowchart TD
+    A[用户提问] --> B[AI理解意图]
+    B --> C{需要什么能力?}
+    
+    C --> D[Tools<br/>执行操作]
+    C --> E[Resources<br/>获取上下文]
+    C --> F[Prompts<br/>应用模板]
+    
+    D --> G[整合结果]
+    E --> G
+    F --> G
+    
+    G --> H[生成回复]
+    H --> I[返回给用户]
+    
+    style A fill:#ffe6e6
+    style I fill:#ffe6e6
+    style D fill:#e8f5e8
+    style E fill:#fff2cc
+    style F fill:#f0f8ff
+    style G fill:#e6f3ff
+```
+
 现在我们知道了MCP的三大核心能力，让我们看看它们是如何协同工作的：
-
-#### 完整交互流程
-
-```
-用户提问
-   ↓
-AI理解意图
-   ↓
-选择合适能力 ← Tools/Resources/Prompts
-   ↓
-执行操作
-   ↓
-整合结果
-   ↓
-生成回复
-```
-
 
 #### 实际运行示例
 
 以"帮我整理桌面文件"为例：
 
-```
-你的请求: "帮我整理桌面文件"
-   ↓
-AI分析: 需要文件信息 + 整理建议
-   ↓
-执行步骤:
-   1. Tools: 扫描桌面文件
-   2. Resources: 读取系统信息
-   3. Prompts: 应用整理模板
-   ↓
-最终回复: 个性化的文件整理方案
-```
+**步骤分解**：
+1. **用户请求** → "帮我整理桌面文件"
+2. **AI分析** → 需要文件信息 + 整理建议
+3. **能力调用**：
+   - **Tools**: 扫描桌面文件
+   - **Resources**: 读取系统信息  
+   - **Prompts**: 应用整理模板
+4. **结果整合** → 个性化的文件整理方案
+5. **回复用户** → 提供具体整理建议
 
 **为什么这样设计？**
 - **安全性**：每个操作都需要用户授权
@@ -573,105 +648,6 @@ MCP还支持一些高级特性，但在实际开发中较少使用：
 **JSON-RPC协议**：所有通信基于JSON-RPC 2.0标准，保证消息格式统一。
 
 这些特性大多由MCP框架自动处理，开发者通常无需关心底层实现细节。
-
-#### 3.5.1 工具选择算法
-
-**基于语义相似度的选择**
-```python
-def select_best_tool(user_query: str, available_tools: list) -> str:
-    """基于语义相似度选择最佳工具"""
-    
-    query_embedding = encode_text(user_query)
-    best_score = 0
-    best_tool = None
-    
-    for tool in available_tools:
-        # 工具描述向量化
-        tool_embedding = encode_text(tool['description'])
-        
-        # 计算余弦相似度
-        similarity = cosine_similarity(query_embedding, tool_embedding)
-        
-        if similarity > best_score:
-            best_score = similarity
-            best_tool = tool
-    
-    return best_tool['name'] if best_score > 0.7 else None
-```
-
-**上下文感知选择**
-```python
-class ContextAwareToolSelector:
-    def __init__(self):
-        self.conversation_history = []
-        self.current_context = {}
-    
-    def select_tool(self, user_query: str) -> str:
-        """上下文感知的工具选择"""
-        
-        # 分析查询意图
-        intent = self.analyze_intent(user_query)
-        
-        # 考虑对话历史
-        context_tools = self.get_context_relevant_tools()
-        
-        # 综合评分
-        candidates = self.score_tools(intent, context_tools)
-        
-        return self.select_best_candidate(candidates)
-    
-    def analyze_intent(self, query: str) -> dict:
-        """分析用户意图"""
-        return {
-            "action_type": "read|write|analyze|create",
-            "domain": "file|database|api|system",
-            "urgency": "high|medium|low"
-        }
-```
-
-#### 3.5.2 参数推理与验证
-
-**智能参数推理**
-```python
-def infer_tool_parameters(tool_schema: dict, user_query: str, context: dict) -> dict:
-    """从用户查询和上下文推理工具参数"""
-    
-    parameters = {}
-    required_params = tool_schema.get('required', [])
-    
-    for param_name, param_def in tool_schema['properties'].items():
-        if param_name in required_params:
-            # 从查询中提取必需参数
-            value = extract_parameter_from_query(
-                user_query, 
-                param_name, 
-                param_def['type']
-            )
-            
-            if value is None:
-                # 从上下文中推理
-                value = infer_from_context(context, param_name)
-            
-            if value is not None:
-                parameters[param_name] = value
-    
-    return parameters
-
-def extract_parameter_from_query(query: str, param_name: str, param_type: str):
-    """从查询中提取参数值"""
-    
-    if param_type == "string":
-        # 使用NER或正则提取字符串
-        return extract_string_parameter(query, param_name)
-    elif param_type == "number":
-        # 提取数字
-        return extract_number_parameter(query, param_name)
-    elif param_type == "boolean":
-        # 推理布尔值
-        return infer_boolean_parameter(query, param_name)
-    
-    return None
-```
 
 ---
 
