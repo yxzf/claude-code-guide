@@ -39,18 +39,18 @@
    - 3.2 客户端原语（Client Primitives）
    - 3.3 AI工具选择机制深度解析
 
-### 第三部分：安装配置（怎么用MCP）
-4. [MCP 安装配置指南](#4-mcp-安装配置指南)
-   - 4.1 claude mcp 命令概述
-   - 4.2 配置管理基础
-   - 4.3 安装方式一：Claude Desktop导入
-   - 4.4 安装方式二：JSON配置方式
-   - 4.5 安装方式三：命令行方式
+### 第三部分：开发实战（怎么开发MCP）
+4. [开发实战指南](#4-开发实战指南)
+   - 4.1 开发环境配置
+   - 4.2 5分钟创建第一个MCP工具
 
-### 第四部分：开发实战（怎么开发MCP）
-5. [开发实战指南](#5-开发实战指南)
-   - 5.1 开发环境配置
-   - 5.2 5分钟创建第一个MCP工具
+### 第四部分：安装配置（怎么用MCP）
+5. [MCP 安装配置指南](#5-mcp-安装配置指南)
+   - 5.1 claude mcp 命令概述
+   - 5.2 配置管理基础
+   - 5.3 安装方式一：Claude Desktop导入
+   - 5.4 安装方式二：JSON配置方式
+   - 5.5 安装方式三：命令行方式
 
 ### 第五部分：生态总览（有哪些MCP）
 6. [MCP生态总览](#6-mcp生态总览)
@@ -680,9 +680,231 @@ def analyze_sales_data(csv_data: str) -> str:
 
 ---
 
-## 4. MCP 安装配置指南
+## 4. 开发实战指南 (动手实践)
 
-### 4.1 claude mcp 命令概述
+### 4.1 开发环境配置
+
+#### Python 开发环境
+
+```bash
+# 1. 安装现代 Python 包管理器
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# 2. 创建项目
+mkdir my-mcp-server && cd my-mcp-server
+uv init --python=3.11
+
+# 3. 安装依赖
+uv add "mcp[cli]" "fastapi" "pydantic" "aiofiles"
+
+# 4. 创建项目结构
+mkdir -p src/{server,client,tools,config}
+touch src/server/__init__.py
+touch src/tools/__init__.py
+```
+
+#### 推荐的项目结构
+
+```
+my-mcp-server/
+├── pyproject.toml              # 项目配置
+├── README.md                   # 项目说明
+├── .env.example               # 环境变量模板
+├── requirements.txt           # 依赖列表
+├── src/
+│   ├── server/                # 服务器实现
+│   │   ├── __init__.py
+│   │   ├── main.py           # 主服务器逻辑
+│   │   └── config.py         # 配置管理
+│   ├── tools/                 # 工具实现
+│   │   ├── __init__.py
+│   │   ├── file_tools.py     # 文件操作工具
+│   │   ├── api_tools.py      # API 集成工具
+│   │   └── data_tools.py     # 数据处理工具
+│   └── client/                # 客户端工具
+│       ├── __init__.py
+│       └── test_client.py    # 测试客户端
+├── tests/                     # 测试代码
+│   ├── test_tools.py
+│   └── test_server.py
+└── docs/                      # 文档
+    ├── api.md
+    └── examples.md
+```
+
+### 4.2 5分钟创建第一个MCP工具
+
+#### 目标：创建一个文件计数器
+让Claude能够统计你桌面上的文件数量
+
+#### 三步搞定
+
+**Step 1: 环境搭建**
+```bash
+# 安装依赖
+pip install "mcp[cli]"
+
+# 创建文件
+touch file_counter.py
+```
+
+**Step 2: 核心代码**
+
+<details>
+<summary>点击展开完整代码 (file_counter.py)</summary>
+
+```python
+import os
+from pathlib import Path
+from mcp.server.fastmcp import FastMCP
+
+# 创建MCP服务器
+mcp = FastMCP("文件计数器")
+
+@mcp.tool()
+def count_files(directory: str = "Desktop") -> str:
+    """统计指定目录的文件数量
+    
+    Args:
+        directory: 目录名称，默认Desktop
+        
+    Returns:
+        文件统计结果
+    """
+    username = os.getenv("USER") or os.getenv("USERNAME")
+    dir_path = Path(f"/Users/{username}/{directory}")
+    
+    if not dir_path.exists():
+        return f"目录 {directory} 不存在"
+    
+    files = list(dir_path.glob("*"))
+    file_count = len([f for f in files if f.is_file()])
+    folder_count = len([f for f in files if f.is_dir()])
+    
+    return f"{directory} 目录统计:\n文件: {file_count} 个\n文件夹: {folder_count} 个"
+
+if __name__ == "__main__":
+    mcp.run()
+```
+
+</details>
+
+**Step 3: 配置Claude Code**
+
+<details>
+<summary>点击展开配置步骤</summary>
+
+```bash
+# 在当前项目中添加MCP服务器
+claude mcp add file-counter -- python file_counter.py
+
+# 验证配置
+claude mcp list
+
+# 在Claude Code中测试
+/mcp
+```
+
+</details>
+
+#### 测试效果
+
+在Claude中说："帮我统计一下桌面文件数量"
+
+Claude会自动调用你的工具并返回结果！
+
+#### 核心要点
+- **装饰器 `@mcp.tool()`**：将普通函数变成MCP工具
+- **文档字符串**：AI理解工具功能的关键
+- **类型注解**：确保参数验证和错误处理
+
+### 4.3 进阶实践：完整MCP服务器
+
+#### 实际项目案例：桌面txt文件管理器
+
+基于前面的基础版本，我们创建一个包含Tools、Resources、Prompts的完整MCP服务器：
+
+**完整功能清单**：
+- **4个工具**：统计文件、列出文件、查找文件、获取系统信息
+- **2个资源**：系统信息和文件列表资源
+- **2个提示模板**：文件分析和清理建议
+
+**核心架构**：
+```python
+from mcp.server.fastmcp import FastMCP
+import os
+import platform
+from pathlib import Path
+
+# 初始化MCP服务器
+mcp = FastMCP("桌面txt文件管理器")
+
+# === Tools 实现 ===
+@mcp.tool()
+def count_desktop_txt_files() -> str:
+    """统计当前用户桌面上的txt文件数量"""
+    # 跨平台桌面路径检测
+    desktop_path = get_desktop_path()
+    if not desktop_path.exists():
+        return f"错误：无法找到桌面目录 {desktop_path}"
+    
+    txt_files = list(desktop_path.glob("*.txt"))
+    return f"桌面txt文件数量：{len(txt_files)} 个"
+
+@mcp.tool()
+def list_desktop_txt_files(include_details: bool = False) -> str:
+    """获取桌面上所有txt文件的名称列表"""
+    # 实现细节...
+
+# === Resources 实现 ===  
+@mcp.resource("desktop://system-info")
+def get_system_resource():
+    """提供系统信息资源"""
+    return json.dumps({
+        "platform": platform.system(),
+        "desktop_path": str(get_desktop_path()),
+        "python_version": platform.python_version()
+    })
+
+# === Prompts 实现 ===
+@mcp.prompt()
+def analyze_txt_files_prompt(file_count: int, file_list: str) -> str:
+    """文件分析提示模板"""
+    return f"""
+请分析以下桌面txt文件情况：
+- 文件数量：{file_count}
+- 文件列表：{file_list}
+
+请提供：
+1. 文件组织建议
+2. 可能的清理方案
+3. 备份建议
+"""
+```
+
+**配置和使用**：
+```bash
+# 添加到Claude Code
+claude mcp add desktop-txt-manager -- python desktop_txt_manager_full.py
+
+# 测试各种功能
+# Tools: "统计桌面txt文件"
+# Resources: "@desktop://system-info"  
+# Prompts: "/analyze-txt-files"
+```
+
+**实际效果演示**：
+1. **工具调用**：AI自动选择合适的工具执行任务
+2. **资源访问**：AI获取系统信息提供准确建议
+3. **提示模板**：AI使用标准化模板生成专业分析
+
+这个案例展示了MCP的核心价值：**一次开发，多种能力，标准化交互**。
+
+---
+
+## 5. MCP 安装配置指南
+
+### 5.1 claude mcp 命令概述
 
 #### 核心命令介绍
 
@@ -766,7 +988,7 @@ claude mcp import-from-claude-desktop [选项]
 
 </details>
 
-### 4.2 配置管理基础
+### 5.2 配置管理基础
 
 #### MCP 安装范围详解
 
@@ -833,7 +1055,7 @@ Local (本地) > Project (项目) > User (用户)
 
 这确保个人配置可以覆盖共享配置，提供最大的灵活性。
 
-### 4.3 安装方式一：Claude Desktop导入
+### 5.3 安装方式一：Claude Desktop导入
 
 **适用场景**：已在 Claude Desktop 中配置了 MCP 服务器，希望在 Claude Code 中复用
 
@@ -882,7 +1104,7 @@ claude mcp get filesystem
 
 </details>
 
-### 4.4 安装方式二：JSON配置方式
+### 5.4 安装方式二：JSON配置方式
 
 **适用场景**：批量配置、团队协作、配置文件管理
 
@@ -970,11 +1192,11 @@ claude mcp add-from-json https://example.com/team-mcp-config.json
 
 </details>
 
-### 4.5 安装方式三：命令行方式
+### 5.5 安装方式三：命令行方式
 
 **适用场景**：快速安装、单个服务器配置、脚本自动化
 
-#### 4.5.1 STDIO服务器（本地进程）
+#### 5.5.1 STDIO服务器（本地进程）
 
 **适用场景**：需要直接系统访问或自定义脚本的工具
 
@@ -1015,7 +1237,7 @@ claude mcp add -s user dev-tools -- npx -y @personal/dev-server
 
 </details>
 
-#### 4.5.2 SSE服务器（实时流连接）
+#### 5.5.2 SSE服务器（实时流连接）
 
 **适用场景**：需要实时更新的云服务
 
@@ -1062,7 +1284,7 @@ claude mcp add -s project --transport sse linear https://mcp.linear.app/sse
 
 </details>
 
-#### 4.5.3 HTTP服务器（标准请求响应）
+#### 5.5.3 HTTP服务器（标准请求响应）
 
 **适用场景**：REST API和标准Web服务
 
@@ -1173,228 +1395,6 @@ claude mcp reset-project-choices
 /mcp resources
 /mcp prompts
 ```
-
----
-
-## 5. 开发实战指南 (动手实践)
-
-### 5.1 开发环境配置
-
-#### Python 开发环境
-
-```bash
-# 1. 安装现代 Python 包管理器
-curl -LsSf https://astral.sh/uv/install.sh | sh
-
-# 2. 创建项目
-mkdir my-mcp-server && cd my-mcp-server
-uv init --python=3.11
-
-# 3. 安装依赖
-uv add "mcp[cli]" "fastapi" "pydantic" "aiofiles"
-
-# 4. 创建项目结构
-mkdir -p src/{server,client,tools,config}
-touch src/server/__init__.py
-touch src/tools/__init__.py
-```
-
-#### 推荐的项目结构
-
-```
-my-mcp-server/
-├── pyproject.toml              # 项目配置
-├── README.md                   # 项目说明
-├── .env.example               # 环境变量模板
-├── requirements.txt           # 依赖列表
-├── src/
-│   ├── server/                # 服务器实现
-│   │   ├── __init__.py
-│   │   ├── main.py           # 主服务器逻辑
-│   │   └── config.py         # 配置管理
-│   ├── tools/                 # 工具实现
-│   │   ├── __init__.py
-│   │   ├── file_tools.py     # 文件操作工具
-│   │   ├── api_tools.py      # API 集成工具
-│   │   └── data_tools.py     # 数据处理工具
-│   └── client/                # 客户端工具
-│       ├── __init__.py
-│       └── test_client.py    # 测试客户端
-├── tests/                     # 测试代码
-│   ├── test_tools.py
-│   └── test_server.py
-└── docs/                      # 文档
-    ├── api.md
-    └── examples.md
-```
-
-### 5.2 5分钟创建第一个MCP工具
-
-#### 目标：创建一个文件计数器
-让Claude能够统计你桌面上的文件数量
-
-#### 三步搞定
-
-**Step 1: 环境搭建**
-```bash
-# 安装依赖
-pip install "mcp[cli]"
-
-# 创建文件
-touch file_counter.py
-```
-
-**Step 2: 核心代码**
-
-<details>
-<summary>点击展开完整代码 (file_counter.py)</summary>
-
-```python
-import os
-from pathlib import Path
-from mcp.server.fastmcp import FastMCP
-
-# 创建MCP服务器
-mcp = FastMCP("文件计数器")
-
-@mcp.tool()
-def count_files(directory: str = "Desktop") -> str:
-    """统计指定目录的文件数量
-    
-    Args:
-        directory: 目录名称，默认Desktop
-        
-    Returns:
-        文件统计结果
-    """
-    username = os.getenv("USER") or os.getenv("USERNAME")
-    dir_path = Path(f"/Users/{username}/{directory}")
-    
-    if not dir_path.exists():
-        return f"目录 {directory} 不存在"
-    
-    files = list(dir_path.glob("*"))
-    file_count = len([f for f in files if f.is_file()])
-    folder_count = len([f for f in files if f.is_dir()])
-    
-    return f"{directory} 目录统计:\n文件: {file_count} 个\n文件夹: {folder_count} 个"
-
-if __name__ == "__main__":
-    mcp.run()
-```
-
-</details>
-
-**Step 3: 配置Claude Code**
-
-<details>
-<summary>点击展开配置步骤</summary>
-
-```bash
-# 在当前项目中添加MCP服务器
-claude mcp add file-counter -- python file_counter.py
-
-# 验证配置
-claude mcp list
-
-# 在Claude Code中测试
-/mcp
-```
-
-</details>
-
-#### 测试效果
-
-在Claude中说："帮我统计一下桌面文件数量"
-
-Claude会自动调用你的工具并返回结果！
-
-#### 核心要点
-- **装饰器 `@mcp.tool()`**：将普通函数变成MCP工具
-- **文档字符串**：AI理解工具功能的关键
-- **类型注解**：确保参数验证和错误处理
-
-### 5.3 进阶实践：完整MCP服务器
-
-#### 实际项目案例：桌面txt文件管理器
-
-基于前面的基础版本，我们创建一个包含Tools、Resources、Prompts的完整MCP服务器：
-
-**完整功能清单**：
-- **4个工具**：统计文件、列出文件、查找文件、获取系统信息
-- **2个资源**：系统信息和文件列表资源
-- **2个提示模板**：文件分析和清理建议
-
-**核心架构**：
-```python
-from mcp.server.fastmcp import FastMCP
-import os
-import platform
-from pathlib import Path
-
-# 初始化MCP服务器
-mcp = FastMCP("桌面txt文件管理器")
-
-# === Tools 实现 ===
-@mcp.tool()
-def count_desktop_txt_files() -> str:
-    """统计当前用户桌面上的txt文件数量"""
-    # 跨平台桌面路径检测
-    desktop_path = get_desktop_path()
-    if not desktop_path.exists():
-        return f"错误：无法找到桌面目录 {desktop_path}"
-    
-    txt_files = list(desktop_path.glob("*.txt"))
-    return f"桌面txt文件数量：{len(txt_files)} 个"
-
-@mcp.tool()
-def list_desktop_txt_files(include_details: bool = False) -> str:
-    """获取桌面上所有txt文件的名称列表"""
-    # 实现细节...
-
-# === Resources 实现 ===  
-@mcp.resource("desktop://system-info")
-def get_system_resource():
-    """提供系统信息资源"""
-    return json.dumps({
-        "platform": platform.system(),
-        "desktop_path": str(get_desktop_path()),
-        "python_version": platform.python_version()
-    })
-
-# === Prompts 实现 ===
-@mcp.prompt()
-def analyze_txt_files_prompt(file_count: int, file_list: str) -> str:
-    """文件分析提示模板"""
-    return f"""
-请分析以下桌面txt文件情况：
-- 文件数量：{file_count}
-- 文件列表：{file_list}
-
-请提供：
-1. 文件组织建议
-2. 可能的清理方案
-3. 备份建议
-"""
-```
-
-**配置和使用**：
-```bash
-# 添加到Claude Code
-claude mcp add desktop-txt-manager -- python desktop_txt_manager_full.py
-
-# 测试各种功能
-# Tools: "统计桌面txt文件"
-# Resources: "@desktop://system-info"  
-# Prompts: "/analyze-txt-files"
-```
-
-**实际效果演示**：
-1. **工具调用**：AI自动选择合适的工具执行任务
-2. **资源访问**：AI获取系统信息提供准确建议
-3. **提示模板**：AI使用标准化模板生成专业分析
-
-这个案例展示了MCP的核心价值：**一次开发，多种能力，标准化交互**。
 
 ---
 
