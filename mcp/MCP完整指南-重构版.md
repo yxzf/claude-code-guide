@@ -288,12 +288,6 @@ sequenceDiagram
 5. **返回结果** → 整合文件信息生成自然回复
 6. **用户获得答案** → 看到真实的桌面文件清单
 
-**关键特点**：
-- **智能决策**：AI自动判断需要调用文件系统工具
-- **安全授权**：系统会请求你的权限才能访问文件
-- **实时数据**：获取的是当前真实的文件信息，不是预设数据
-- **自然交互**：整个过程对用户透明，就像AI"真的看到了"你的桌面
-
 这就是MCP的魅力：**让AI能够像人一样，在需要时主动获取实时信息来回答问题**。
 
 ### 2.2 MCP双层架构
@@ -316,12 +310,10 @@ graph TB
         TL4[安全通信机制]
     end
     
-    DL1 --> TL1
-    DL1 --> TL2
-    DL2 --> TL3
-    DL3 --> TL1
-    DL3 --> TL2
-    DL4 --> TL4
+    TL1 --> DL1
+    TL2 --> DL1
+    TL3 --> DL2
+    TL4 --> DL4
     
     style DL1 fill:#e1f5fe
     style DL2 fill:#e1f5fe
@@ -353,38 +345,6 @@ MCP采用分层设计，包含两个核心层次：
 - 架构清晰，便于扩展和维护
 
 ### 2.3 三大核心能力概述
-
-**MCP三大核心能力关系图**：
-
-```mermaid
-graph LR
-    subgraph "AI处理流程"
-        A[用户需求] --> B{AI分析}
-        B --> C[选择合适能力]
-        C --> D[执行操作]
-        D --> E[整合结果]
-        E --> F[生成回复]
-    end
-    
-    subgraph "MCP三大核心能力"
-        T[Tools 工具<br/>执行具体操作]
-        R[Resources 资源<br/>提供上下文数据] 
-        P[Prompts 提示模板<br/>标准化处理]
-    end
-    
-    C --> T
-    C --> R  
-    C --> P
-    T --> D
-    R --> D
-    P --> D
-    
-    style T fill:#e8f5e8
-    style R fill:#fff2cc
-    style P fill:#f0f8ff
-    style A fill:#ffe6e6
-    style F fill:#ffe6e6
-```
 
 现在我们了解了MCP的实际效果，让我们快速认识支撑这一切的三大核心能力：
 
@@ -431,32 +391,6 @@ Prompts确保AI能够以专业、一致的方式处理复杂任务。
 
 ### 2.4 MCP交互流程总览
 
-**完整交互流程图**：
-
-```mermaid
-flowchart TD
-    A[用户提问] --> B[AI理解意图]
-    B --> C{需要什么能力?}
-    
-    C --> D[Tools<br/>执行操作]
-    C --> E[Resources<br/>获取上下文]
-    C --> F[Prompts<br/>应用模板]
-    
-    D --> G[整合结果]
-    E --> G
-    F --> G
-    
-    G --> H[生成回复]
-    H --> I[返回给用户]
-    
-    style A fill:#ffe6e6
-    style I fill:#ffe6e6
-    style D fill:#e8f5e8
-    style E fill:#fff2cc
-    style F fill:#f0f8ff
-    style G fill:#e6f3ff
-```
-
 现在我们知道了MCP的三大核心能力，让我们看看它们是如何协同工作的：
 
 #### 实际运行示例
@@ -472,12 +406,6 @@ flowchart TD
    - **Prompts**: 应用整理模板
 4. **结果整合** → 个性化的文件整理方案
 5. **回复用户** → 提供具体整理建议
-
-**为什么这样设计？**
-- **安全性**：每个操作都需要用户授权
-- **准确性**：基于实时数据而非猜测
-- **专业性**：运用最佳实践模板
-- **透明性**：用户知道AI在做什么
 
 > 💡 **想深入了解技术实现细节？** 包括双向通信机制、工具选择算法、架构设计原理等，请参考第3章《MCP技术深入》。
 
