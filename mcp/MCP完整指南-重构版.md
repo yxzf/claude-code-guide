@@ -315,6 +315,13 @@ MCP基于官方架构设计，采用双向通信模式，包含两大类核心�
 
 ### 3.1 服务器原语（Server Primitives）
 
+**理解服务器原语的核心思路**：把MCP服务器想象成一个"工具箱"，里面装着AI可以使用的各种能力。就像现实中的工具箱有螺丝刀、扳手、锤子，MCP工具箱里有Tools（干活的工具）、Resources（参考资料）、Prompts（操作手册）。
+
+**实际使用分布**：
+- **Tools (90%+)**：日常使用的主力工具，如读文件、查数据库、调API
+- **Resources (<20%)**：提供背景信息，如系统配置、环境状态  
+- **Prompts (<5%)**：特殊场景的专业模板，如代码审查、文档生成
+
 服务器原语是MCP协议的核心组件，由服务器实现并向客户端公开。根据官方架构标准，包含三种类型：
 
 #### 3.1.1 Tools - 工具调用
@@ -400,6 +407,15 @@ def code_review_prompt(code: str) -> str:
 
 ### 3.2 客户端原语（Client Primitives）
 
+**理解客户端原语的核心思路**：如果说服务器原语是"AI能调用的工具"，那客户端原语就是"工具能反过来请求AI做的事"。这实现了真正的双向通信：不仅AI能使用工具，工具也能"回调"AI。
+
+**典型使用场景**：
+- **代码生成工具**：请求AI根据需求生成代码（Sampling）
+- **配置向导**：请求用户输入API密钥、选择环境（Elicitation）  
+- **监控系统**：向客户端发送运行状态、错误信息（Logging）
+
+**实际使用频率较低**：大多数MCP工具只需要服务器原语就够用了，客户端原语主要用于高级交互场景。
+
 客户端原语是MCP客户端提供给服务器的能力，实现服务器到客户端的反向调用。
 
 #### 3.2.1 Sampling - 模型推理
@@ -484,39 +500,91 @@ def complex_operation():
 
 ### 3.3 AI工具选择机制深度解析
 
-MCP的核心魅力在于AI能够智能地选择和调用合适的工具。了解这个机制有助于开发者设计更好的工具描述和参数定义。
+MCP最神奇的地方在于：**AI是如何从众多工具中精确选择合适的那一个**？这背后的原理值得深入了解。
 
-#### 3.3.1 工具选择的实现原理
-
-**基于Prompt Engineering的选择机制**
-
-当用户提出问题时，MCP客户端会将所有可用工具的描述信息格式化为结构化文本，作为system prompt的一部分发送给AI模型：
-
-```python
-# 工具描述格式化示例
-def format_for_llm(tool) -> str:
-    return f"""
-Tool: {tool.name}
-Description: {tool.description}
-Arguments:
-- city: 城市名称 (required)
-- unit: 温度单位 (optional, default: celsius)
-"""
-
-# System Prompt构建
-system_message = (
-    "You are a helpful assistant with access to these tools:\n\n"
-    f"{tools_description}\n"
-    "Choose the appropriate tool based on the user's question. "
-    "If no tool is needed, reply directly.\n\n"
-    "IMPORTANT: When you need to use a tool, respond with JSON format:\n"
-    '{"tool": "tool-name", "arguments": {"param": "value"}}'
-)
+```mermaid
+flowchart TD
+    A[用户提问] --> B[MCP客户端]
+    B --> C[格式化所有工具描述]
+    C --> D[构建System Prompt]
+    D --> E[发送给AI模型]
+    E --> F{AI分析判断}
+    F -->|需要工具| G[输出JSON格式工具调用]
+    F -->|无需工具| H[直接回复]
+    G --> I[执行指定工具]
+    I --> J[获取执行结果]
+    J --> K[结果+原问题重新发给AI]
+    K --> L[生成最终自然语言回复]
+    
+    style F fill:#e1f5fe
+    style G fill:#fff3e0
+    style I fill:#f3e5f5
 ```
 
-**工具描述的来源**
+#### 3.3.1 工具选择的核心原理：基于Prompt Engineering
 
-MCP框架通过装饰器自动提取工具信息：
+**关键洞察**：AI模型是通过**结构化的工具描述文本**来理解和选择工具的，整个过程基于Prompt Engineering。
+
+**第一步：工具描述自动格式化**
+
+当用户提问时，MCP客户端会将所有可用工具转换为结构化文本：
+
+```python
+# 工具描述格式化（基于知乎文章源码分析）
+class Tool:
+    def format_for_llm(self) -> str:
+        """将工具信息格式化为AI可理解的文本"""
+        args_desc = []
+        if "properties" in self.input_schema:
+            for param_name, param_info in self.input_schema["properties"].items():
+                arg_desc = f"- {param_name}: {param_info.get('description', 'No description')}"
+                if param_name in self.input_schema.get("required", []):
+                    arg_desc += " (required)"
+                args_desc.append(arg_desc)
+        
+        return f"""
+Tool: {self.name}
+Description: {self.description}
+Arguments:
+{chr(10).join(args_desc)}
+"""
+```
+
+**第二步：构建System Prompt**
+
+所有工具描述会被整合到一个统一的system prompt中：
+
+```python
+# System Prompt构建（基于实际MCP源码）
+async def start(self):
+    # 获取所有工具
+    all_tools = []
+    for server in self.servers:
+        tools = await server.list_tools()
+        all_tools.extend(tools)
+    
+    # 格式化工具描述
+    tools_description = "\n".join([tool.format_for_llm() for tool in all_tools])
+    
+    # 构建System Prompt
+    system_message = (
+        "You are a helpful assistant with access to these tools:\n\n"
+        f"{tools_description}\n"
+        "Choose the appropriate tool based on the user's question. "
+        "If no tool is needed, reply directly.\n\n"
+        "IMPORTANT: When you need to use a tool, you must ONLY respond with "
+        "the exact JSON object format below, nothing else:\n"
+        '{"tool": "tool-name", "arguments": {"argument-name": "value"}}\n\n'
+        "After receiving a tool's response:\n"
+        "1. Transform the raw data into a natural, conversational response\n"
+        "2. Keep responses concise but informative\n"
+        "3. Focus on the most relevant information"
+    )
+```
+
+**工具信息的自动提取**
+
+MCP通过装饰器自动提取工具元信息：
 
 ```python
 @mcp.tool()
@@ -524,64 +592,77 @@ def get_weather(city: str, unit: str = "celsius") -> str:
     """获取指定城市的天气信息
     
     Args:
-        city: 城市名称
-        unit: 温度单位，支持celsius和fahrenheit
+        city: 城市名称，如"北京"、"上海"
+        unit: 温度单位，支持celsius和fahrenheit，默认celsius
     """
     # 工具实现
 ```
 
-- **name**: 来自函数名 `get_weather`
-- **description**: 来自函数的docstring
-- **arguments**: 通过类型注解自动推断参数类型和要求
+**自动提取的信息**：
+- **name**: 函数名 `get_weather`
+- **description**: docstring中的描述  
+- **arguments**: 通过类型注解推断参数类型和要求
+- **required**: 无默认值的参数自动标记为required
 
-#### 3.3.2 工具执行与结果反馈
+#### 3.3.2 工具执行的完整链路分析
 
-**执行流程**
+基于知乎文章的源码深入分析，MCP工具执行过程可以分为两个关键步骤：
 
-```mermaid
-sequenceDiagram
-    participant U as 用户
-    participant AI as AI模型
-    participant C as MCP客户端
-    participant S as MCP服务器
-    
-    U->>AI: 用户问题 + 工具描述
-    AI->>AI: 分析需求，选择工具
-    AI->>C: 返回JSON格式的工具调用
-    C->>S: 执行指定工具
-    S-->>C: 返回执行结果
-    C->>AI: 工具结果 + 原始问题
-    AI->>U: 生成最终回复
-```
-
-**结果处理机制**
+**步骤1：AI模型确定工具选择**
 
 ```python
-# 简化的执行逻辑
-async def process_llm_response(llm_response):
-    # 检查是否包含工具调用JSON
-    if is_tool_call(llm_response):
+# 简化的核心执行逻辑（基于知乎文章源码）
+while True:
+    # 用户输入消息
+    messages.append({"role": "user", "content": user_input})
+    
+    # 发送给AI模型（包含system prompt和用户消息）
+    llm_response = self.llm_client.get_response(messages)
+    
+    # 处理AI响应（检查是否包含工具调用）
+    result = await self.process_llm_response(llm_response)
+    
+    # 如果执行了工具，将结果重新发给AI
+    if result != llm_response:
+        messages.append({"role": "assistant", "content": llm_response})
+        messages.append({"role": "system", "content": result})
+        
+        # 获取最终回复
+        final_response = self.llm_client.get_response(messages)
+        messages.append({"role": "assistant", "content": final_response})
+    else:
+        # 无需工具，直接返回
+        messages.append({"role": "assistant", "content": llm_response})
+```
+
+**步骤2：工具执行和结果处理**
+
+```python
+async def process_llm_response(self, llm_response):
+    """处理AI响应，执行工具调用"""
+    # 检查是否包含JSON格式的工具调用
+    if self.is_tool_call(llm_response):
         try:
-            # 解析工具调用请求
-            tool_call = parse_tool_call(llm_response)
+            # 解析工具调用JSON
+            tool_call = self.parse_tool_call(llm_response)
             
-            # 执行工具
-            result = await execute_tool(tool_call)
+            # 执行指定工具
+            result = await self.execute_tool(tool_call)
             
-            # 将结果发送回AI进行最终处理
-            return await get_final_response(result)
+            return result
             
-        except Exception:
-            # 跳过无效的工具调用
+        except Exception as e:
+            # 容错处理：跳过无效工具调用
             return llm_response
     
     return llm_response
 ```
 
-**关键设计特点**：
-- **容错性**: 无效的工具调用会被跳过，不会中断对话
-- **上下文保持**: 工具执行结果会与原始问题一起重新发送给AI
-- **格式标准化**: 使用JSON格式确保解析的一致性
+**关键设计洞察**：
+- **Prompt工程核心**：所有工具选择基于结构化文本描述，任何支持Prompt的模型理论上都能使用MCP
+- **Claude专项优化**：Anthropic针对Claude做了专门的MCP训练，因此Claude在工具选择准确性上表现更好
+- **双轮对话机制**：工具执行结果与原问题一起重新发送给AI，确保AI能基于实际数据生成自然回复
+- **容错设计**：无效的工具调用被自动跳过，保证对话连续性
 
 #### 3.3.3 开发最佳实践
 
