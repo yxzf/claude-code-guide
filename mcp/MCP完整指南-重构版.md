@@ -1,66 +1,7 @@
 # Model Context Protocol (MCP) 完整指南
 
-> **作者**: Claude Code Assistant  
-> **版本**: 2.1  
-> **最后更新**: 2025年01月  
-> **适用范围**: AI应用开发者、系统架构师、产品经理  
-> **更新内容**: 基于官方文档补充客户端原语、通知机制等核心概念
+![MCP主题图片](images/mcp1.jpg)
 
----
-
-## 文档概览
-
-本指南为你提供 Model Context Protocol (MCP) 的全面理解，从基础概念到高级实现，涵盖理论与实践。基于官方最新文档，深入解析MCP的完整架构体系，包括服务器原语、客户端原语、通知机制等核心概念。无论你是初学者还是经验丰富的开发者，都能在这里找到所需的知识。
-
-### 学习路径  
-- **视频学习**: 按三段式观看：概念理解 → 快速实践 → 生态了解
-- **新手入门**: 第1章概念 → 第5章快速实践 → 生态总览
-- **开发实战**: 第2章原理 → 第5章开发指南 → 生态项目选择  
-- **架构设计**: 第3章技术深入 → 第4章配置 → 协议标准
-
----
-
-## 目录结构
-
-### 第一部分：概念讲解（什么是MCP）
-1. [MCP 核心概念](#1-mcp-核心概念)
-   - 1.1 基础概念和价值
-   - 1.2 核心架构设计
-   - 1.3 MCP vs Function Call
-2. [MCP 怎么工作](#2-mcp-怎么工作)
-   - 2.1 从实际场景理解MCP工作流程
-   - 2.2 MCP双层架构
-   - 2.3 核心原语概述
-   - 2.4 MCP交互流程总览
-
-### 第二部分：技术深入（MCP技术原理）
-3. [MCP 技术深入](#3-mcp-技术深入)
-   - 3.1 服务器原语（Server Primitives）
-   - 3.2 客户端原语（Client Primitives）
-   - 3.3 AI工具选择机制深度解析
-
-### 第三部分：开发实战（怎么开发MCP）
-4. [开发实战指南](#4-开发实战指南)
-   - 4.1 开发环境配置
-   - 4.2 5分钟创建第一个MCP工具
-
-### 第四部分：安装配置（怎么用MCP）
-5. [MCP 安装配置指南](#5-mcp-安装配置指南)
-   - 5.1 claude mcp 命令概述
-   - 5.2 配置管理基础
-   - 5.3 安装方式一：Claude Desktop导入
-   - 5.4 安装方式二：JSON配置方式
-   - 5.5 安装方式三：命令行方式
-
-### 第五部分：生态总览（有哪些MCP）
-6. [MCP生态总览](#6-mcp生态总览)
-  - 热门MCP项目推荐
-  - Claude Desktop兼容性  
-  - 生态发展现状
-  - 项目选择指南
-- [总结](#总结)
-
----
 
 ## 1. MCP 核心概念
 
@@ -72,7 +13,7 @@
 
 MCP 采用**客户端-服务器架构设计**，AI应用通过MCP客户端与多个MCP服务器建立一对一连接：
 
-![MCP核心架构图](images/mcp_official_architecture.png)
+<img src="images/mcp_official_architecture.png" alt="MCP核心架构图" width="500">
 
 #### 架构参与者（Participants）
 
@@ -108,17 +49,7 @@ MCP Host (AI应用)
 #### 核心类比：AI 世界的 USB-C
 就像 USB-C 为各种设备提供了统一的连接标准，MCP 为 AI 模型与外部资源提供了统一的交互协议。
 
-```
-传统方式 (混乱):
-AI应用 ──┬─→ OpenAI Functions ──→ 工具A
-         ├─→ Google Extensions ──→ 工具B  
-         └─→ 自定义API ──→ 工具C
-
-MCP方式 (统一):
-AI应用 ──→ MCP协议 ──┬─→ MCP服务器A
-                      ├─→ MCP服务器B
-                      └─→ MCP服务器C
-```
+![MCP对比图](images/mcp2.jpg)
 
 ### 1.2 为什么需要MCP？
 
@@ -400,63 +331,84 @@ MCP基于官方架构设计，采用双向通信模式，包含两大类核心�
 
 #### 3.1.1 Tools - 工具调用
 
-**定义与作用**
-Tools是MCP服务器向客户端公开的可调用函数。AI模型通过工具实现与外部系统的交互，从简单的数据查询到复杂的系统操作。
+**定义**：Tools是MCP服务器向客户端公开的可调用函数，让AI能够执行具体操作。
 
-**完整技术规范**：
+**如何定义工具**：
+```python
+from mcp.server.fastmcp import FastMCP
 
-**工具声明结构**
-```json
-{
-  "name": "get_weather",
-  "description": "获取指定城市的天气信息",
-  "inputSchema": {
-    "type": "object",
-    "properties": {
-      "city": {
-        "type": "string",
-        "description": "城市名称"
-      },
-      "unit": {
-        "type": "string",
-        "enum": ["celsius", "fahrenheit"],
-        "default": "celsius"
-      }
-    },
-    "required": ["city"]
-  }
-}
+mcp = FastMCP("文件管理工具")
+
+@mcp.tool()
+def read_file(file_path: str) -> str:
+    """读取指定文件内容
+    
+    Args:
+        file_path: 文件路径
+        
+    Returns:
+        文件内容字符串
+    """
+    try:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            return f.read()
+    except FileNotFoundError:
+        return f"错误：文件 {file_path} 不存在"
+    except Exception as e:
+        return f"读取文件时出错：{str(e)}"
 ```
 
-**工具调用流程**
-```
-1. 工具发现: list_tools() → 返回可用工具列表
-2. 工具选择: AI分析并选择合适工具
-3. 参数验证: 根据inputSchema验证参数
-4. 工具执行: call_tool(name, arguments)
-5. 结果返回: 结构化响应或错误信息
-```
+**如何使用工具**：
+1. AI分析用户需求，自动选择合适工具
+2. AI填充必要参数，调用工具函数
+3. 工具执行后返回结果给AI
+4. AI基于结果生成用户友好的回复
+
+**实际效果**：
+- 用户说："帮我读取config.json文件内容"
+- AI自动调用`read_file("config.json")`
+- 返回文件内容或错误信息
 
 
 #### 3.1.2 Resources - 资源访问（可选功能）
 
-Resources提供AI上下文信息，如配置文件、日志等。实际使用中较少，大多数情况通过Tools获取数据更直接。
+**定义**：Resources为AI提供上下文信息，如配置文件、系统状态等。
 
+**如何定义资源**：
 ```python
 @mcp.resource("config://app/settings")
 def get_app_config():
-    return {"name": "My App", "version": "1.0.0"}
+    """获取应用配置信息"""
+    return {
+        "name": "My App",
+        "version": "1.0.0",
+        "debug_mode": False
+    }
 ```
+
+**使用场景**：AI可以通过`@config://app/settings`引用此资源，获取应用配置信息来提供更准确的建议。实际使用中较少，大多数情况通过Tools获取数据更直接。
 
 #### 3.1.3 Prompts - 提示模板（高级功能）
 
-Prompts是预定义模板，为复杂任务提供结构化指导。在实际项目中很少使用。
+**定义**：Prompts是预定义模板，为特定任务提供标准化处理模板。
 
+**如何定义提示模板**：
 ```python
 @mcp.prompt()
 def code_review_prompt(code: str) -> str:
-    return f"请审查以下代码：\n{code}"
+    """代码审查提示模板"""
+    return f"""请审查以下代码的：
+1. 代码规范和风格
+2. 潜在的bug和安全问题
+3. 性能优化建议
+4. 可读性和维护性
+
+代码：
+{code}
+"""
 ```
+
+**使用场景**：通过`/code-review`命令调用此模板，为代码审查提供标准化指导。在实际项目中使用较少。
 
 ### 3.2 客户端原语（Client Primitives）
 
