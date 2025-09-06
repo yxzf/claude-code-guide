@@ -17,9 +17,8 @@
   - [3.2 客户端原语（Client Primitives）](#32-客户端原语client-primitives)
   - [3.3 AI工具选择机制深度解析](#33-ai工具选择机制深度解析)
 - [4. 开发实战指南 (动手实践)](#4-开发实战指南-动手实践)
-  - [4.1 开发环境配置](#41-开发环境配置)
-  - [4.2 5分钟创建第一个MCP工具](#42-5分钟创建第一个mcp工具)
-  - [4.3 完整实战案例：桌面文档管理器](#43-完整实战案例桌面文档管理器)
+  - [4.1 5分钟创建第一个MCP工具](#41-5分钟创建第一个mcp工具)
+  - [4.2 完整实战案例：桌面文档管理器](#42-完整实战案例桌面文档管理器)
 - [5. MCP 安装配置指南](#5-mcp-安装配置指南)
   - [5.1 claude mcp 命令概述](#51-claude-mcp-命令概述)
   - [5.2 配置管理基础](#52-配置管理基础)
@@ -734,57 +733,7 @@ def analyze_sales_data(csv_data: str) -> str:
 
 ## 4. 开发实战指南 (动手实践)
 
-### 4.1 开发环境配置
-
-#### Python 开发环境
-
-```bash
-# 1. 安装现代 Python 包管理器
-curl -LsSf https://astral.sh/uv/install.sh | sh
-
-# 2. 创建项目
-mkdir my-mcp-server && cd my-mcp-server
-uv init --python=3.11
-
-# 3. 安装依赖
-uv add "mcp[cli]" "fastapi" "pydantic" "aiofiles"
-
-# 4. 创建项目结构
-mkdir -p src/{server,client,tools,config}
-touch src/server/__init__.py
-touch src/tools/__init__.py
-```
-
-#### 推荐的项目结构
-
-```
-my-mcp-server/
-├── pyproject.toml              # 项目配置
-├── README.md                   # 项目说明
-├── .env.example               # 环境变量模板
-├── requirements.txt           # 依赖列表
-├── src/
-│   ├── server/                # 服务器实现
-│   │   ├── __init__.py
-│   │   ├── main.py           # 主服务器逻辑
-│   │   └── config.py         # 配置管理
-│   ├── tools/                 # 工具实现
-│   │   ├── __init__.py
-│   │   ├── file_tools.py     # 文件操作工具
-│   │   ├── api_tools.py      # API 集成工具
-│   │   └── data_tools.py     # 数据处理工具
-│   └── client/                # 客户端工具
-│       ├── __init__.py
-│       └── test_client.py    # 测试客户端
-├── tests/                     # 测试代码
-│   ├── test_tools.py
-│   └── test_server.py
-└── docs/                      # 文档
-    ├── api.md
-    └── examples.md
-```
-
-### 4.2 5分钟创建第一个MCP工具
+### 4.1 5分钟创建第一个MCP工具
 
 #### 目标：创建一个天气查询服务器
 基于官方示例，让Claude能够查询美国天气预报和灾害预警
@@ -948,7 +897,7 @@ Claude会自动：
 - **错误处理**：API调用的容错机制
 - **异步支持**：处理网络请求的最佳实践
 
-### 4.3 进阶实践：完整MCP服务器
+### 4.2 进阶实践：完整MCP服务器
 
 #### 实际项目案例：桌面txt文件管理器
 
