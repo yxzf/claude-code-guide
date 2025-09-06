@@ -295,7 +295,28 @@ Claude整合信息：
 
 这就是MCP的魅力：**让AI能够像人一样，在需要时主动获取实时信息来回答问题**。
 
-### 2.2 三大核心能力概述
+### 2.2 MCP双层架构
+
+MCP采用分层设计，包含两个核心层次：
+
+#### 数据层（Data Layer）
+- **协议基础**：基于JSON-RPC 2.0的通信协议
+- **生命周期管理**：处理连接初始化、能力协商、连接终止
+- **核心原语**：定义Tools、Resources、Prompts等功能
+- **消息语义**：规定客户端和服务器之间的交互规范
+
+#### 传输层（Transport Layer）  
+- **通信机制**：管理客户端和服务器之间的连接通道
+- **STDIO传输**：本地进程间通信，性能最优，无网络开销
+- **HTTP传输**：远程服务器通信，支持标准HTTP认证
+- **消息框架**：处理连接建立、消息传递、安全通信
+
+**分层优势**：
+- 数据层专注协议语义，传输层处理通信细节
+- 相同的JSON-RPC消息格式适用于所有传输方式
+- 架构清晰，便于扩展和维护
+
+### 2.3 三大核心能力概述
 
 现在我们了解了MCP的实际效果，让我们快速认识支撑这一切的三大核心能力：
 
@@ -340,7 +361,7 @@ Prompts确保AI能够以专业、一致的方式处理复杂任务。
 
 > 💡 **想深入了解技术实现细节？** 请参考第3章《MCP技术深入》，那里有完整的架构解析和实现原理。
 
-### 2.3 MCP交互流程总览
+### 2.4 MCP交互流程总览
 
 现在我们知道了MCP的三大核心能力，让我们看看它们是如何协同工作的：
 
@@ -360,29 +381,6 @@ AI理解意图
 生成回复
 ```
 
-#### 五个关键环节
-
-**1. 用户提问**
-- 自然语言描述需求
-- 可以是简单查询或复杂任务
-
-**2. AI理解意图**
-- 分析问题类型和所需信息
-- 决定使用哪种MCP能力
-
-**3. 能力选择**
-- **需要执行操作** → 选择Tools
-- **需要上下文数据** → 读取Resources  
-- **需要专业指导** → 应用Prompts
-
-**4. 执行操作**
-- 安全授权检查
-- 实际执行相应操作
-- 获取实时结果
-
-**5. 整合回复**
-- 将原始数据转换为自然语言
-- 结合上下文提供完整答案
 
 #### 实际运行示例
 
@@ -457,216 +455,25 @@ Tools是MCP服务器向客户端公开的可调用函数。AI模型通过工具�
 5. 结果返回: 结构化响应或错误信息
 ```
 
-**高级特性**
 
-**参数验证与类型安全**
-```python
-from mcp.server.fastmcp import FastMCP
-from pydantic import BaseModel, Field
+#### 3.1.2 Resources - 上下文资源（可选功能）
 
-class WeatherRequest(BaseModel):
-    city: str = Field(description="城市名称", min_length=1)
-    unit: str = Field(default="celsius", regex="^(celsius|fahrenheit)$")
+Resources提供AI上下文信息，如配置文件、日志等。实际使用中较少，大多数情况通过Tools获取数据更直接。
 
-@mcp.tool()
-def get_weather(request: WeatherRequest) -> dict:
-    """类型安全的天气查询工具"""
-    return {"city": request.city, "temp": 25, "unit": request.unit}
-```
-
-**错误处理机制**
-```python
-@mcp.tool()
-def risky_operation(file_path: str) -> str:
-    """演示错误处理的工具"""
-    try:
-        with open(file_path, 'r') as f:
-            return f.read()
-    except FileNotFoundError:
-        raise McpError(
-            code=-1, 
-            message=f"文件不存在: {file_path}"
-        )
-    except PermissionError:
-        raise McpError(
-            code=-2, 
-            message=f"权限不足: {file_path}"
-        )
-```
-
-#### 3.1.2 Resources - 上下文与数据源
-
-**定义与作用**
-Resources提供AI模型所需的上下文信息，包括文件内容、数据库状态、配置信息等。Resources是只读的，为AI决策提供必要的背景信息。
-
-**Resource URI设计规范**
-```
-协议://主机/路径?查询参数#片段
-
-示例:
-- file://localhost/home/user/config.json
-- database://prod/users/table?limit=100
-- api://github.com/repos/owner/repo/issues
-```
-
-**Resources实现**
-
-**基础Resource实现**
 ```python
 @mcp.resource("config://app/settings")
 def get_app_config():
-    """应用配置资源"""
-    return {
-        "name": "My App",
-        "version": "1.0.0",
-        "database_url": "postgresql://...",
-        "debug_mode": False
-    }
-
-@mcp.resource("logs://app/recent")
-def get_recent_logs():
-    """最近日志资源"""
-    return "\n".join([
-        "2024-01-15 10:00:00 INFO: Application started",
-        "2024-01-15 10:01:00 DEBUG: Processing request",
-        "2024-01-15 10:02:00 ERROR: Database connection failed"
-    ])
+    return {"name": "My App", "version": "1.0.0"}
 ```
 
-**动态Resources**
-```python
-@mcp.resource("database://users/{user_id}")
-def get_user_profile(user_id: str):
-    """动态用户资源"""
-    user = database.get_user(user_id)
-    if not user:
-        raise McpError(code=-1, message=f"用户 {user_id} 不存在")
-    
-    return {
-        "id": user.id,
-        "name": user.name,
-        "email": user.email,
-        "created_at": user.created_at.isoformat()
-    }
-```
+#### 3.1.3 Prompts - 提示模板（高级功能）
 
-**Resources列表和发现**
-```python
-def list_resources():
-    """返回可用资源列表"""
-    return [
-        {
-            "uri": "config://app/settings",
-            "name": "应用配置",
-            "description": "当前应用的配置信息"
-        },
-        {
-            "uri": "logs://app/recent", 
-            "name": "最近日志",
-            "description": "应用最近的运行日志"
-        }
-    ]
-```
+Prompts是预定义模板，为复杂任务提供结构化指导。在实际项目中很少使用。
 
-#### 3.1.3 Prompts - 结构化提示模板
-
-**定义与作用**
-Prompts是预定义的提示模板，为特定任务提供结构化指导。通过Prompts，AI能够以一致、专业的方式处理复杂任务。
-
-**Prompt结构设计**
 ```python
 @mcp.prompt()
-def code_review_prompt(
-    code: str,
-    language: str = "python",
-    focus_areas: list[str] = None
-) -> str:
-    """代码审查提示模板"""
-    focus_text = ""
-    if focus_areas:
-        focus_text = f"\n特别关注: {', '.join(focus_areas)}"
-    
-    return f"""
-请对以下{language}代码进行专业审查：
-
-```{language}
-{code}
-```
-
-审查要点：
-1. 代码质量和可读性
-2. 潜在的bug和安全问题  
-3. 性能优化建议
-4. 最佳实践遵循情况{focus_text}
-
-请提供：
-- 具体的改进建议
-- 严重性评级（高/中/低）
-- 修改示例代码
-"""
-
-@mcp.prompt()
-def data_analysis_prompt(
-    dataset_info: str,
-    analysis_goals: list[str]
-) -> str:
-    """数据分析提示模板"""
-    goals_text = "\n".join([f"- {goal}" for goal in analysis_goals])
-    
-    return f"""
-基于以下数据集信息进行分析：
-
-{dataset_info}
-
-分析目标：
-{goals_text}
-
-请提供：
-1. 数据质量评估
-2. 探索性数据分析建议
-3. 适合的分析方法
-4. 预期的洞察和结论
-5. 可视化建议
-"""
-```
-
-**高级Prompt特性**
-
-**条件分支Prompt**
-```python
-@mcp.prompt()
-def diagnostic_prompt(
-    system_type: str,
-    error_symptoms: list[str],
-    severity: str = "medium"
-) -> str:
-    """自适应诊断提示"""
-    
-    if system_type == "database":
-        focus = "查询性能、连接问题、锁定状态"
-    elif system_type == "web_server":
-        focus = "响应时间、内存使用、并发处理"
-    else:
-        focus = "系统资源、进程状态、网络连接"
-    
-    urgency = "立即处理" if severity == "high" else "优先处理" if severity == "medium" else "常规处理"
-    
-    return f"""
-{system_type.upper()} 系统故障诊断
-
-症状描述：
-{chr(10).join([f"- {symptom}" for symptom in error_symptoms])}
-
-处理级别：{urgency}
-诊断重点：{focus}
-
-请按以下步骤进行诊断：
-1. 根本原因分析
-2. 影响范围评估  
-3. 解决方案建议
-4. 预防措施
-5. 监控建议
-"""
+def code_review_prompt(code: str) -> str:
+    return f"请审查以下代码：\n{code}"
 ```
 
 ### 3.2 客户端原语（Client Primitives）
@@ -753,150 +560,19 @@ def complex_operation():
         raise
 ```
 
-### 3.3 通知机制（Notifications）
+### 3.3 高级特性概述
 
-MCP支持双向通知，实现实时状态同步和事件通知。
+MCP还支持一些高级特性，但在实际开发中较少使用：
 
-#### 3.3.1 服务器到客户端通知
+**通知机制**：支持服务器和客户端之间的实时通知，用于动态更新工具列表或资源状态。
 
-**Resource更新通知**
-```python
-class FileSystemServer:
-    def __init__(self):
-        self.watched_files = set()
-    
-    def watch_file(self, file_path: str):
-        """监视文件变化"""
-        self.watched_files.add(file_path)
-        
-        # 文件变化时发送通知
-        def on_file_change():
-            self.notify_resource_updated(
-                uri=f"file://{file_path}"
-            )
-        
-        setup_file_watcher(file_path, on_file_change)
-```
+**传输协议**：
+- STDIO传输：用于本地进程通信
+- HTTP传输：用于远程服务器通信，支持标准认证
 
-**Tool列表更新通知**
-```python
-def register_dynamic_tool(tool_name: str, tool_func):
-    """动态注册工具"""
-    self.tools[tool_name] = tool_func
-    
-    # 通知客户端工具列表已更新
-    self.notify_tools_changed()
-```
+**JSON-RPC协议**：所有通信基于JSON-RPC 2.0标准，保证消息格式统一。
 
-#### 3.3.2 客户端到服务器通知
-
-**进度通知**
-```python
-def handle_progress_notification(progress: dict):
-    """处理进度通知"""
-    print(f"进度更新: {progress['completed']}/{progress['total']}")
-    
-    if progress['completed'] == progress['total']:
-        print("任务完成！")
-```
-
-### 3.4 双向通信机制
-
-#### 3.4.1 传输层协议
-
-**STDIO传输**
-```python
-# 服务器端
-class StdioServer:
-    def __init__(self):
-        self.stdin = sys.stdin
-        self.stdout = sys.stdout
-    
-    def read_message(self):
-        """从stdin读取JSON-RPC消息"""
-        line = self.stdin.readline()
-        return json.loads(line)
-    
-    def send_message(self, message):
-        """向stdout发送JSON-RPC消息"""
-        json.dump(message, self.stdout)
-        self.stdout.write('\n')
-        self.stdout.flush()
-```
-
-**HTTP传输**
-```python
-from fastapi import FastAPI
-from mcp.server.fastmcp import FastMCP
-
-app = FastAPI()
-mcp = FastMCP("HTTP服务器")
-
-@app.post("/mcp")
-async def mcp_endpoint(request: dict):
-    """HTTP MCP端点"""
-    return await mcp.handle_request(request)
-```
-
-**SSE传输**
-```python
-@app.get("/mcp/sse")
-async def sse_endpoint():
-    """服务器发送事件端点"""
-    
-    async def event_stream():
-        while True:
-            # 等待新事件
-            event = await wait_for_mcp_event()
-            yield f"data: {json.dumps(event)}\n\n"
-    
-    return StreamingResponse(
-        event_stream(), 
-        media_type="text/plain"
-    )
-```
-
-#### 3.4.2 消息协议规范
-
-**JSON-RPC 2.0基础结构**
-```json
-{
-  "jsonrpc": "2.0",
-  "method": "tools/call",
-  "params": {
-    "name": "get_weather",
-    "arguments": {
-      "city": "Beijing"
-    }
-  },
-  "id": 1
-}
-```
-
-**MCP特定扩展**
-```json
-{
-  "jsonrpc": "2.0", 
-  "method": "mcp/initialize",
-  "params": {
-    "protocolVersion": "2024-11-05",
-    "capabilities": {
-      "tools": {},
-      "resources": {},
-      "prompts": {},
-      "sampling": {},
-      "logging": {}
-    },
-    "clientInfo": {
-      "name": "Claude Code",
-      "version": "1.0.0"
-    }
-  },
-  "id": 1
-}
-```
-
-### 3.5 AI工具选择机制详解
+这些特性大多由MCP框架自动处理，开发者通常无需关心底层实现细节。
 
 #### 3.5.1 工具选择算法
 
