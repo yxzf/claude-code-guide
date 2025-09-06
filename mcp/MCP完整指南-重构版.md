@@ -634,6 +634,141 @@ def complex_operation():
         raise
 ```
 
+### 3.3 AI工具选择机制深度解析
+
+MCP的核心魅力在于AI能够智能地选择和调用合适的工具。了解这个机制有助于开发者设计更好的工具描述和参数定义。
+
+#### 3.3.1 工具选择的实现原理
+
+**基于Prompt Engineering的选择机制**
+
+当用户提出问题时，MCP客户端会将所有可用工具的描述信息格式化为结构化文本，作为system prompt的一部分发送给AI模型：
+
+```python
+# 工具描述格式化示例
+def format_for_llm(tool) -> str:
+    return f"""
+Tool: {tool.name}
+Description: {tool.description}
+Arguments:
+- city: 城市名称 (required)
+- unit: 温度单位 (optional, default: celsius)
+"""
+
+# System Prompt构建
+system_message = (
+    "You are a helpful assistant with access to these tools:\n\n"
+    f"{tools_description}\n"
+    "Choose the appropriate tool based on the user's question. "
+    "If no tool is needed, reply directly.\n\n"
+    "IMPORTANT: When you need to use a tool, respond with JSON format:\n"
+    '{"tool": "tool-name", "arguments": {"param": "value"}}'
+)
+```
+
+**工具描述的来源**
+
+MCP框架通过装饰器自动提取工具信息：
+
+```python
+@mcp.tool()
+def get_weather(city: str, unit: str = "celsius") -> str:
+    """获取指定城市的天气信息
+    
+    Args:
+        city: 城市名称
+        unit: 温度单位，支持celsius和fahrenheit
+    """
+    # 工具实现
+```
+
+- **name**: 来自函数名 `get_weather`
+- **description**: 来自函数的docstring
+- **arguments**: 通过类型注解自动推断参数类型和要求
+
+#### 3.3.2 工具执行与结果反馈
+
+**执行流程**
+
+```mermaid
+sequenceDiagram
+    participant U as 用户
+    participant AI as AI模型
+    participant C as MCP客户端
+    participant S as MCP服务器
+    
+    U->>AI: 用户问题 + 工具描述
+    AI->>AI: 分析需求，选择工具
+    AI->>C: 返回JSON格式的工具调用
+    C->>S: 执行指定工具
+    S-->>C: 返回执行结果
+    C->>AI: 工具结果 + 原始问题
+    AI->>U: 生成最终回复
+```
+
+**结果处理机制**
+
+```python
+# 简化的执行逻辑
+async def process_llm_response(llm_response):
+    # 检查是否包含工具调用JSON
+    if is_tool_call(llm_response):
+        try:
+            # 解析工具调用请求
+            tool_call = parse_tool_call(llm_response)
+            
+            # 执行工具
+            result = await execute_tool(tool_call)
+            
+            # 将结果发送回AI进行最终处理
+            return await get_final_response(result)
+            
+        except Exception:
+            # 跳过无效的工具调用
+            return llm_response
+    
+    return llm_response
+```
+
+**关键设计特点**：
+- **容错性**: 无效的工具调用会被跳过，不会中断对话
+- **上下文保持**: 工具执行结果会与原始问题一起重新发送给AI
+- **格式标准化**: 使用JSON格式确保解析的一致性
+
+#### 3.3.3 开发最佳实践
+
+**工具描述优化**
+
+```python
+# ❌ 模糊的描述
+@mcp.tool()
+def process_data(data: str) -> str:
+    """处理数据"""
+    pass
+
+# ✅ 清晰的描述  
+@mcp.tool()
+def analyze_sales_data(csv_data: str) -> str:
+    """分析销售数据并生成报告
+    
+    功能：解析CSV格式的销售数据，计算总销售额、平均订单价值、
+    最佳销售产品等关键指标，并生成结构化的分析报告。
+    
+    Args:
+        csv_data: CSV格式的销售数据，必须包含date,product,amount列
+        
+    Returns:
+        包含销售分析结果的JSON格式报告
+    """
+    pass
+```
+
+**参数设计原则**
+
+1. **参数名要语义化**: 使用`city_name`而不是`c`
+2. **提供默认值**: 减少必需参数数量
+3. **类型注解完整**: 帮助MCP生成准确的参数描述
+4. **文档字符串详细**: 说明参数用途、格式要求、示例值
 
 ---
 
@@ -1130,142 +1265,6 @@ claude mcp reset-project-choices
 /mcp resources
 /mcp prompts
 ```
-
-### 3.3 AI工具选择机制深度解析
-
-MCP的核心魅力在于AI能够智能地选择和调用合适的工具。了解这个机制有助于开发者设计更好的工具描述和参数定义。
-
-#### 3.3.1 工具选择的实现原理
-
-**基于Prompt Engineering的选择机制**
-
-当用户提出问题时，MCP客户端会将所有可用工具的描述信息格式化为结构化文本，作为system prompt的一部分发送给AI模型：
-
-```python
-# 工具描述格式化示例
-def format_for_llm(tool) -> str:
-    return f"""
-Tool: {tool.name}
-Description: {tool.description}
-Arguments:
-- city: 城市名称 (required)
-- unit: 温度单位 (optional, default: celsius)
-"""
-
-# System Prompt构建
-system_message = (
-    "You are a helpful assistant with access to these tools:\n\n"
-    f"{tools_description}\n"
-    "Choose the appropriate tool based on the user's question. "
-    "If no tool is needed, reply directly.\n\n"
-    "IMPORTANT: When you need to use a tool, respond with JSON format:\n"
-    '{"tool": "tool-name", "arguments": {"param": "value"}}'
-)
-```
-
-**工具描述的来源**
-
-MCP框架通过装饰器自动提取工具信息：
-
-```python
-@mcp.tool()
-def get_weather(city: str, unit: str = "celsius") -> str:
-    """获取指定城市的天气信息
-    
-    Args:
-        city: 城市名称
-        unit: 温度单位，支持celsius和fahrenheit
-    """
-    # 工具实现
-```
-
-- **name**: 来自函数名 `get_weather`
-- **description**: 来自函数的docstring
-- **arguments**: 通过类型注解自动推断参数类型和要求
-
-#### 3.3.2 工具执行与结果反馈
-
-**执行流程**
-
-```mermaid
-sequenceDiagram
-    participant U as 用户
-    participant AI as AI模型
-    participant C as MCP客户端
-    participant S as MCP服务器
-    
-    U->>AI: 用户问题 + 工具描述
-    AI->>AI: 分析需求，选择工具
-    AI->>C: 返回JSON格式的工具调用
-    C->>S: 执行指定工具
-    S-->>C: 返回执行结果
-    C->>AI: 工具结果 + 原始问题
-    AI->>U: 生成最终回复
-```
-
-**结果处理机制**
-
-```python
-# 简化的执行逻辑
-async def process_llm_response(llm_response):
-    # 检查是否包含工具调用JSON
-    if is_tool_call(llm_response):
-        try:
-            # 解析工具调用请求
-            tool_call = parse_tool_call(llm_response)
-            
-            # 执行工具
-            result = await execute_tool(tool_call)
-            
-            # 将结果发送回AI进行最终处理
-            return await get_final_response(result)
-            
-        except Exception:
-            # 跳过无效的工具调用
-            return llm_response
-    
-    return llm_response
-```
-
-**关键设计特点**：
-- **容错性**: 无效的工具调用会被跳过，不会中断对话
-- **上下文保持**: 工具执行结果会与原始问题一起重新发送给AI
-- **格式标准化**: 使用JSON格式确保解析的一致性
-
-#### 3.3.3 开发最佳实践
-
-**工具描述优化**
-
-```python
-# ❌ 模糊的描述
-@mcp.tool()
-def process_data(data: str) -> str:
-    """处理数据"""
-    pass
-
-# ✅ 清晰的描述  
-@mcp.tool()
-def analyze_sales_data(csv_data: str) -> str:
-    """分析销售数据并生成报告
-    
-    功能：解析CSV格式的销售数据，计算总销售额、平均订单价值、
-    最佳销售产品等关键指标，并生成结构化的分析报告。
-    
-    Args:
-        csv_data: CSV格式的销售数据，必须包含date,product,amount列
-        
-    Returns:
-        包含销售分析结果的JSON格式报告
-    """
-    pass
-```
-
-**参数设计原则**
-
-1. **参数名要语义化**: 使用`city_name`而不是`c`
-2. **提供默认值**: 减少必需参数数量
-3. **类型注解完整**: 帮助MCP生成准确的参数描述
-4. **文档字符串详细**: 说明参数用途、格式要求、示例值
 
 ---
 
