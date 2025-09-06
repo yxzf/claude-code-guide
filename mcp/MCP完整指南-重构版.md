@@ -786,89 +786,167 @@ my-mcp-server/
 
 ### 4.2 5分钟创建第一个MCP工具
 
-#### 目标：创建一个文件计数器
-让Claude能够统计你桌面上的文件数量
+#### 目标：创建一个天气查询服务器
+基于官方示例，让Claude能够查询美国天气预报和灾害预警
 
-#### 三步搞定
+#### 四步搞定
 
 **Step 1: 环境搭建**
 ```bash
+# 安装现代Python包管理器
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# 创建项目
+mkdir weather-server && cd weather-server
+uv init --python=3.11
+
 # 安装依赖
-pip install "mcp[cli]"
+uv add "mcp[cli]" httpx
 
 # 创建文件
-touch file_counter.py
+touch weather.py
 ```
 
 **Step 2: 核心代码**
 
 <details>
-<summary>点击展开完整代码 (file_counter.py)</summary>
+<summary>点击展开完整代码 (weather.py)</summary>
 
 ```python
-import os
-from pathlib import Path
+from typing import Any
+import httpx
 from mcp.server.fastmcp import FastMCP
 
-# 创建MCP服务器
-mcp = FastMCP("文件计数器")
+# 初始化FastMCP服务器
+mcp = FastMCP("weather")
+
+# 常量配置
+NWS_API_BASE = "https://api.weather.gov"
+USER_AGENT = "weather-app/1.0"
+
+async def make_nws_request(url: str) -> dict[str, Any] | None:
+    """向NWS API发送请求，带错误处理"""
+    headers = {
+        "User-Agent": USER_AGENT,
+        "Accept": "application/geo+json"
+    }
+    
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.get(url, headers=headers, timeout=30.0)
+            response.raise_for_status()
+            return response.json()
+        except Exception:
+            return None
+
+def format_alert(feature: dict) -> str:
+    """格式化预警信息为可读字符串"""
+    props = feature["properties"]
+    return f"""
+事件: {props.get('event', 'Unknown')}
+区域: {props.get('areaDesc', 'Unknown')}
+严重程度: {props.get('severity', 'Unknown')}
+描述: {props.get('description', 'No description available')}
+指导: {props.get('instruction', 'No specific instructions provided')}
+"""
 
 @mcp.tool()
-def count_files(directory: str = "Desktop") -> str:
-    """统计指定目录的文件数量
+async def get_alerts(state: str) -> str:
+    """获取美国州的天气预警
     
     Args:
-        directory: 目录名称，默认Desktop
-        
-    Returns:
-        文件统计结果
+        state: 美国州代码，如CA、NY
     """
-    username = os.getenv("USER") or os.getenv("USERNAME")
-    dir_path = Path(f"/Users/{username}/{directory}")
+    url = f"{NWS_API_BASE}/alerts/active/area/{state}"
+    data = await make_nws_request(url)
     
-    if not dir_path.exists():
-        return f"目录 {directory} 不存在"
+    if not data or "features" not in data:
+        return "无法获取预警信息或未找到预警。"
     
-    files = list(dir_path.glob("*"))
-    file_count = len([f for f in files if f.is_file()])
-    folder_count = len([f for f in files if f.is_dir()])
+    if not data["features"]:
+        return "该州没有活跃的天气预警。"
     
-    return f"{directory} 目录统计:\n文件: {file_count} 个\n文件夹: {folder_count} 个"
+    alerts = [format_alert(feature) for feature in data["features"]]
+    return "\n---\n".join(alerts)
+
+@mcp.tool()
+async def get_forecast(latitude: float, longitude: float) -> str:
+    """获取指定位置的天气预报
+    
+    Args:
+        latitude: 纬度
+        longitude: 经度
+    """
+    # 首先获取预报网格端点
+    points_url = f"{NWS_API_BASE}/points/{latitude},{longitude}"
+    points_data = await make_nws_request(points_url)
+    
+    if not points_data:
+        return "无法获取该位置的预报数据。"
+    
+    # 从points响应中获取预报URL
+    forecast_url = points_data["properties"]["forecast"]
+    forecast_data = await make_nws_request(forecast_url)
+    
+    if not forecast_data:
+        return "无法获取详细预报。"
+    
+    # 格式化预报时段为可读格式
+    periods = forecast_data["properties"]["periods"]
+    forecasts = []
+    
+    for period in periods[:5]:  # 只显示接下来5个时段
+        forecast = f"""
+{period['name']}:
+温度: {period['temperature']}°{period['temperatureUnit']}
+风力: {period['windSpeed']} {period['windDirection']}
+预报: {period['detailedForecast']}
+"""
+        forecasts.append(forecast)
+    
+    return "\n---\n".join(forecasts)
 
 if __name__ == "__main__":
-    mcp.run()
+    # 初始化并运行服务器
+    mcp.run(transport='stdio')
 ```
 
 </details>
 
 **Step 3: 配置Claude Code**
 
-<details>
-<summary>点击展开配置步骤</summary>
-
 ```bash
 # 在当前项目中添加MCP服务器
-claude mcp add file-counter -- python file_counter.py
+claude mcp add weather -- uv run weather.py
 
 # 验证配置
 claude mcp list
 
-# 在Claude Code中测试
-/mcp
+# 查看详细信息
+claude mcp get weather
 ```
 
-</details>
+**Step 4: 测试效果**
 
-#### 测试效果
+在Claude中测试以下问题：
 
-在Claude中说："帮我统计一下桌面文件数量"
+1. **天气预报查询**：
+   "萨克拉门托的天气怎么样？"（纬度38.5816，经度-121.4944）
 
-Claude会自动调用你的工具并返回结果！
+2. **预警信息查询**：
+   "德克萨斯州有什么天气预警吗？"
 
-#### 核心要点
-- **装饰器 `@mcp.tool()`**：将普通函数变成MCP工具
-- **文档字符串**：AI理解工具功能的关键
-- **类型注解**：确保参数验证和错误处理
+Claude会自动：
+- 识别需要天气查询功能
+- 选择合适的工具（get_forecast 或 get_alerts）
+- 调用美国国家气象局API
+- 返回格式化的天气信息
+
+#### 核心学习点
+- **装饰器 `@mcp.tool()`**：将异步函数变成MCP工具
+- **类型注解**：支持多种参数类型（字符串、浮点数）
+- **错误处理**：API调用的容错机制
+- **异步支持**：处理网络请求的最佳实践
 
 ### 4.3 进阶实践：完整MCP服务器
 
