@@ -533,22 +533,15 @@ def complex_operation():
 MCP最神奇的地方在于：**AI是如何从众多工具中精确选择合适的那一个**？这背后的原理值得深入了解。
 
 ```mermaid
-flowchart TD
-    A[用户提问] --> B[MCP客户端]
-    B --> C[格式化所有工具描述]
-    C --> D[构建System Prompt]
-    D --> E[发送给AI模型]
-    E --> F{AI分析判断}
-    F -->|需要工具| G[输出JSON格式工具调用]
-    F -->|无需工具| H[直接回复]
-    G --> I[执行指定工具]
-    I --> J[获取执行结果]
-    J --> K[结果+原问题重新发给AI]
-    K --> L[生成最终自然语言回复]
-    
-    style F fill:#e1f5fe
-    style G fill:#fff3e0
-    style I fill:#f3e5f5
+flowchart LR
+    A[用户提问] --> B[格式化工具描述]
+    B --> C[发送给AI模型]
+    C --> D{需要工具?}
+    D -->|是| E[输出JSON调用]
+    D -->|否| F[直接回复]
+    E --> G[执行工具]
+    G --> H[结果+原问题重新发给AI]
+    H --> I[生成最终回复]
 ```
 
 #### 3.3.1 工具如何"自我介绍"：描述格式化机制
@@ -562,7 +555,7 @@ flowchart TD
 当用户提问时，MCP客户端会将所有可用工具转换为结构化文本：
 
 ```python
-# 工具描述格式化（基于知乎文章源码分析）
+# 工具描述格式化机制
 class Tool:
     def format_for_llm(self) -> str:
         """将工具信息格式化为AI可理解的文本"""
@@ -642,13 +635,13 @@ def get_weather(city: str, unit: str = "celsius") -> str:
 
 **执行逻辑**：AI通过分析用户问题和工具描述，输出JSON格式的调用指令，然后系统执行工具并将结果反馈给AI。
 
-基于知乎文章的源码深入分析，AI使用工具的过程可以分为两个关键步骤：
+通过源码深入分析，AI使用工具的过程可以分为两个关键步骤：
 
 **步骤1：AI分析决策阶段**
 AI分析用户问题，对比所有工具描述，决定是否需要工具以及选择哪个工具：
 
 ```python
-# 简化的核心执行逻辑（基于知乎文章源码）
+# 简化的核心执行逻辑
 while True:
     # 用户输入消息
     messages.append({"role": "user", "content": user_input})
