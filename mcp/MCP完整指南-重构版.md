@@ -761,34 +761,21 @@ touch weather.py
 #### 代码结构示意图
 
 ```
-weather.py 天气服务器架构
-├── 📦 导入模块
-│   ├── typing.Any          # 类型注解
-│   ├── httpx               # 异步HTTP客户端
-│   └── FastMCP            # MCP框架
-│
-├── 🔧 基础设施层
-│   ├── mcp = FastMCP("weather")     # 服务器实例
-│   ├── NWS_API_BASE                 # API基础URL
-│   ├── USER_AGENT                   # 请求头标识
-│   ├── make_nws_request()           # 统一API调用函数
-│   └── format_alert()               # 警报格式化工具
-│
-├── 🛠️ MCP工具层（AI可调用）
-│   ├── @mcp.tool()
-│   │   └── get_alerts(state: str)   # 获取州天气预警
-│   └── @mcp.tool()
-│       └── get_forecast(lat, lon)   # 获取位置天气预报
-│
-└── 🚀 服务器启动
-    └── mcp.run(transport='stdio')   # STDIO传输启动
+weather.py 核心组件
+├── 🛠️ MCP工具（核心）
+│   ├── get_alerts(state)     # 天气预警
+│   └── get_forecast(lat,lon) # 天气预报
+├── 🔧 辅助函数
+│   ├── make_nws_request()    # API调用
+│   └── format_alert()       # 数据格式化
+└── 🚀 mcp.run()             # 启动服务器
 ```
 
 #### 数据流向图
 
 ```
 用户提问 → Claude → MCP客户端 → weather.py → 美国气象局API
-    ↓                                ↑              ↓
+    ↑                                ↓              ↓
 格式化回答 ← Claude ← MCP客户端 ← 数据处理 ← JSON响应
 ```
 
