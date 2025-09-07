@@ -738,7 +738,7 @@ def analyze_sales_data(csv_data: str) -> str:
 #### 目标：创建一个天气查询服务器
 基于官方示例，让Claude能够查询美国天气预报和灾害预警
 
-#### 四步搞定
+#### 五步搞定
 
 **Step 1: 环境搭建**
 ```bash
@@ -896,7 +896,27 @@ if __name__ == "__main__":
 
 </details>
 
-**Step 3: 配置Claude Code**
+**Step 3: 测试服务器**
+
+服务器代码完成后，首先进行独立测试确保功能正常：
+
+```bash
+# 启动MCP服务器（独立运行模式）
+uv run weather.py
+```
+
+**预期行为**：
+- 服务器启动后会等待来自MCP客户端的消息
+- 不会有可见输出，这是正常的（服务器在监听STDIO输入）
+- 按 `Ctrl+C` 可以停止服务器
+
+**这一步的作用**：
+- ✅ 验证代码语法正确
+- ✅ 确认依赖库正常加载
+- ✅ 检查服务器能够正常启动
+- ✅ 为下一步的Claude配置做准备
+
+**Step 4: 配置Claude Code**
 
 ```bash
 # 在当前项目中添加MCP服务器
@@ -909,7 +929,7 @@ claude mcp list
 claude mcp get weather
 ```
 
-**Step 4: 测试效果**
+**Step 5: 测试效果**
 
 在Claude中测试以下问题：
 
