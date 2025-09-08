@@ -4,7 +4,10 @@
       "Bash(git add:*)",
       "Bash(git push:*)",
       "Bash(git config:*)",
-      "Bash(mv:*)"
+      "Bash(mv:*)",
+      "Bash(git restore:*)",
+      "mcp__chrome-mcp-server__chrome_navigate",
+      "mcp__chrome-mcp-server__chrome_get_web_content"
     ],
     "deny": [],
     "ask": []
