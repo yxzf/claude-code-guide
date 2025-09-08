@@ -22,10 +22,8 @@
 - [5. MCP 安装配置指南](#5-mcp-安装配置指南)
   - [5.1 claude mcp add 命令详解](#51-claude-mcp-add-命令详解)
   - [5.2 其他MCP管理命令](#52-其他mcp管理命令)
-  - [5.3 配置管理基础](#53-配置管理基础)
-  - [5.4 安装方式一：Claude Desktop导入](#54-安装方式一claude-desktop导入)
-  - [5.5 安装方式二：JSON配置方式](#55-安装方式二json配置方式)
-  - [5.6 安装方式三：命令行方式](#56-安装方式三命令行方式)
+  - [5.3 三种安装配置方式](#53-三种安装配置方式)
+  - [5.4 配置最佳实践](#54-配置最佳实践)
 - [6. MCP 生态系统](#6-mcp-生态系统)
   - [6.1 官方工具集](#61-官方工具集)
   - [6.2 社区工具推荐](#62-社区工具推荐)
@@ -1289,412 +1287,215 @@ claude mcp import-from-claude-desktop [选项]
 --preserve-scope            # 保持原有作用域设置
 ```
 
-### 5.3 配置管理基础
+### 5.3 三种安装配置方式
 
-#### MCP 安装范围详解
+MCP服务器支持三种配置方式，每种方式都有其适用场景和配置范围。
 
-MCP 服务器可以在三个不同的范围级别配置，了解这些范围有助于选择最佳配置方式：
+#### 配置范围说明
 
-**本地范围（Local）**：
-- **存储位置**：项目特定用户设置  
-- **适用场景**：个人开发、实验配置、敏感凭据
-- **访问权限**：仅当前项目目录可用
-- **命令示例**：`claude mcp add -s local my-server`
+**配置范围决定MCP服务器的可见性和共享方式**：
 
-**项目范围（Project）**：
-- **存储位置**：项目根目录的 `.mcp.json` 文件
-- **适用场景**：团队共享、项目特定工具、版本控制
-- **访问权限**：所有团队成员（需要批准）
-- **命令示例**：`claude mcp add -s project team-tools`
+| 范围 | 存储位置 | 适用场景 | 命令示例 |
+|------|---------|---------|----------|
+| **local** | 当前目录`.claude/mcp.json` | 项目特定、敏感配置 | `claude mcp add -s local` |
+| **project** | 项目根目录`.mcp.json` | 团队共享、版本控制 | `claude mcp add -s project` |
+| **user** | `~/.claude/mcp.json` | 个人工具、跨项目 | `claude mcp add -s user` |
 
-**用户范围（User）**：
-- **存储位置**：用户级配置文件
-- **适用场景**：个人工具、开发环境、跨项目服务
-- **访问权限**：用户所有项目可用
-- **命令示例**：`claude mcp add -s user dev-tools`
+**范围优先级**：Local > Project > User（个人配置覆盖共享配置）
 
-#### 环境变量扩展支持
+#### 方式一：命令行配置（推荐）
 
-Claude Code 在配置文件中支持环境变量扩展，提供灵活的配置管理：
+**适用场景**：快速配置、单个服务器、开发测试
 
-**支持语法**：
+**基本语法**：
 ```bash
-${VAR}              # 环境变量VAR的值
-${VAR:-default}     # VAR的值，如果未设置则使用default
+claude mcp add [--scope <范围>] [--transport <协议>] <名称> <命令或URL> [参数...]
 ```
 
-**可扩展位置**：
-- `command` - 服务器可执行文件路径
-- `args` - 命令行参数  
-- `env` - 环境变量
-- `url` - SSE/HTTP服务器URL  
-- `headers` - 身份验证Headers
-
-**实际应用示例**：
-```json
-{
-  "mcpServers": {
-    "my-server": {
-      "command": "${PYTHON_PATH:-python3}",
-      "args": ["${PROJECT_ROOT}/server.py"],
-      "env": {
-        "API_KEY": "${API_KEY}",
-        "LOG_LEVEL": "${LOG_LEVEL:-info}"
-      }
-    }
-  }
-}
-```
-
-#### 范围优先级和冲突解决
-
-当多个范围中存在同名服务器时，系统按以下优先级解决冲突：
-
-```
-Local (本地) > Project (项目) > User (用户)
-```
-
-这确保个人配置可以覆盖共享配置，提供最大的灵活性。
-
-### 5.4 安装方式一：Claude Desktop导入
-
-**适用场景**：已在 Claude Desktop 中配置了 MCP 服务器，希望在 Claude Code 中复用
-
-<details>
-<summary>点击查看：Claude Desktop导入详细步骤</summary>
-
-**Step 1: 检查 Claude Desktop 配置**
+**常用示例**：
 ```bash
-# 查看 Claude Desktop 配置文件位置
-# macOS: ~/Library/Application Support/Claude/claude_desktop_config.json
-# Windows: %APPDATA%/Claude/claude_desktop_config.json
+# 个人开发工具（用户范围）
+claude mcp add --scope user filesystem -- npx -y @modelcontextprotocol/server-filesystem ~/Documents
 
-# 检查现有配置
-cat ~/Library/Application\ Support/Claude/claude_desktop_config.json | jq .mcpServers
+# 团队项目工具（项目范围）
+claude mcp add --scope project database \
+  --env DATABASE_URL=${DATABASE_URL} \
+  -- python scripts/db_server.py
+
+# 远程服务器（SSE协议）
+claude mcp add --transport sse --scope user \
+  linear https://mcp.linear.app/sse
 ```
 
-**Step 2: 导入所有配置**
+#### 方式二：JSON文件配置
+
+**适用场景**：批量配置、团队协作、复杂环境管理
+
+**配置文件位置**：
 ```bash
-# 导入所有Claude Desktop的MCP配置
-claude mcp import-from-claude-desktop
-
-# 查看导入结果
-claude mcp list
+# 用户范围：~/.claude/mcp.json
+# 项目范围：项目根目录/.mcp.json  
+# 本地范围：当前目录/.claude/mcp.json
 ```
 
-**Step 3: 选择性导入**
-```bash
-# 仅导入特定服务器
-claude mcp import-from-claude-desktop --server filesystem --server github
-
-# 导入时保持原有作用域设置
-claude mcp import-from-claude-desktop --preserve-scope
-```
-
-**Step 4: 验证导入结果**
-```bash
-# 列出所有导入的服务器
-claude mcp list
-
-# 查看特定服务器配置
-claude mcp get filesystem
-
-# 在Claude Code中测试
-/mcp
-```
-
-</details>
-
-### 5.5 安装方式二：JSON配置方式
-
-**适用场景**：批量配置、团队协作、配置文件管理
-
-<details>
-<summary>点击查看：JSON配置详细方法</summary>
-
-**方法一：从JSON文件导入**
-```bash
-# 从本地JSON文件添加配置
-claude mcp add-from-json ./mcp-config.json
-
-# 从远程URL添加配置
-claude mcp add-from-json https://example.com/team-mcp-config.json
-```
-
-**方法二：直接编辑配置文件**
-
-**全局配置文件位置**：
-```bash
-# macOS/Linux
-~/.claude.json
-
-# Windows  
-%USERPROFILE%\.claude.json
-```
-
-**项目配置文件**：
-```bash
-# 项目根目录
-.mcp.json
-```
-
-**标准JSON格式**：
+**标准格式示例**：
 ```json
 {
   "mcpServers": {
     "filesystem": {
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-filesystem", "${HOME}/Documents"],
-      "env": {}
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "${HOME}/Documents"]
     },
     "github": {
-      "command": "npx",
+      "command": "npx", 
       "args": ["-y", "@modelcontextprotocol/server-github"],
       "env": {
         "GITHUB_TOKEN": "${GITHUB_TOKEN}"
       }
     },
-    "sentry": {
+    "remote-api": {
       "transport": "http",
-      "url": "https://mcp.sentry.dev/mcp",
+      "url": "https://api.example.com/mcp",
       "headers": {
-        "Authorization": "Bearer ${SENTRY_TOKEN}"
+        "Authorization": "Bearer ${API_TOKEN}"
       }
     }
   }
 }
 ```
 
-**团队协作配置示例**：
-```json
+**环境变量扩展**：
+- `${VAR}`：环境变量值
+- `${VAR:-default}`：环境变量值或默认值
+- 支持command、args、env、url、headers等字段
+
+#### 方式三：Claude Desktop导入
+
+**适用场景**：从Claude Desktop迁移配置到Claude Code
+
+**导入命令**：
+```bash
+# 导入所有配置
+claude mcp import-from-claude-desktop
+
+# 选择性导入
+claude mcp import-from-claude-desktop --server filesystem --server github
+
+# 保持原有作用域
+claude mcp import-from-claude-desktop --preserve-scope
+```
+
+**Claude Desktop配置文件位置**：
+- macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
+- Windows: `%APPDATA%/Claude/claude_desktop_config.json`
+
+### 5.4 配置最佳实践
+
+#### 团队协作配置
+
+**项目范围配置管理**：
+```bash
+# 在项目根目录创建.mcp.json
+cat > .mcp.json << EOF
 {
   "mcpServers": {
-    "team-database": {
-      "command": "${PROJECT_PYTHON_PATH:-python}",
-      "args": ["-m", "custom_mcp_server"],
+    "project-db": {
+      "command": "python",
+      "args": ["scripts/db_server.py"],
       "env": {
-        "DATABASE_URL": "${DATABASE_URL}",
-        "API_KEY": "${API_KEY:-development-key}"
+        "DATABASE_URL": "\${DATABASE_URL}",
+        "LOG_LEVEL": "\${LOG_LEVEL:-info}"
       }
     },
-    "shared-tools": {
-      "command": "${HOME}/.local/bin/team-tools",
-      "args": ["--config", "${PROJECT_ROOT}/config.yaml"],
-      "env": {
-        "TEAM_ID": "${TEAM_ID}",
-        "ENV": "${ENVIRONMENT:-development}"
+    "api-gateway": {
+      "transport": "http",
+      "url": "https://api.company.com/mcp",
+      "headers": {
+        "Authorization": "Bearer \${API_TOKEN}"
       }
     }
   }
 }
+EOF
+
+# 提交到版本控制
+git add .mcp.json
+git commit -m "添加项目MCP配置"
 ```
 
-**配置后重启Claude Code使配置生效**
+#### 环境变量管理
 
-</details>
-
-### 5.6 安装方式三：命令行方式
-
-**适用场景**：快速安装、单个服务器配置、脚本自动化
-
-#### 5.6.1 STDIO服务器（本地进程）
-
-**适用场景**：需要直接系统访问或自定义脚本的工具
-
-<details>
-<summary>点击查看：STDIO服务器配置详解</summary>
-
-**基本语法**：
+**开发环境设置**：
 ```bash
-claude mcp add [选项] <name> <command> [args...]
+# .env文件
+DATABASE_URL=postgresql://localhost:5432/dev_db
+API_TOKEN=dev_token_123
+LOG_LEVEL=debug
+
+# 生产环境变量
+DATABASE_URL=postgresql://prod-host:5432/prod_db
+API_TOKEN=prod_token_456
+LOG_LEVEL=warn
 ```
 
-**常用STDIO服务器示例**：
+**安全性配置**：
 ```bash
-# 文件系统访问（最常用）
-claude mcp add filesystem -- npx -y @modelcontextprotocol/server-filesystem ~/Documents
+# 敏感配置使用本地范围
+claude mcp add --scope local secure-api \
+  --env SECRET_KEY=${SECRET_KEY} \
+  -- python secure_server.py
 
-# GitHub集成（需要Token）
-claude mcp add github --env GITHUB_TOKEN=ghp_xxxx -- npx -y @modelcontextprotocol/server-github
-
-# Airtable数据库
-claude mcp add airtable --env AIRTABLE_API_KEY=key123 -- npx -y airtable-mcp-server
-
-# ClickUp项目管理
-claude mcp add clickup --env CLICKUP_API_KEY=pk_123 --env CLICKUP_TEAM_ID=456 -- npx -y @hauptsache.net/clickup-mcp
+# 团队共享配置使用项目范围
+claude mcp add --scope project shared-tools \
+  --env TEAM_API_KEY=${TEAM_API_KEY} \
+  -- npx -y @team/shared-mcp
 ```
 
-**不同范围的配置**：
+#### 开发调试技巧
+
+**配置验证**：
 ```bash
-# 本地范围（默认）- 仅当前项目
-claude mcp add -s local my-server -- npx -y @example/server
+# 检查所有配置
+claude mcp list --format json
 
-# 项目范围 - 团队共享，存储在.mcp.json
-claude mcp add -s project shared-db -- npx -y @team/database-server
-
-# 用户范围 - 跨项目可用
-claude mcp add -s user dev-tools -- npx -y @personal/dev-server
-```
-
-</details>
-
-#### 5.6.2 SSE服务器（实时流连接）
-
-**适用场景**：需要实时更新的云服务
-
-<details>
-<summary>点击查看：SSE服务器配置详解</summary>
-
-**基本语法**：
-```bash
-claude mcp add --transport sse [选项] <name> <url>
-```
-
-**官方SSE服务器示例**：
-```bash
-# Asana工作空间项目管理
-claude mcp add --transport sse asana https://mcp.asana.com/sse
-
-# Atlassian Jira和Confluence
-claude mcp add --transport sse atlassian https://mcp.atlassian.com/v1/sse
-
-# Linear问题跟踪
-claude mcp add --transport sse linear https://mcp.linear.app/sse
-
-# Monday.com看板管理
-claude mcp add --transport sse monday https://mcp.monday.com/sse
-
-# Plaid银行数据
-claude mcp add --transport sse plaid https://api.dashboard.plaid.com/mcp/sse
-
-# Square支付API
-claude mcp add --transport sse square https://mcp.squareup.com/sse
-
-# InVideo视频创建
-claude mcp add --transport sse invideo https://mcp.invideo.io/sse
-```
-
-**带作用域的SSE配置**：
-```bash
-# 用户范围SSE服务器
-claude mcp add -s user --transport sse asana https://mcp.asana.com/sse
-
-# 项目范围SSE服务器  
-claude mcp add -s project --transport sse linear https://mcp.linear.app/sse
-```
-
-</details>
-
-#### 5.6.3 HTTP服务器（标准请求响应）
-
-**适用场景**：REST API和标准Web服务
-
-<details>
-<summary>点击查看：HTTP服务器配置详解</summary>
-
-**基本语法**：
-```bash
-claude mcp add --transport http [选项] <name> <url>
-```
-
-**官方HTTP服务器示例**：
-```bash
-# Sentry错误监控
-claude mcp add --transport http sentry https://mcp.sentry.dev/mcp
-
-# Socket依赖安全分析
-claude mcp add --transport http socket https://mcp.socket.dev/
-
-# HuggingFace AI模型
-claude mcp add --transport http hugging-face https://huggingface.co/mcp
-
-# Jam调试记录
-claude mcp add --transport http jam https://mcp.jam.dev/mcp
-
-# Intercom客户服务
-claude mcp add --transport http intercom https://mcp.intercom.com/mcp
-
-# Notion文档管理
-claude mcp add --transport http notion https://mcp.notion.com/mcp
-
-# Box企业内容
-claude mcp add --transport http box https://mcp.box.com/
-
-# Fireflies会议分析
-claude mcp add --transport http fireflies https://api.fireflies.ai/mcp
-
-# HubSpot CRM
-claude mcp add --transport http hubspot https://mcp.hubspot.com/anthropic
-
-# PayPal支付
-claude mcp add --transport http paypal https://mcp.paypal.com/mcp
-
-# Stripe财务
-claude mcp add --transport http stripe https://mcp.stripe.com
-
-# Figma设计（需要本地Dev Mode服务器）
-claude mcp add --transport http figma-dev-mode-mcp-server http://127.0.0.1:3845/mcp
-
-# Canva设计
-claude mcp add --transport http canva https://mcp.canva.com/mcp
-
-# Netlify部署
-claude mcp add --transport http netlify https://netlify-mcp.netlify.app/mcp
-
-# Vercel项目管理
-claude mcp add --transport http vercel https://mcp.vercel.com/
-
-# Stytch认证
-claude mcp add --transport http stytch http://mcp.stytch.dev/mcp
-```
-
-**需要认证的HTTP服务器**：
-```bash
-# 许多HTTP服务器需要OAuth认证
-# Claude Code会自动处理OAuth流程，打开浏览器进行授权
-claude mcp add --transport http github-enterprise https://api.github.company.com/mcp
-```
-
-</details>
-
-#### 配置验证和管理
-
-**验证配置**：
-```bash
-# 列出所有配置的服务器
-claude mcp list
-
-# 查看特定服务器详情
+# 测试特定服务器
 claude mcp get server-name
 
-# 在Claude Code中检查状态
+# 查看MCP状态
 /mcp
 ```
 
-**配置管理**：
+**故障排查**：
 ```bash
-# 删除服务器（指定范围）
-claude mcp remove server-name -s local
-claude mcp remove team-tools -s project
-claude mcp remove dev-tools -s user
-
-# 重置项目范围批准
+# 重置项目批准选择
 claude mcp reset-project-choices
+
+# 删除问题配置重新添加
+claude mcp remove problematic-server -s local
+claude mcp add problematic-server -- fixed-command
 ```
 
-**使用MCP功能**：
+#### 生产部署建议
+
+**CI/CD集成**：
+```yaml
+# .github/workflows/deploy.yml
+- name: Setup MCP Servers
+  run: |
+    claude mcp add --scope project production-db \
+      --env DATABASE_URL=${{ secrets.DATABASE_URL }} \
+      -- python scripts/prod_db_server.py
+```
+
+**监控和维护**：
 ```bash
-# 引用MCP资源
-@resource-name
-@server-name/resource-path
+# 定期检查MCP服务器状态
+claude mcp list | grep -v "✓" # 查找有问题的服务器
 
-# 使用MCP提示命令
-/prompt-name
-/code-review "review this function"
-
-# 列出可用功能
-/mcp resources
-/mcp prompts
+# 批量更新服务器
+for server in $(claude mcp list --format json | jq -r '.[] | .name'); do
+  claude mcp get $server
+done
 ```
 
 ---
