@@ -20,11 +20,12 @@
   - [4.1 5分钟创建第一个MCP工具](#41-5分钟创建第一个mcp工具)
   - [4.2 完整实战案例：桌面文档管理器](#42-完整实战案例桌面文档管理器)
 - [5. MCP 安装配置指南](#5-mcp-安装配置指南)
-  - [5.1 claude mcp 命令概述](#51-claude-mcp-命令概述)
-  - [5.2 配置管理基础](#52-配置管理基础)
-  - [5.3 安装方式一：Claude Desktop导入](#53-安装方式一claude-desktop导入)
-  - [5.4 安装方式二：手动配置](#54-安装方式二手动配置)
-  - [5.5 安装方式三：开发模式](#55-安装方式三开发模式)
+  - [5.1 claude mcp add 命令详解](#51-claude-mcp-add-命令详解)
+  - [5.2 其他MCP管理命令](#52-其他mcp管理命令)
+  - [5.3 配置管理基础](#53-配置管理基础)
+  - [5.4 安装方式一：Claude Desktop导入](#54-安装方式一claude-desktop导入)
+  - [5.5 安装方式二：JSON配置方式](#55-安装方式二json配置方式)
+  - [5.6 安装方式三：命令行方式](#56-安装方式三命令行方式)
 - [6. MCP 生态系统](#6-mcp-生态系统)
   - [6.1 官方工具集](#61-官方工具集)
   - [6.2 社区工具推荐](#62-社区工具推荐)
@@ -1024,16 +1025,220 @@ claude mcp add desktop-txt-manager -- python desktop_txt_manager_full.py
 
 ## 5. MCP 安装配置指南
 
-### 5.1 claude mcp 命令概述
+### 5.1 claude mcp add 命令详解
 
-#### 核心命令介绍
+#### 基本语法
+
+```bash
+claude mcp add [选项] <name> <commandOrUrl> [args...]
+```
+
+#### 核心参数说明
+
+**必需参数**
+
+- `<name>`：MCP服务器的标识名称，用于后续管理和引用
+- `<commandOrUrl>`：服务器命令或URL，支持多种格式
+
+#### 选项参数详解
+
+| 参数                      | 简写  | 默认值   | 说明                       |
+|-------------------------|-----|-------|--------------------------|
+| --scope <scope>         | -s  | local | 配置作用域：local、user、project |
+| --transport <transport> | -t  | stdio | 传输协议：stdio、sse、http      |
+| --env <env...>          | -e  | 无     | 环境变量设置                   |
+| --header <header...>    | -H  | 无     | WebSocket请求头设置           |
+
+#### 作用域详解
+
+**1. local（本地作用域）**
+
+```bash
+claude mcp add --scope local filesystem /usr/local/bin/mcp-filesystem
+```
+- **作用范围**：仅当前用户的当前工作目录
+- **配置文件**：当前目录的 `.claude/mcp.json`
+- **适用场景**：项目特定的MCP服务器
+
+**2. user（用户作用域）**
+
+```bash
+claude mcp add --scope user github-tools /usr/local/bin/mcp-github
+```
+- **作用范围**：当前用户的所有Claude Code会话
+- **配置文件**：`~/.claude/mcp.json`
+- **适用场景**：个人常用的开发工具
+
+**3. project（项目作用域）**
+
+```bash
+claude mcp add --scope project database-tools ./scripts/db-mcp-server.py
+```
+- **作用范围**：项目根目录及其子目录
+- **配置文件**：项目根目录的 `.mcp.json`
+- **适用场景**：团队共享的项目特定工具
+
+#### 传输协议详解
+
+**1. stdio（标准输入输出）**
+
+最常用的协议，适合本地MCP服务器
+
+```bash
+# Python脚本
+claude mcp add --transport stdio weather-api python3 ./weather_server.py
+
+# Node.js应用
+claude mcp add --transport stdio file-manager node ./file-server.js
+
+# 二进制程序
+claude mcp add --transport stdio system-tools /usr/local/bin/system-mcp
+
+# 带参数的命令
+claude mcp add --transport stdio database-query \
+  python3 ./db_server.py --config ./config.json --verbose
+```
+
+**2. sse（Server-Sent Events）**
+
+适合HTTP流式通信
+
+```bash
+# 远程SSE服务器
+claude mcp add --transport sse analytics-api https://api.example.com/mcp/analytics
+
+# 本地SSE服务器
+claude mcp add --transport sse local-metrics http://localhost:8080/mcp
+
+# 带认证的SSE服务器
+claude mcp add --transport sse secure-api \
+  -H "Authorization: Bearer your-token" \
+  -H "X-Client-ID: claude-code" \
+  https://secure.example.com/mcp
+```
+
+**3. http（HTTP协议）**
+
+适合RESTful API风格的MCP服务器
+
+```bash
+# 简单HTTP服务器
+claude mcp add --transport http api-gateway http://localhost:3000
+
+# 企业级API
+claude mcp add --transport http enterprise-tools \
+  -H "X-API-Key: your-api-key" \
+  -H "X-Organization: your-org" \
+  https://enterprise.example.com/mcp/v1
+```
+
+#### 环境变量配置
+
+**单个环境变量**
+
+```bash
+claude mcp add --env API_KEY=sk-1234567890 \
+  openai-tools python3 ./openai_server.py
+```
+
+**多个环境变量**
+
+```bash
+claude mcp add \
+  -e DATABASE_URL=postgresql://user:pass@localhost/db \
+  -e REDIS_URL=redis://localhost:6379 \
+  -e DEBUG=true \
+  database-cache python3 ./cache_server.py
+```
+
+**从文件加载环境变量**
+
+```bash
+claude mcp add \
+  -e $(cat .env | tr '\n' ' ') \
+  complex-service ./service.sh
+```
+
+#### 实际使用示例
+
+**示例1：文件系统管理器**
+
+```bash
+# 添加本地文件系统MCP服务器
+claude mcp add filesystem \
+  python3 /usr/local/bin/mcp-filesystem-server \
+  --root /Users/username/projects
+```
+
+**示例2：GitHub集成工具**
+
+```bash
+# 添加GitHub API集成
+claude mcp add --scope user \
+  -e GITHUB_TOKEN=ghp_xxxxxxxxxxxx \
+  -e GITHUB_ORG=mycompany \
+  github-api python3 ./github_mcp.py
+```
+
+**示例3：数据库查询工具**
+
+```bash
+# 添加数据库MCP服务器
+claude mcp add --scope project \
+  -e DATABASE_URL=postgresql://user:pass@localhost:5432/mydb \
+  -e QUERY_TIMEOUT=30 \
+  database-query node ./db-mcp-server.js --pool-size 10
+```
+
+**示例4：远程API服务**
+
+```bash
+# 添加远程MCP服务器
+claude mcp add --transport sse \
+  -H "Authorization: Bearer your-jwt-token" \
+  -H "X-Version: v2" \
+  remote-analytics https://analytics.example.com/mcp/stream
+```
+
+**示例5：Docker容器化服务**
+
+```bash
+# 添加Docker化的MCP服务器
+claude mcp add docker-tools \
+  docker run --rm -i \
+  -e DOCKER_HOST=unix:///var/run/docker.sock \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  mycompany/docker-mcp:latest
+```
+
+**示例6：微服务架构**
+
+```bash
+# 用户服务
+claude mcp add --scope project \
+  -e SERVICE_NAME=user-service \
+  -e SERVICE_PORT=3001 \
+  user-service python3 ./services/user_mcp.py
+
+# 订单服务
+claude mcp add --scope project \
+  -e SERVICE_NAME=order-service \
+  -e SERVICE_PORT=3002 \
+  order-service python3 ./services/order_mcp.py
+
+# 支付服务
+claude mcp add --scope project \
+  -e SERVICE_NAME=payment-service \
+  -e SERVICE_PORT=3003 \
+  -e STRIPE_KEY=sk_test_xxxxxxxxxxxx \
+  payment-service python3 ./services/payment_mcp.py
+```
+
+### 5.2 其他MCP管理命令
+
+#### claude mcp 命令概述
 
 `claude mcp` 是 Claude Code 提供的专用命令行工具，用于管理 MCP 服务器的完整生命周期。
-
-**命令结构**：
-```bash
-claude mcp [子命令] [选项] [参数...]
-```
 
 **主要子命令**：
 ```bash
@@ -1045,131 +1250,7 @@ claude mcp serve      # 将Claude Code作为MCP服务器运行
 claude mcp reset-project-choices  # 重置项目范围的批准选择
 ```
 
-#### 常用命令参数详解
-
-<details>
-<summary>点击查看：命令参数完整说明</summary>
-
-**claude mcp add 参数语法**：
-```bash
-# STDIO传输（本地命令）
-claude mcp add [选项] <name> <command> [args...]
-
-# 远程传输（SSE/HTTP）
-claude mcp add --transport <type> [选项] <name> <url>
-```
-
-**通用选项**：
-```bash
--s, --scope <scope>          # 设置范围：local（默认）/project/user
--e, --env <key=value>        # 设置环境变量，支持多个-e选项
---transport <type>           # 传输类型：stdio（默认）/sse/http
-```
-
-**STDIO传输参数（本地服务器）**：
-```bash
-<name>                      # 服务器名称（唯一标识符）
-<command>                   # 服务器启动命令
-[args...]                   # 命令行参数
-```
-
-**远程传输参数（SSE/HTTP）**：
-```bash
-<name>                      # 服务器名称
-<url>                       # 服务器URL端点
---header <key=value>        # HTTP请求头（仅HTTP传输）
-```
-
-**实际使用示例**：
-
-**1. STDIO服务器配置示例**：
-```bash
-# 基本文件系统访问
-claude mcp add filesystem -- npx -y @modelcontextprotocol/server-filesystem ~/Documents
-
-# 带环境变量的GitHub集成
-claude mcp add github \
-  --env GITHUB_TOKEN=ghp_xxxxxxxxxxxx \
-  -- npx -y @modelcontextprotocol/server-github
-
-# 多环境变量配置
-claude mcp add database \
-  --env DB_HOST=localhost \
-  --env DB_PORT=5432 \
-  --env DB_NAME=myapp \
-  -- python -m database_mcp_server
-
-# 自定义Python脚本
-claude mcp add weather \
-  --scope user \
-  -- uv run weather.py
-
-# 项目范围配置（团队共享）
-claude mcp add team-tools \
-  --scope project \
-  --env API_KEY=${API_KEY} \
-  -- python scripts/team_server.py
-```
-
-**2. SSE服务器配置示例**：
-```bash
-# Linear项目管理
-claude mcp add --transport sse linear https://mcp.linear.app/sse
-
-# Asana任务管理
-claude mcp add --transport sse asana https://mcp.asana.com/sse
-
-# 用户范围SSE服务器
-claude mcp add --transport sse --scope user \
-  monday https://mcp.monday.com/sse
-```
-
-**3. HTTP服务器配置示例**：
-```bash
-# Sentry错误监控
-claude mcp add --transport http sentry https://mcp.sentry.dev/mcp
-
-# 带认证头的HTTP服务器
-claude mcp add --transport http \
-  --header "Authorization=Bearer ${API_TOKEN}" \
-  custom-api https://api.example.com/mcp
-
-# Socket安全分析
-claude mcp add --transport http socket https://mcp.socket.dev/
-```
-
-**4. 不同范围的实际应用**：
-```bash
-# 本地范围：个人实验和敏感配置
-claude mcp add --scope local experimental-server -- python test_server.py
-
-# 项目范围：团队共享工具（存储在.mcp.json）
-claude mcp add --scope project shared-db \
-  --env DATABASE_URL=${PROJECT_DATABASE_URL} \
-  -- npx -y @team/database-mcp
-
-# 用户范围：跨项目开发工具
-claude mcp add --scope user dev-tools \
-  --env OPENAI_API_KEY=${OPENAI_API_KEY} \
-  -- python ~/.local/bin/dev_assistant.py
-```
-
-**5. 高级配置技巧**：
-```bash
-# 使用环境变量扩展
-claude mcp add flexible-server \
-  --env CONFIG_PATH=${PROJECT_ROOT}/config.yaml \
-  --env LOG_LEVEL=${LOG_LEVEL:-info} \
-  -- ${PYTHON_PATH:-python3} server.py
-
-# 复杂参数传递
-claude mcp add data-processor \
-  --env API_TIMEOUT=30 \
-  --env BATCH_SIZE=100 \
-  -- npx -y @company/data-processor \
-  --config config.json \
-  --workers 4
-```
+#### 常用管理命令详解
 
 **claude mcp list 参数**：
 ```bash
@@ -1208,9 +1289,7 @@ claude mcp import-from-claude-desktop [选项]
 --preserve-scope            # 保持原有作用域设置
 ```
 
-</details>
-
-### 5.2 配置管理基础
+### 5.3 配置管理基础
 
 #### MCP 安装范围详解
 
@@ -1277,7 +1356,7 @@ Local (本地) > Project (项目) > User (用户)
 
 这确保个人配置可以覆盖共享配置，提供最大的灵活性。
 
-### 5.3 安装方式一：Claude Desktop导入
+### 5.4 安装方式一：Claude Desktop导入
 
 **适用场景**：已在 Claude Desktop 中配置了 MCP 服务器，希望在 Claude Code 中复用
 
@@ -1326,7 +1405,7 @@ claude mcp get filesystem
 
 </details>
 
-### 5.4 安装方式二：JSON配置方式
+### 5.5 安装方式二：JSON配置方式
 
 **适用场景**：批量配置、团队协作、配置文件管理
 
@@ -1414,11 +1493,11 @@ claude mcp add-from-json https://example.com/team-mcp-config.json
 
 </details>
 
-### 5.5 安装方式三：命令行方式
+### 5.6 安装方式三：命令行方式
 
 **适用场景**：快速安装、单个服务器配置、脚本自动化
 
-#### 5.5.1 STDIO服务器（本地进程）
+#### 5.6.1 STDIO服务器（本地进程）
 
 **适用场景**：需要直接系统访问或自定义脚本的工具
 
@@ -1459,7 +1538,7 @@ claude mcp add -s user dev-tools -- npx -y @personal/dev-server
 
 </details>
 
-#### 5.5.2 SSE服务器（实时流连接）
+#### 5.6.2 SSE服务器（实时流连接）
 
 **适用场景**：需要实时更新的云服务
 
@@ -1506,7 +1585,7 @@ claude mcp add -s project --transport sse linear https://mcp.linear.app/sse
 
 </details>
 
-#### 5.5.3 HTTP服务器（标准请求响应）
+#### 5.6.3 HTTP服务器（标准请求响应）
 
 **适用场景**：REST API和标准Web服务
 
