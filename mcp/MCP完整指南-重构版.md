@@ -1070,7 +1070,7 @@ claude mcp [子命令] [选项] [参数...]
 #### 基本语法
 
 ```bash
-claude mcp add [选项] <name> <commandOrUrl> [args...]
+claude mcp add <name> <command> [args...]
 ```
 
 #### 完整参数说明
@@ -1082,31 +1082,12 @@ claude mcp add [选项] <name> <commandOrUrl> [args...]
 | **--env** | **-e** | 无 | **环境变量设置**：格式 `--env KEY=value`，可多次使用 | stdio |
 | **--header** | **-H** | 无 | **HTTP请求头**：格式 `--header "Key: Value"`，支持认证 | sse/http |
 
-#### 重要概念："--"参数分隔符
+#### 官方语法格式
 
-**理解`--`的作用**：双破折号分隔Claude自身参数与MCP服务器命令
-
+**基础语法**：
 ```bash
-# 基本格式
-claude mcp add [Claude选项] <name> -- [MCP服务器命令和参数]
-
-# 实际示例
-claude mcp add --env API_KEY=abc123 weather -- python server.py --port 8080
-#            ↑ Claude的选项 ↑              ↑ MCP服务器的命令和参数 ↑
-```
-
-**为什么需要`--`**：
-- **避免参数冲突**：防止服务器参数被Claude误解
-- **清晰分工**：`--`前是Claude配置，`--`后是服务器启动命令  
-- **Windows兼容**：Windows需要`cmd /c`包装npx命令
-
-```bash
-# ✅ 正确：参数分离清晰
-claude mcp add myserver --env KEY=value -- python server.py --debug
-# 运行：python server.py --debug，环境变量KEY=value
-
-# ❌ 错误：没有--分隔，参数混乱
-claude mcp add myserver --env KEY=value python server.py --debug
+# 官方标准语法
+claude mcp add <name> <command> [args...]
 ```
 
 #### 分协议详细配置
@@ -1124,21 +1105,18 @@ claude mcp add airtable --env AIRTABLE_API_KEY=YOUR_KEY \
   -- npx -y airtable-mcp-server
 ```
 
-> **💡 理解"--"参数的核心作用**：
+> **💡 理解"--"参数分隔符**：
 > 
 > 双破折号(`--`)分隔Claude自身的CLI标志与传递给MCP服务器的命令和参数。
 > 
 > - `--`**之前**：Claude的选项（如`--env`、`--scope`）
 > - `--`**之后**：运行MCP服务器的实际命令
 > 
-> **示例对比**：
+> **官方示例**：
 > ```bash
-> # ✅ 正确：参数分离清晰
-> claude mcp add myserver -- npx server
-> # → 运行：npx server
-> 
-> claude mcp add myserver --env KEY=value -- python server.py --port 8080  
-> # → 运行：python server.py --port 8080，环境变量：KEY=value
+> # 标准格式（来自官方文档）
+> claude mcp add airtable --env AIRTABLE_API_KEY=YOUR_KEY \
+>   -- npx -y airtable-mcp-server
 > ```
 > 
 > 这样可以防止Claude的标志与服务器标志之间的冲突。
