@@ -1073,57 +1073,131 @@ claude mcp [子命令] [选项] [参数...]
 claude mcp add [选项] <name> <commandOrUrl> [args...]
 ```
 
-#### 核心参数
+#### 完整参数说明
 
-| 参数 | 简写 | 默认值 | 说明 |
-|------|------|-------|------|
-| --scope | -s | local | 配置作用域：local/user/project |
-| --transport | -t | stdio | 传输协议：stdio/sse/http |
-| --env | -e | 无 | 环境变量设置 |
-| --header | -H | 无 | HTTP请求头设置 |
+| 参数 | 简写 | 默认值 | 说明 | 适用协议 |
+|------|------|-------|------|---------|
+| **--scope** | **-s** | **local** | **配置作用域**：local（项目特定）/user（跨项目）/project（团队共享） | 全部 |
+| **--transport** | **-t** | **stdio** | **传输协议**：stdio（本地进程）/sse（流式）/http（标准HTTP） | 全部 |
+| **--env** | **-e** | 无 | **环境变量设置**：格式 `--env KEY=value`，可多次使用 | stdio |
+| **--header** | **-H** | 无 | **HTTP请求头**：格式 `--header "Key: Value"`，支持认证 | sse/http |
 
-#### 常用配置示例
+#### 重要概念："--"参数分隔符
 
-**本地开发工具**：
+**理解`--`的作用**：双破折号分隔Claude自身参数与MCP服务器命令
+
 ```bash
+# 基本格式
+claude mcp add [Claude选项] <name> -- [MCP服务器命令和参数]
+
+# 实际示例
+claude mcp add --env API_KEY=abc123 weather -- python server.py --port 8080
+#            ↑ Claude的选项 ↑              ↑ MCP服务器的命令和参数 ↑
+```
+
+**为什么需要`--`**：
+- **避免参数冲突**：防止服务器参数被Claude误解
+- **清晰分工**：`--`前是Claude配置，`--`后是服务器启动命令  
+- **Windows兼容**：Windows需要`cmd /c`包装npx命令
+
+```bash
+# ✅ 正确：参数分离清晰
+claude mcp add myserver --env KEY=value -- python server.py --debug
+# 运行：python server.py --debug，环境变量KEY=value
+
+# ❌ 错误：没有--分隔，参数混乱
+claude mcp add myserver --env KEY=value python server.py --debug
+```
+
+#### 分协议详细配置
+
+**Option 1: 本地stdio服务器**（最常用）
+```bash
+# 基础语法
+claude mcp add <name> -- <command> [args...]
+
 # 文件系统访问
 claude mcp add filesystem -- npx -y @modelcontextprotocol/server-filesystem ~/Documents
 
-# GitHub集成
-claude mcp add github \
-  --env GITHUB_TOKEN=ghp_xxxxxxxxxxxx \
-  -- npx -y @modelcontextprotocol/server-github
+# 带环境变量的服务器
+claude mcp add airtable --env AIRTABLE_API_KEY=YOUR_KEY \
+  -- npx -y airtable-mcp-server
 
 # 自定义Python工具
 claude mcp add weather --scope user -- uv run weather.py
+
+# Windows系统（需要cmd /c包装）
+claude mcp add my-server -- cmd /c npx -y @some/package
 ```
 
-**团队项目工具**：
+**Option 2: 远程SSE服务器**（实时流式）
 ```bash
-# 项目数据库
+# 基础语法
+claude mcp add --transport sse <name> <url>
+
+# Linear项目管理
+claude mcp add --transport sse linear https://mcp.linear.app/sse
+
+# 带认证头的SSE
+claude mcp add --transport sse private-api https://api.company.com/mcp \
+  --header "X-API-Key: your-key-here"
+```
+
+**Option 3: 远程HTTP服务器**（标准REST）
+```bash
+# 基础语法
+claude mcp add --transport http <name> <url>
+
+# Notion知识库
+claude mcp add --transport http notion https://mcp.notion.com/mcp
+
+# 带Bearer token认证
+claude mcp add --transport http secure-api https://api.example.com/mcp \
+  --header "Authorization: Bearer your-token"
+
+# Sentry错误监控
+claude mcp add --transport http sentry https://mcp.sentry.dev/mcp
+```
+
+#### 高级配置技巧
+
+**多环境变量设置**：
+```bash
+# 多个环境变量
 claude mcp add --scope project database \
+  --env DATABASE_URL=${DATABASE_URL} \
+  --env LOG_LEVEL=debug \
+  --env TIMEOUT=30 \
+  -- python scripts/db_server.py
+```
+
+**作用域选择策略**：
+```bash
+# 个人开发工具（user scope）
+claude mcp add --scope user personal-tools -- python ~/tools/server.py
+
+# 团队共享服务（project scope）
+claude mcp add --scope project team-db \
   --env DATABASE_URL=${DATABASE_URL} \
   -- python scripts/db_server.py
 
-# 微服务配置
-claude mcp add --scope project api-gateway \
-  --env SERVICE_PORT=3001 \
-  --env API_KEY=${API_KEY} \
-  -- node services/gateway.js
+# 项目特定配置（local scope，默认）
+claude mcp add sensitive-api \
+  --env API_SECRET=${SECRET_KEY} \
+  -- python local_api.py
 ```
 
-**远程服务器**：
+**实用配置模式**：
 ```bash
-# SSE流式服务
-claude mcp add --transport sse linear https://mcp.linear.app/sse
+# 开发环境 vs 生产环境
+claude mcp add dev-api --env NODE_ENV=development -- node api.js
+claude mcp add prod-api --env NODE_ENV=production -- node api.js
 
-# HTTP API服务
-claude mcp add --transport http sentry https://mcp.sentry.dev/mcp
+# 超时和性能调优
+MCP_TIMEOUT=10000 claude mcp add slow-server -- python slow_server.py
 
-# 带认证的远程服务
-claude mcp add --transport http secure-api \
-  -H "Authorization: Bearer ${API_TOKEN}" \
-  https://api.example.com/mcp
+# 大输出限制调整
+MAX_MCP_OUTPUT_TOKENS=50000 claude mcp add data-server -- python data_server.py
 ```
 
 ### 5.3 其他管理命令
