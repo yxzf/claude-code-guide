@@ -1112,16 +1112,46 @@ claude mcp add myserver --env KEY=value python server.py --debug
 #### 分协议详细配置
 
 **Option 1: 本地stdio服务器**（最常用）
+
+Stdio服务器作为本地进程运行，非常适合需要直接系统访问或自定义脚本的工具。
+
 ```bash
 # 基础语法
 claude mcp add <name> -- <command> [args...]
 
+# 实际示例：添加Airtable服务器
+claude mcp add airtable --env AIRTABLE_API_KEY=YOUR_KEY \
+  -- npx -y airtable-mcp-server
+```
+
+> **💡 理解"--"参数的核心作用**：
+> 
+> 双破折号(`--`)分隔Claude自身的CLI标志与传递给MCP服务器的命令和参数。
+> 
+> - `--`**之前**：Claude的选项（如`--env`、`--scope`）
+> - `--`**之后**：运行MCP服务器的实际命令
+> 
+> **示例对比**：
+> ```bash
+> # ✅ 正确：参数分离清晰
+> claude mcp add myserver -- npx server
+> # → 运行：npx server
+> 
+> claude mcp add myserver --env KEY=value -- python server.py --port 8080  
+> # → 运行：python server.py --port 8080，环境变量：KEY=value
+> ```
+> 
+> 这样可以防止Claude的标志与服务器标志之间的冲突。
+
+**更多stdio服务器示例**：
+```bash
 # 文件系统访问
 claude mcp add filesystem -- npx -y @modelcontextprotocol/server-filesystem ~/Documents
 
-# 带环境变量的服务器
-claude mcp add airtable --env AIRTABLE_API_KEY=YOUR_KEY \
-  -- npx -y airtable-mcp-server
+# GitHub集成
+claude mcp add github \
+  --env GITHUB_TOKEN=ghp_xxxxxxxxxxxx \
+  -- npx -y @modelcontextprotocol/server-github
 
 # 自定义Python工具
 claude mcp add weather --scope user -- uv run weather.py
@@ -1200,6 +1230,34 @@ MCP_TIMEOUT=10000 claude mcp add slow-server -- python slow_server.py
 MAX_MCP_OUTPUT_TOKENS=50000 claude mcp add data-server -- python data_server.py
 ```
 
+#### 📌 重要配置提示
+
+> **💡 实用技巧**：
+> 
+> - **作用域选择**：使用`--scope`标志指定配置存储位置
+>   - `local`（默认）：仅当前项目可用（曾叫`project`）
+>   - `project`：团队共享，通过`.mcp.json`文件版本控制
+>   - `user`：跨项目可用（曾叫`global`）
+> 
+> - **环境变量**：使用`--env`标志设置（如`--env KEY=value`）
+> 
+> - **超时配置**：使用`MCP_TIMEOUT`环境变量配置服务器启动超时（如`MCP_TIMEOUT=10000 claude`设置10秒超时）
+> 
+> - **输出限制**：Claude Code在MCP工具输出超过10,000个token时显示警告。使用`MAX_MCP_OUTPUT_TOKENS`环境变量调整限制（如`MAX_MCP_OUTPUT_TOKENS=50000`）
+> 
+> - **OAuth认证**：使用`/mcp`命令认证需要OAuth 2.0的远程服务器
+
+> **⚠️ Windows用户特别注意**：
+> 
+> 在原生Windows（非WSL）上，使用`npx`的本地MCP服务器需要`cmd /c`包装器确保正确执行：
+> 
+> ```bash
+> # ✅ Windows正确方式
+> claude mcp add my-server -- cmd /c npx -y @some/package
+> ```
+> 
+> 不使用`cmd /c`包装器会遇到"Connection closed"错误，因为Windows无法直接执行`npx`。
+
 ### 5.3 其他管理命令
 
 #### claude mcp list - 查看配置
@@ -1215,6 +1273,21 @@ claude mcp list --scope project
 
 # JSON格式输出（便于脚本处理）
 claude mcp list --format json
+```
+
+**管理服务器命令**：
+```bash
+# 列出所有已配置的服务器
+claude mcp list
+
+# 获取特定服务器的详细信息
+claude mcp get github
+
+# 删除服务器
+claude mcp remove github
+
+# 在Claude Code中检查服务器状态
+/mcp
 ```
 
 #### claude mcp get - 查看详情
