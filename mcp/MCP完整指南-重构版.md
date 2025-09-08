@@ -1172,17 +1172,49 @@ claude mcp remove old-server --force
 
 #### claude mcp serve - 服务器模式
 
+**核心功能**：让Claude Code作为MCP服务器运行，供其他MCP客户端连接和使用。
+
+**主要使用场景**：
+
+1. **为Claude Desktop提供服务**
+   ```json
+   // 在Claude Desktop的配置中添加：
+   {
+     "mcpServers": {
+       "claude-code": {
+         "command": "claude",
+         "args": ["mcp", "serve"],
+         "env": {}
+       }
+     }
+   }
+   ```
+
+2. **团队协作开发环境**
+   - 启动Claude Code作为共享的MCP服务器
+   - 团队成员可以通过统一的服务器访问代码库和工具
+   - 支持远程开发环境的代码操作
+
+3. **CI/CD集成**
+   - 在持续集成流水线中启动Claude Code服务器
+   - 自动化代码审查、测试生成、文档更新等任务
+
 **基本用法**：
 ```bash
-# STDIO模式（默认）
+# STDIO模式（默认）- 适用于Claude Desktop
 claude mcp serve
 
-# HTTP模式
+# HTTP模式 - 适用于远程访问
 claude mcp serve --http --port 3000
 
-# 指定监听地址
+# 指定监听地址 - 适用于团队共享
 claude mcp serve --http --host 0.0.0.0 --port 8080
 ```
+
+**实际应用价值**：
+- **扩展Claude Desktop功能**：将Claude Code的文件操作、代码分析能力直接集成到Claude Desktop中
+- **统一开发环境**：提供标准化的代码操作接口，支持多种客户端连接
+- **自动化工作流**：结合MCP协议实现复杂的自动化开发任务
 
 #### 导入导出命令
 

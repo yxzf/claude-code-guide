@@ -8,7 +8,10 @@
       "Bash(git restore:*)",
       "mcp__chrome-mcp-server__chrome_navigate",
       "mcp__chrome-mcp-server__chrome_get_web_content",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "mcp__playwright__browser_navigate",
+      "mcp__playwright__browser_click",
+      "mcp__playwright__browser_tabs"
     ],
     "deny": [],
     "ask": []
