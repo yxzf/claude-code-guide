@@ -1387,38 +1387,6 @@ claude mcp add-from-json https://company.com/mcp-config.json
 | [**screenshot**](https://github.com/BrowserLoop/mcp-server-screenshot) | 屏幕截图 | 自动截图、图像分析 |
 | [**sqlite**](https://github.com/modelcontextprotocol/servers/tree/main/src/sqlite) | SQLite数据库 | 本地数据查询管理 |
 
-### Claude Desktop兼容性
-
-已验证兼容的MCP服务器包括：
-- **文件操作**: filesystem, git, sqlite
-- **网络服务**: brave-search, fetch, slack  
-- **数据处理**: postgres, memory, puppeteer
-
-<details>
-<summary>查看Claude Desktop配置示例</summary>
-
-```json
-{
-  "mcpServers": {
-    "filesystem": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/Users/username"]
-    },
-    "brave-search": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-brave-search"],
-      "env": { "BRAVE_API_KEY": "your-api-key" }
-    },
-    "postgres": {
-      "command": "npx", 
-      "args": ["-y", "@modelcontextprotocol/server-postgres"],
-      "env": { "POSTGRES_CONNECTION_STRING": "postgresql://user:pass@localhost/db" }
-    }
-  }
-}
-```
-
-</details>
 
 
 ---
