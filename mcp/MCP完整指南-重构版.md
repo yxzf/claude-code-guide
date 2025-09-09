@@ -1278,18 +1278,19 @@ MCP服务器可以通过三种方式进行配置，每种方式适用于不同�
 
 **JSON格式规范**：
 
-**基础结构**：
 ```json
 {
   "mcpServers": {
-    "服务器名称": {
-      // 服务器配置
+    "shared-server": {
+      "command": "/path/to/server",
+      "args": [],
+      "env": {}
     }
   }
 }
 ```
 
-**stdio服务器配置**：
+**实际配置示例**：
 ```json
 {
   "mcpServers": {
@@ -1300,48 +1301,16 @@ MCP服务器可以通过三种方式进行配置，每种方式适用于不同�
         "DEBUG": "true"
       }
     },
-    "custom-tool": {
-      "command": "python",
-      "args": ["scripts/db_server.py", "--port", "8080"],
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
       "env": {
-        "DATABASE_URL": "${DATABASE_URL}",
-        "LOG_LEVEL": "${LOG_LEVEL:-info}"
+        "GITHUB_TOKEN": "${GITHUB_TOKEN}"
       }
     }
   }
 }
 ```
-
-**SSE/HTTP服务器配置**：
-```json
-{
-  "mcpServers": {
-    "linear": {
-      "transport": "sse",
-      "url": "https://mcp.linear.app/sse"
-    },
-    "notion": {
-      "transport": "http", 
-      "url": "https://mcp.notion.com/mcp",
-      "headers": {
-        "Authorization": "Bearer ${NOTION_TOKEN}",
-        "User-Agent": "MyApp/1.0"
-      }
-    }
-  }
-}
-```
-
-**配置字段说明**：
-
-| 字段 | 类型 | 必需 | 说明 | 适用协议 |
-|------|------|------|------|---------|
-| `command` | string | 是 | 服务器启动命令 | stdio |
-| `args` | array | 否 | 命令行参数数组 | stdio |
-| `env` | object | 否 | 环境变量键值对 | stdio |
-| `transport` | string | 是 | 传输协议：sse/http | sse/http |
-| `url` | string | 是 | 服务器URL地址 | sse/http |
-| `headers` | object | 否 | HTTP请求头 | sse/http |
 
 **环境变量支持**：
 - `${VAR}`：环境变量值
