@@ -1187,9 +1187,6 @@ claude mcp list
 # 仅显示特定范围的服务器
 claude mcp list --scope user
 claude mcp list --scope project
-
-# JSON格式输出（便于脚本处理）
-claude mcp list --format json
 ```
 
 **管理服务器命令**：
