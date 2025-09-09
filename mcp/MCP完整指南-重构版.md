@@ -1076,23 +1076,8 @@ Local > Project > User（本地配置覆盖项目配置，项目配置覆盖用�
 #### 基本语法
 
 ```bash
-# 基本语法
 claude mcp add <name> <command> [args...]
-
-# 实际示例：添加Airtable服务器
-claude mcp add airtable --env AIRTABLE_API_KEY=YOUR_KEY \
-  -- npx -y airtable-mcp-server
 ```
-
-> **💡 理解"--"参数的核心作用**：
->
-> 双破折号(`--`)分隔Claude自身的CLI标志与传递给MCP服务器的命令和参数。`--`之前的是Claude的选项（如`--env`、`--scope`），`--`之后的是运行MCP服务器的实际命令。
->
-> **示例说明**：
-> - `claude mcp add filesystem -- npx -y @modelcontextprotocol/server-filesystem ~/Documents` → 运行：npx -y @modelcontextprotocol/server-filesystem ~/Documents
-> - `claude mcp add airtable --env AIRTABLE_API_KEY=key123 -- npx -y airtable-mcp-server` → 运行：npx -y airtable-mcp-server，环境变量：AIRTABLE_API_KEY=key123
->
-> 这样可以防止Claude的标志与服务器标志之间的冲突。
 
 #### 完整参数说明
 
@@ -1102,6 +1087,45 @@ claude mcp add airtable --env AIRTABLE_API_KEY=YOUR_KEY \
 | **--transport** | **-t** | **stdio** | **传输协议**：stdio（本地进程）/sse（流式）/http（标准HTTP） | 全部 |
 | **--env** | **-e** | 无 | **环境变量设置**：格式 `--env KEY=value`，可多次使用 | stdio |
 | **--header** | **-H** | 无 | **HTTP请求头**：格式 `--header "Key: Value"`，支持认证 | sse/http |
+
+#### 实际示例
+
+```bash
+# 添加Airtable服务器
+claude mcp add airtable --env AIRTABLE_API_KEY=YOUR_KEY \
+  -- npx -y airtable-mcp-server
+```
+
+#### 理解"--"参数分隔符
+
+> **💡 关键概念**：
+>
+> 双破折号(`--`)分隔Claude自身的CLI标志与传递给MCP服务器的命令和参数。`--`之前的是Claude的选项（如`--env`、`--scope`），`--`之后的是运行MCP服务器的实际命令。
+>
+> **示例说明**：
+> - `claude mcp add filesystem -- npx -y @modelcontextprotocol/server-filesystem ~/Documents` → 运行：npx -y @modelcontextprotocol/server-filesystem ~/Documents
+> - `claude mcp add airtable --env AIRTABLE_API_KEY=key123 -- npx -y airtable-mcp-server` → 运行：npx -y airtable-mcp-server，环境变量：AIRTABLE_API_KEY=key123
+>
+> 这样可以防止Claude的标志与服务器标志之间的冲突。
+
+#### 参数组合使用示例
+
+```bash
+# 使用多个参数的完整示例
+claude mcp add my-server \
+  --scope user \
+  --transport stdio \
+  --env API_KEY=secret123 \
+  --env DEBUG=true \
+  -- python /path/to/server.py --port 8080
+
+# SSE服务器带认证头
+claude mcp add api-server \
+  --scope project \
+  --transport sse \
+  --header "Authorization: Bearer token123" \
+  -- https://api.example.com/mcp
+```
 
 #### 分协议详细配置
 
