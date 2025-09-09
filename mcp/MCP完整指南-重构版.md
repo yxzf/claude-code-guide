@@ -1118,6 +1118,16 @@ claude mcp add airtable --env AIRTABLE_API_KEY=YOUR_KEY \
 
 Stdio服务器作为本地进程运行，非常适合需要直接系统访问或自定义脚本的工具。
 
+**基本语法**：
+```bash
+# 基本语法
+claude mcp add <name> <command> [args...]
+
+# 实际示例：添加Airtable服务器
+claude mcp add airtable --env AIRTABLE_API_KEY=YOUR_KEY \
+  -- npx -y airtable-mcp-server
+```
+
 **stdio服务器示例**：
 ```bash
 # 文件系统访问（官方服务器）
@@ -1137,8 +1147,12 @@ claude mcp add sqlite-server --scope user \
 
 适用场景：云服务，实时更新需求，持续数据流
 
+**基本语法**：
 ```bash
-# Linear项目管理（真实服务）
+# 基本语法
+claude mcp add --transport sse <name> <url>
+
+# 实际示例：添加Linear项目管理服务器
 claude mcp add --transport sse linear https://mcp.linear.app/sse
 
 # 带认证头的私有API示例
@@ -1150,8 +1164,12 @@ claude mcp add --transport sse private-api https://api.company.com/mcp \
 
 适用场景：标准HTTP API，REST服务，Web服务集成
 
+**基本语法**：
 ```bash
-# HubSpot CRM（真实服务）
+# 基本语法
+claude mcp add --transport http <name> <url>
+
+# 实际示例：添加HubSpot CRM服务器
 claude mcp add --transport http hubspot https://mcp.hubspot.com/anthropic
 
 # Daloopa数据平台（真实服务）
