@@ -15,7 +15,8 @@
       "mcp__chrome-mcp-server__chrome_click_element",
       "mcp__playwright__browser_snapshot",
       "Bash(curl:*)",
-      "Bash(git rebase:*)"
+      "Bash(git rebase:*)",
+      "WebFetch(domain:github.com)"
     ],
     "deny": [],
     "ask": []

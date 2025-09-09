@@ -1076,9 +1076,9 @@ Local > Project > User（本地配置覆盖项目配置，项目配置覆盖用�
 
 | 协议 | 适用场景 | 示例 |
 |------|---------|------|
-| **stdio** | 本地进程通信（默认） | `claude mcp add local-tool -- python tool.py` |
-| **sse** | 实时流式通信 | `claude mcp add --transport sse remote-api https://api.com/sse` |
-| **http** | 标准HTTP API | `claude mcp add --transport http rest-api https://api.com/mcp` |
+| **stdio** | 本地进程通信（默认） | `claude mcp add filesystem -- npx -y @modelcontextprotocol/server-filesystem ~/Documents` |
+| **sse** | 实时流式通信 | `claude mcp add --transport sse linear https://mcp.linear.app/sse` |
+| **http** | 标准HTTP API | `claude mcp add --transport http hubspot https://mcp.hubspot.com/anthropic` |
 
 ### 5.2 claude mcp add 详解
 
@@ -1098,8 +1098,8 @@ claude mcp add airtable --env AIRTABLE_API_KEY=YOUR_KEY \
 > 双破折号(`--`)分隔Claude自身的CLI标志与传递给MCP服务器的命令和参数。`--`之前的是Claude的选项（如`--env`、`--scope`），`--`之后的是运行MCP服务器的实际命令。
 >
 > **示例说明**：
-> - `claude mcp add myserver -- npx server` → 运行：npx server
-> - `claude mcp add myserver --env KEY=value -- python server.py --port 8080` → 运行：python server.py --port 8080，环境变量：KEY=value
+> - `claude mcp add filesystem -- npx -y @modelcontextprotocol/server-filesystem ~/Documents` → 运行：npx -y @modelcontextprotocol/server-filesystem ~/Documents
+> - `claude mcp add airtable --env AIRTABLE_API_KEY=key123 -- npx -y airtable-mcp-server` → 运行：npx -y airtable-mcp-server，环境变量：AIRTABLE_API_KEY=key123
 >
 > 这样可以防止Claude的标志与服务器标志之间的冲突。
 
@@ -1120,19 +1120,17 @@ Stdio服务器作为本地进程运行，非常适合需要直接系统访问或
 
 **stdio服务器示例**：
 ```bash
-# 文件系统访问
+# 文件系统访问（官方服务器）
 claude mcp add filesystem -- npx -y @modelcontextprotocol/server-filesystem ~/Documents
 
-# GitHub集成
-claude mcp add github \
-  --env GITHUB_TOKEN=ghp_xxxxxxxxxxxx \
-  -- npx -y @modelcontextprotocol/server-github
+# Airtable数据库集成
+claude mcp add airtable --env AIRTABLE_API_KEY=YOUR_KEY \
+  -- npx -y airtable-mcp-server
 
-# 自定义Python工具
-claude mcp add weather --scope user -- uv run weather.py
-
-# Windows系统（需要cmd /c包装）
-claude mcp add my-server -- cmd /c npx -y @some/package
+# SQLite数据库服务器
+claude mcp add sqlite-server --scope user \
+  --env SQLITE_DB_PATH="./data.db" \
+  -- uvx run sqlite_explorer.py
 ```
 
 **Option 2: 远程SSE服务器（实时流式）**
@@ -1140,10 +1138,10 @@ claude mcp add my-server -- cmd /c npx -y @some/package
 适用场景：云服务，实时更新需求，持续数据流
 
 ```bash
-# Linear项目管理
+# Linear项目管理（真实服务）
 claude mcp add --transport sse linear https://mcp.linear.app/sse
 
-# 带认证头的SSE
+# 带认证头的私有API示例
 claude mcp add --transport sse private-api https://api.company.com/mcp \
   --header "X-API-Key: your-key-here"
 ```
@@ -1153,15 +1151,11 @@ claude mcp add --transport sse private-api https://api.company.com/mcp \
 适用场景：标准HTTP API，REST服务，Web服务集成
 
 ```bash
-# Notion知识库
-claude mcp add --transport http notion https://mcp.notion.com/mcp
+# HubSpot CRM（真实服务）
+claude mcp add --transport http hubspot https://mcp.hubspot.com/anthropic
 
-# 带Bearer token认证
-claude mcp add --transport http secure-api https://api.example.com/mcp \
-  --header "Authorization: Bearer your-token"
-
-# Sentry错误监控
-claude mcp add --transport http sentry https://mcp.sentry.dev/mcp
+# Daloopa数据平台（真实服务）
+claude mcp add --transport http daloopa https://mcp.daloopa.com/server/mcp
 ```
 
 ### 5.3 其他管理命令
@@ -1187,10 +1181,10 @@ claude mcp list --format json
 claude mcp list
 
 # 获取特定服务器的详细信息
-claude mcp get github
+claude mcp get airtable
 
 # 删除服务器
-claude mcp remove github
+claude mcp remove filesystem
 
 # 在Claude Code中检查服务器状态
 /mcp
@@ -1201,11 +1195,11 @@ claude mcp remove github
 **基本用法**：
 ```bash
 # 查看特定服务器配置详情
-claude mcp get weather
+claude mcp get airtable
 claude mcp get filesystem
 
 # 查看服务器状态和连接信息
-claude mcp get database --verbose
+claude mcp get sqlite-server --verbose
 ```
 
 #### claude mcp remove - 删除服务器
@@ -1213,14 +1207,14 @@ claude mcp get database --verbose
 **基本用法**：
 ```bash
 # 删除指定服务器
-claude mcp remove weather
+claude mcp remove airtable
 
 # 指定范围删除
-claude mcp remove --scope project team-db
-claude mcp remove --scope user personal-tools
+claude mcp remove --scope project sqlite-server
+claude mcp remove --scope user filesystem
 
 # 强制删除（无确认提示）
-claude mcp remove old-server --force
+claude mcp remove hubspot --force
 ```
 
 #### claude mcp serve - 服务器模式
