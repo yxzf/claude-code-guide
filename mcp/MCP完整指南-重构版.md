@@ -1278,13 +1278,29 @@ MCP服务器可以通过三种方式进行配置，每种方式适用于不同�
 
 **JSON格式规范**：
 
+**本地stdio服务器**：
 ```json
 {
   "mcpServers": {
-    "shared-server": {
+    "server-name": {
       "command": "/path/to/server",
       "args": [],
       "env": {}
+    }
+  }
+}
+```
+
+**远程SSE/HTTP服务器**：
+```json
+{
+  "mcpServers": {
+    "api-server": {
+      "type": "sse",
+      "url": "https://api.example.com/mcp",
+      "headers": {
+        "Authorization": "Bearer ${API_KEY}"
+      }
     }
   }
 }
@@ -1302,11 +1318,16 @@ MCP服务器可以通过三种方式进行配置，每种方式适用于不同�
       }
     },
     "github": {
-      "command": "npx",
+      "command": "npx", 
       "args": ["-y", "@modelcontextprotocol/server-github"],
       "env": {
         "GITHUB_TOKEN": "${GITHUB_TOKEN}"
       }
+    },
+    "claude-code": {
+      "command": "claude",
+      "args": ["mcp", "serve"],
+      "env": {}
     }
   }
 }
