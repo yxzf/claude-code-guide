@@ -28,9 +28,17 @@ claude mcp reset-project-choices  # ⭐ 重置项目批准选择
 ```
 
 **三种配置范围系统**：
-- **local（本地）**：当前目录`.claude/mcp.json`，项目特定、敏感配置
+- **local（本地）**：`~/.claude.json` 中的 projects 节点，项目特定、敏感配置
 - **project（项目）**：项目根目录`.mcp.json`，团队共享、版本控制
-- **user（用户）**：`~/.claude/mcp.json`，个人工具、跨项目
+- **user（用户）**：`~/.claude.json` 中的 mcpServers 节点，个人工具、跨项目
+
+**Local vs Project 核心区别**：
+
+| 维度 | Local | Project |
+|------|-------|---------|
+| **版本控制** | ❌ 不会被git追踪 | ✅ 会被git追踪 |
+| **团队协作** | 仅自己有效 | 团队克隆后自动生效 |
+| **典型用途** | 个人token、私钥等敏感信息 | 团队共享工具链、公共API |
 
 **范围优先级**：Local > Project > User（本地配置覆盖项目，项目覆盖用户）
 
@@ -306,22 +314,33 @@ claude mcp add-from-json https://company.com/mcp-config.json
 本地范围（Local）：敏感配置，仅当前目录
 ```
 
+**Local vs Project 实战对比**：
+
+| 维度      | Local 示例                               | Project 示例                     |
+| ------- | -------------------------------------- | ------------------------------ |
+| **文件位置** | `~/.claude.json` 中的 `projects.<绝对路径>` | 项目根目录下的 `.mcp.json`            |
+| **版本控制** | ❌ 不在仓库，**不会**被 git 追踪                | ✅ 在仓库，**会**被 git 追踪            |
+| **协作特性** | 仅你自己有效，同事克隆后看不到                      | 团队/CI 克隆后自动生效                  |
+| **典型用途** | 个人 token、私钥等**敏感**信息；临时调试用            | 团队共享工具链，如公司内网 API、公共数据库       |
+| **生效条件** | 只有 `pwd` 等于配置里写的那个绝对路径时才加载           | 只要 `.mcp.json` 存在就加载（不论在哪台机器）  |
+
 **实际配置示例**：
 ```bash
-# 用户范围：个人开发工具
+# 用户范围：个人开发工具（跨项目可用）
 claude mcp add -s user dev-tools -- python ~/tools/dev_server.py
 
-# 项目范围：团队共享数据库
+# 项目范围：团队共享数据库（进版本控制）
 claude mcp add -s project team-db -- python db_server.py
 
-# 本地范围：API密钥等敏感信息
-claude mcp add -s local secrets -- python secret_server.py
+# 本地范围：个人API密钥（敏感信息，不进版本控制）
+claude mcp add -s local secrets --env API_KEY=$MY_SECRET_KEY -- python secret_server.py
 ```
 
 **权限控制机制重点**：
-- 项目范围服务器使用前需要用户明确批准（安全保护）
+- 项目范围服务器使用前需要用户明确批准（重要安全保护）
 - Local > Project > User 的优先级覆盖规则
 - 环境变量扩展支持敏感信息隔离
+- **核心理念**：敏感信息用Local，团队工具用Project
 
 ### 安全与权限管理 (17:30-18:30)
 
