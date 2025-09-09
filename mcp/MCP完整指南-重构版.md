@@ -1198,10 +1198,6 @@ claude mcp add --transport http daloopa https://mcp.daloopa.com/server/mcp
 ```bash
 # 列出所有MCP服务器
 claude mcp list
-
-# 仅显示特定范围的服务器
-claude mcp list --scope user
-claude mcp list --scope project
 ```
 
 **管理服务器命令**：

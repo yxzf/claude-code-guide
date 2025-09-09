@@ -194,10 +194,6 @@ claude mcp add --transport http daloopa https://mcp.daloopa.com/server/mcp
 # 列出所有已配置的服务器
 claude mcp list
 
-# 仅显示特定范围的服务器
-claude mcp list --scope user
-claude mcp list --scope project
-
 # 获取特定服务器的详细信息
 claude mcp get airtable
 
@@ -428,10 +424,6 @@ def sensitive_operation(user_id: str) -> str:
 ```bash
 # 查看所有MCP服务器状态
 claude mcp list
-
-# 仅显示特定范围的服务器
-claude mcp list --scope user
-claude mcp list --scope project
 
 # 检查特定服务器详情
 claude mcp get server-name
