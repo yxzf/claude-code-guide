@@ -1256,40 +1256,119 @@ claude mcp serve --http --host 0.0.0.0 --port 8080
 
 ### 5.4 安装配置方式
 
+MCP服务器可以通过三种方式进行配置，每种方式适用于不同的场景：
+
+| 配置方式 | 适用场景 | 优势 | 劣势 |
+|---------|---------|------|------|
+| **命令行配置** | 单个服务器、临时配置 | 简单直观、即时生效 | 批量操作不便 |
+| **JSON文件配置** | 批量配置、团队协作 | 版本控制、批量管理 | 需要了解JSON格式 |
+| **Claude Desktop导入** | 从Desktop迁移 | 一键迁移、无需重配 | 仅限迁移场景 |
+
 #### JSON文件批量配置
 
 **适用场景**：批量配置、团队协作、复杂环境管理
 
-**标准格式**：
+**配置文件位置**：
+
+| 作用域 | 文件路径 | 使用场景 |
+|-------|---------|---------|
+| **local** | `.claude/mcp.json` (当前目录) | 项目特定配置，私有设置 |
+| **project** | `.mcp.json` (项目根目录) | 团队共享，版本控制 |
+| **user** | `~/.claude/mcp.json` (用户目录) | 个人全局配置 |
+
+**JSON格式规范**：
+
+**基础结构**：
+```json
+{
+  "mcpServers": {
+    "服务器名称": {
+      // 服务器配置
+    }
+  }
+}
+```
+
+**stdio服务器配置**：
 ```json
 {
   "mcpServers": {
     "filesystem": {
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-filesystem", "${HOME}/Documents"]
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "${HOME}/Documents"],
+      "env": {
+        "DEBUG": "true"
+      }
     },
-    "database": {
+    "custom-tool": {
       "command": "python",
-      "args": ["scripts/db_server.py"],
+      "args": ["scripts/db_server.py", "--port", "8080"],
       "env": {
         "DATABASE_URL": "${DATABASE_URL}",
         "LOG_LEVEL": "${LOG_LEVEL:-info}"
-      }
-    },
-    "remote-api": {
-      "transport": "http",
-      "url": "https://api.example.com/mcp",
-      "headers": {
-        "Authorization": "Bearer ${API_TOKEN}"
       }
     }
   }
 }
 ```
 
+**SSE/HTTP服务器配置**：
+```json
+{
+  "mcpServers": {
+    "linear": {
+      "transport": "sse",
+      "url": "https://mcp.linear.app/sse"
+    },
+    "notion": {
+      "transport": "http", 
+      "url": "https://mcp.notion.com/mcp",
+      "headers": {
+        "Authorization": "Bearer ${NOTION_TOKEN}",
+        "User-Agent": "MyApp/1.0"
+      }
+    }
+  }
+}
+```
+
+**配置字段说明**：
+
+| 字段 | 类型 | 必需 | 说明 | 适用协议 |
+|------|------|------|------|---------|
+| `command` | string | 是 | 服务器启动命令 | stdio |
+| `args` | array | 否 | 命令行参数数组 | stdio |
+| `env` | object | 否 | 环境变量键值对 | stdio |
+| `transport` | string | 是 | 传输协议：sse/http | sse/http |
+| `url` | string | 是 | 服务器URL地址 | sse/http |
+| `headers` | object | 否 | HTTP请求头 | sse/http |
+
 **环境变量支持**：
 - `${VAR}`：环境变量值
 - `${VAR:-default}`：环境变量值或默认值
+
+**实际使用示例**：
+
+创建项目共享配置（`.mcp.json`）：
+```bash
+# 在项目根目录创建
+cat > .mcp.json << 'EOF'
+{
+  "mcpServers": {
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_TOKEN": "${GITHUB_TOKEN}"
+      }
+    }
+  }
+}
+EOF
+
+# 提交到版本控制
+git add .mcp.json
+```
 
 #### Claude Desktop导入配置
 
