@@ -14,7 +14,8 @@
       "mcp__playwright__browser_tabs",
       "mcp__chrome-mcp-server__chrome_click_element",
       "mcp__playwright__browser_snapshot",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(git rebase:*)"
     ],
     "deny": [],
     "ask": []
