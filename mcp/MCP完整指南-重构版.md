@@ -27,7 +27,6 @@
 - [6. MCP 生态系统](#6-mcp-生态系统)
   - [6.1 官方工具集](#61-官方工具集)
   - [6.2 社区工具推荐](#62-社区工具推荐)
-  - [6.3 选择和评估指南](#63-选择和评估指南)
 
 ---
 
@@ -1421,47 +1420,6 @@ claude mcp add-from-json https://company.com/mcp-config.json
 
 </details>
 
-### 生态发展现状
-
-#### 增长数据
-
-| 时间 | 项目数量 | 发展阶段 |
-|------|---------|---------|
-| 2024年11月 | 10个 | Anthropic发布 |
-| 2024年12月 | 100个 | 早期采用 |
-| 2025年01月 | 500+ | 社区爆发 |
-| 2025年03月 | 1000+ | 企业采用 |
-
-#### 编程语言分布
-
-| 语言 | 占比 | 项目数 |
-|------|------|-------|
-| Python | 45% | 250+ |
-| TypeScript/JavaScript | 35% | 200+ |
-| Go | 12% | 60+ |
-| Rust | 5% | 30+ |
-| 其他 | 3% | 15+ |
-
-### 项目选择指南
-
-#### 评估标准
-
-| 标准 | 重要性 | 评估要点 |
-|------|-------|---------|
-| 活跃度 | 高 | 更新频率、Issue响应 |
-| 文档质量 | 高 | README、示例完整性 |
-| 社区支持 | 中 | Star数、贡献者数量 |
-| 功能匹配 | 高 | 业务需求契合度 |
-
-#### 发现资源
-
-**官方资源**：
-- [Awesome MCP Servers](https://github.com/modelcontextprotocol/servers)
-- [MCP官网项目列表](https://modelcontextprotocol.io/servers)
-
-**社区资源**：
-- GitHub Topic: `mcp-server`
-- Reddit: r/ModelContextProtocol
 
 ---
 
