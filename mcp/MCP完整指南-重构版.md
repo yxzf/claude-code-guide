@@ -1284,57 +1284,12 @@ MCP服务器可以通过三种方式进行安装配置：
 
 **JSON格式规范**：
 
-根据官方文档，MCP配置文件使用以下标准格式：
-
-**本地stdio服务器配置**：
 ```json
 {
   "mcpServers": {
     "server-name": {
       "command": "/path/to/server",
       "args": [],
-      "env": {}
-    }
-  }
-}
-```
-
-**远程SSE/HTTP服务器配置**：
-```json
-{
-  "mcpServers": {
-    "api-server": {
-      "type": "sse",
-      "url": "https://api.example.com/mcp",
-      "headers": {
-        "Authorization": "Bearer ${API_KEY}"
-      }
-    }
-  }
-}
-```
-
-**实际配置示例**：
-```json
-{
-  "mcpServers": {
-    "filesystem": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-filesystem", "${HOME}/Documents"],
-      "env": {
-        "DEBUG": "true"
-      }
-    },
-    "github": {
-      "command": "npx", 
-      "args": ["-y", "@modelcontextprotocol/server-github"],
-      "env": {
-        "GITHUB_TOKEN": "${GITHUB_TOKEN}"
-      }
-    },
-    "claude-code": {
-      "command": "claude",
-      "args": ["mcp", "serve"],
       "env": {}
     }
   }
@@ -1373,28 +1328,6 @@ MCP服务器可以通过三种方式进行安装配置：
 
 注意：如果必需的环境变量未设置且没有默认值，Claude Code将无法解析配置。
 
-**实际使用示例**：
-
-创建项目共享配置（`.mcp.json`）：
-```bash
-# 在项目根目录创建
-cat > .mcp.json << 'EOF'
-{
-  "mcpServers": {
-    "github": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-github"],
-      "env": {
-        "GITHUB_TOKEN": "${GITHUB_TOKEN}"
-      }
-    }
-  }
-}
-EOF
-
-# 提交到版本控制
-git add .mcp.json
-```
 
 #### Claude Desktop 导入
 
