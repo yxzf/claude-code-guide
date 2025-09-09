@@ -1200,21 +1200,6 @@ claude mcp add --transport http daloopa https://mcp.daloopa.com/server/mcp
 claude mcp list
 ```
 
-**管理服务器命令**：
-```bash
-# 列出所有已配置的服务器
-claude mcp list
-
-# 获取特定服务器的详细信息
-claude mcp get airtable
-
-# 删除服务器
-claude mcp remove filesystem
-
-# 在Claude Code中检查服务器状态
-/mcp
-```
-
 #### claude mcp get - 查看详情
 
 **基本用法**：
