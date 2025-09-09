@@ -1070,23 +1070,27 @@ claude mcp [子命令] [选项] [参数...]
 #### 基本语法
 
 ```bash
+# 基本语法
 claude mcp add <name> <command> [args...]
+
+# 实际示例：添加Airtable服务器
+claude mcp add airtable --env AIRTABLE_API_KEY=YOUR_KEY \
+  -- npx -y airtable-mcp-server
 ```
 
-> **💡 理解"--"参数分隔符**：
-> 
-> 双破折号(`--`)分隔Claude自身的CLI标志与传递给MCP服务器的命令和参数。
-> 
-> - `--`**之前**：Claude的选项（如`--env`、`--scope`）
-> - `--`**之后**：运行MCP服务器的实际命令
-> 
-> **官方示例**：
+> **💡 理解"--"参数的作用**：
+>
+> 双破折号(`--`)分隔Claude自身的CLI标志与传递给MCP服务器的命令和参数。`--`之前的是Claude的选项（如`--env`、`--scope`），`--`之后的是运行MCP服务器的实际命令。
+>
+> **示例对比**：
 > ```bash
-> # 标准格式（来自官方文档）
-> claude mcp add airtable --env AIRTABLE_API_KEY=YOUR_KEY \
->   -- npx -y airtable-mcp-server
+> claude mcp add myserver -- npx server
+> # → 运行：npx server
+>
+> claude mcp add myserver --env KEY=value -- python server.py --port 8080
+> # → 运行：python server.py --port 8080，环境变量：KEY=value
 > ```
-> 
+>
 > 这样可以防止Claude的标志与服务器标志之间的冲突。
 
 #### 完整参数说明
