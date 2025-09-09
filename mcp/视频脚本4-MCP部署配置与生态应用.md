@@ -50,8 +50,19 @@ claude mcp reset-project-choices  # ⭐ 重置项目批准选择
 ```bash
 # 核心语法结构
 claude mcp add <name> <command> [args...]
+```
 
-# 实际示例：添加Airtable服务器
+**完整参数说明**：
+
+| 参数 | 简写 | 默认值 | 说明 | 适用协议 |
+|------|------|-------|------|---------|
+| **--scope** | **-s** | **local** | **配置作用域**：local（项目特定）/user（跨项目）/project（团队共享） | 全部 |
+| **--transport** | **-t** | **stdio** | **传输协议**：stdio（本地进程）/sse（流式）/http（标准HTTP） | 全部 |
+| **--env** | **-e** | 无 | **环境变量设置**：格式 `--env KEY=value`，可多次使用 | stdio |
+| **--header** | **-H** | 无 | **HTTP请求头**：格式 `--header "Key: Value"`，支持认证 | sse/http |
+
+**实际示例：添加Airtable服务器**
+```bash
 claude mcp add airtable --env AIRTABLE_API_KEY=YOUR_KEY \
   -- npx -y airtable-mcp-server
 ```
@@ -72,20 +83,7 @@ claude mcp add myserver -- npx server --port 8080
 claude mcp add myserver --env KEY=value -- python server.py --port 8080
 ```
 
-**演示重点**：我会现场演示参数分隔符使用错误时的错误信息，以及正确用法。
-
-**完整参数说明**：
-
-现在来详细说明claude mcp add命令支持的所有参数：
-
-| 参数 | 简写 | 默认值 | 说明 | 适用协议 |
-|------|------|-------|------|---------|
-| **--scope** | **-s** | **local** | **配置作用域**：local（项目特定）/user（跨项目）/project（团队共享） | 全部 |
-| **--transport** | **-t** | **stdio** | **传输协议**：stdio（本地进程）/sse（流式）/http（标准HTTP） | 全部 |
-| **--env** | **-e** | 无 | **环境变量设置**：格式 `--env KEY=value`，可多次使用 | stdio |
-| **--header** | **-H** | 无 | **HTTP请求头**：格式 `--header "Key: Value"`，支持认证 | sse/http |
-
-**参数使用示例**：
+**参数组合使用示例**：
 ```bash
 # 使用所有参数的完整示例
 claude mcp add my-server \
@@ -102,6 +100,8 @@ claude mcp add api-server \
   --header "Authorization: Bearer token123" \
   -- https://api.example.com/mcp
 ```
+
+**演示重点**：我会现场演示参数分隔符使用错误时的错误信息，以及正确用法。
 
 ### 三种传输协议详解 (6:00-8:30)
 
