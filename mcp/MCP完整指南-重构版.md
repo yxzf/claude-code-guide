@@ -1073,38 +1073,6 @@ claude mcp [子命令] [选项] [参数...]
 claude mcp add <name> <command> [args...]
 ```
 
-#### 完整参数说明
-
-| 参数 | 简写 | 默认值 | 说明 | 适用协议 |
-|------|------|-------|------|---------|
-| **--scope** | **-s** | **local** | **配置作用域**：local（项目特定）/user（跨项目）/project（团队共享） | 全部 |
-| **--transport** | **-t** | **stdio** | **传输协议**：stdio（本地进程）/sse（流式）/http（标准HTTP） | 全部 |
-| **--env** | **-e** | 无 | **环境变量设置**：格式 `--env KEY=value`，可多次使用 | stdio |
-| **--header** | **-H** | 无 | **HTTP请求头**：格式 `--header "Key: Value"`，支持认证 | sse/http |
-
-#### 官方语法格式
-
-**基础语法**：
-```bash
-# 官方标准语法
-claude mcp add <name> <command> [args...]
-```
-
-#### 分协议详细配置
-
-**Option 1: 本地stdio服务器**（最常用）
-
-Stdio服务器作为本地进程运行，非常适合需要直接系统访问或自定义脚本的工具。
-
-```bash
-# 基础语法
-claude mcp add <name> -- <command> [args...]
-
-# 实际示例：添加Airtable服务器
-claude mcp add airtable --env AIRTABLE_API_KEY=YOUR_KEY \
-  -- npx -y airtable-mcp-server
-```
-
 > **💡 理解"--"参数分隔符**：
 > 
 > 双破折号(`--`)分隔Claude自身的CLI标志与传递给MCP服务器的命令和参数。
@@ -1120,6 +1088,30 @@ claude mcp add airtable --env AIRTABLE_API_KEY=YOUR_KEY \
 > ```
 > 
 > 这样可以防止Claude的标志与服务器标志之间的冲突。
+
+#### 完整参数说明
+
+| 参数 | 简写 | 默认值 | 说明 | 适用协议 |
+|------|------|-------|------|---------|
+| **--scope** | **-s** | **local** | **配置作用域**：local（项目特定）/user（跨项目）/project（团队共享） | 全部 |
+| **--transport** | **-t** | **stdio** | **传输协议**：stdio（本地进程）/sse（流式）/http（标准HTTP） | 全部 |
+| **--env** | **-e** | 无 | **环境变量设置**：格式 `--env KEY=value`，可多次使用 | stdio |
+| **--header** | **-H** | 无 | **HTTP请求头**：格式 `--header "Key: Value"`，支持认证 | sse/http |
+
+#### 分协议详细配置
+
+**Option 1: 本地stdio服务器**（最常用）
+
+Stdio服务器作为本地进程运行，非常适合需要直接系统访问或自定义脚本的工具。
+
+```bash
+# 基础语法
+claude mcp add <name> -- <command> [args...]
+
+# 实际示例：添加Airtable服务器
+claude mcp add airtable --env AIRTABLE_API_KEY=YOUR_KEY \
+  -- npx -y airtable-mcp-server
+```
 
 **更多stdio服务器示例**：
 ```bash
@@ -1166,75 +1158,6 @@ claude mcp add --transport http secure-api https://api.example.com/mcp \
 # Sentry错误监控
 claude mcp add --transport http sentry https://mcp.sentry.dev/mcp
 ```
-
-#### 高级配置技巧
-
-**多环境变量设置**：
-```bash
-# 多个环境变量
-claude mcp add --scope project database \
-  --env DATABASE_URL=${DATABASE_URL} \
-  --env LOG_LEVEL=debug \
-  --env TIMEOUT=30 \
-  -- python scripts/db_server.py
-```
-
-**作用域选择策略**：
-```bash
-# 个人开发工具（user scope）
-claude mcp add --scope user personal-tools -- python ~/tools/server.py
-
-# 团队共享服务（project scope）
-claude mcp add --scope project team-db \
-  --env DATABASE_URL=${DATABASE_URL} \
-  -- python scripts/db_server.py
-
-# 项目特定配置（local scope，默认）
-claude mcp add sensitive-api \
-  --env API_SECRET=${SECRET_KEY} \
-  -- python local_api.py
-```
-
-**实用配置模式**：
-```bash
-# 开发环境 vs 生产环境
-claude mcp add dev-api --env NODE_ENV=development -- node api.js
-claude mcp add prod-api --env NODE_ENV=production -- node api.js
-
-# 超时和性能调优
-MCP_TIMEOUT=10000 claude mcp add slow-server -- python slow_server.py
-
-# 大输出限制调整
-MAX_MCP_OUTPUT_TOKENS=50000 claude mcp add data-server -- python data_server.py
-```
-
-#### 📌 重要配置提示
-
-> **💡 实用技巧**：
-> 
-> - **作用域选择**：使用`--scope`标志指定配置存储位置
->   - `local`（默认）：仅当前项目可用（曾叫`project`）
->   - `project`：团队共享，通过`.mcp.json`文件版本控制
->   - `user`：跨项目可用（曾叫`global`）
-> 
-> - **环境变量**：使用`--env`标志设置（如`--env KEY=value`）
-> 
-> - **超时配置**：使用`MCP_TIMEOUT`环境变量配置服务器启动超时（如`MCP_TIMEOUT=10000 claude`设置10秒超时）
-> 
-> - **输出限制**：Claude Code在MCP工具输出超过10,000个token时显示警告。使用`MAX_MCP_OUTPUT_TOKENS`环境变量调整限制（如`MAX_MCP_OUTPUT_TOKENS=50000`）
-> 
-> - **OAuth认证**：使用`/mcp`命令认证需要OAuth 2.0的远程服务器
-
-> **⚠️ Windows用户特别注意**：
-> 
-> 在原生Windows（非WSL）上，使用`npx`的本地MCP服务器需要`cmd /c`包装器确保正确执行：
-> 
-> ```bash
-> # ✅ Windows正确方式
-> claude mcp add my-server -- cmd /c npx -y @some/package
-> ```
-> 
-> 不使用`cmd /c`包装器会遇到"Connection closed"错误，因为Windows无法直接执行`npx`。
 
 ### 5.3 其他管理命令
 
@@ -1341,50 +1264,11 @@ claude mcp serve --http --host 0.0.0.0 --port 8080
 - **统一开发环境**：提供标准化的代码操作接口，支持多种客户端连接
 - **自动化工作流**：结合MCP协议实现复杂的自动化开发任务
 
-#### 导入导出命令
+### 5.4 高级配置方法
 
-**从Claude Desktop导入**：
-```bash
-# 导入所有配置
-claude mcp import-from-claude-desktop
-
-# 选择性导入
-claude mcp import-from-claude-desktop --server filesystem --server github
-
-# 从JSON文件批量导入
-claude mcp add-from-json ./team-mcp-config.json
-claude mcp add-from-json https://company.com/mcp-config.json
-```
-
-### 5.4 安装配置方式
-
-#### 方式一：命令行配置（推荐）
-
-**适用场景**：快速配置、单个服务器、开发测试
-
-最直接的配置方式，使用 `claude mcp add` 命令：
-
-```bash
-# 基本配置
-claude mcp add weather -- python weather.py
-
-# 指定范围和环境变量
-claude mcp add --scope project database \
-  --env DATABASE_URL=${DATABASE_URL} \
-  -- python scripts/db_server.py
-
-# 远程服务器
-claude mcp add --transport sse linear https://mcp.linear.app/sse
-```
-
-#### 方式二：JSON文件配置
+#### JSON文件批量配置
 
 **适用场景**：批量配置、团队协作、复杂环境管理
-
-**配置文件位置**：
-- 用户范围：`~/.claude/mcp.json`
-- 项目范围：项目根目录`/.mcp.json`  
-- 本地范围：当前目录`/.claude/mcp.json`
 
 **标准格式**：
 ```json
