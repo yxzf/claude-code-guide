@@ -32,13 +32,13 @@ claude mcp reset-project-choices  # ⭐ 重置项目批准选择
 - **project（项目）**：项目根目录`.mcp.json`，团队共享、版本控制
 - **user（用户）**：`~/.claude.json` 中的 mcpServers 节点，个人工具、跨项目
 
-**Local vs Project 核心区别**：
+**三种配置范围对比**：
 
-| 维度 | Local | Project |
-|------|-------|---------|
-| **版本控制** | ❌ 不会被git追踪 | ✅ 会被git追踪 |
-| **团队协作** | 仅自己有效 | 团队克隆后自动生效 |
-| **典型用途** | 个人token、私钥等敏感信息 | 团队共享工具链、公共API |
+| 作用域 | 存储位置 | 可见范围 | 典型用法 | 添加方式 |
+| --------------- | -------------------------------- | ------- | --------- | -------------- |
+| **Local**（本地） | `~/.claude.json` 的 projects 节点 | 仅当前目录 | 个人调试、敏感凭证 | 默认或 `-s local` |
+| **Project**（项目） | 项目根目录 `.mcp.json` | 仓库内所有成员 | 团队共享工具 | `-s project` |
+| **User**（用户） | `~/.claude.json` 的 mcpServers 节点 | 本机所有项目 | 常用通用工具 | `-s user` |
 
 **范围优先级**：Local > Project > User（本地配置覆盖项目，项目覆盖用户）
 
@@ -89,31 +89,41 @@ claude mcp add myserver --env KEY=value -- python server.py --port 8080
 
 适用场景：需要直接系统访问或自定义脚本的工具
 
+**基本语法**：
 ```bash
-# 文件系统访问
+claude mcp add <name> <command> [args...]
+```
+
+**stdio服务器示例**：
+```bash
+# 文件系统访问（官方服务器）
 claude mcp add filesystem -- npx -y @modelcontextprotocol/server-filesystem ~/Documents
 
-# GitHub集成
-claude mcp add github \
-  --env GITHUB_TOKEN=ghp_xxxxxxxxxxxx \
-  -- npx -y @modelcontextprotocol/server-github
+# Airtable数据库集成
+claude mcp add airtable --env AIRTABLE_API_KEY=YOUR_KEY \
+  -- npx -y airtable-mcp-server
 
-# 自定义Python工具
-claude mcp add weather --scope user -- uv run weather.py
-
-# Windows系统（需要cmd /c包装）
-claude mcp add my-server -- cmd /c npx -y @some/package
+# SQLite数据库服务器
+claude mcp add sqlite-server --scope user \
+  --env SQLITE_DB_PATH="./data.db" \
+  -- uvx run sqlite_explorer.py
 ```
 
 **Option 2: 远程SSE服务器（实时流式）**
 
 适用场景：云服务，实时更新需求，持续数据流
 
+**基本语法**：
 ```bash
-# Linear项目管理
+claude mcp add --transport sse <name> <url>
+```
+
+**SSE服务器示例**：
+```bash
+# Linear项目管理（真实服务）
 claude mcp add --transport sse linear https://mcp.linear.app/sse
 
-# 带认证头的SSE
+# 带认证头的私有API示例
 claude mcp add --transport sse private-api https://api.company.com/mcp \
   --header "X-API-Key: your-key-here"
 ```
@@ -122,16 +132,18 @@ claude mcp add --transport sse private-api https://api.company.com/mcp \
 
 适用场景：标准HTTP API，REST服务，Web服务集成
 
+**基本语法**：
 ```bash
-# Notion知识库
-claude mcp add --transport http notion https://mcp.notion.com/mcp
+claude mcp add --transport http <name> <url>
+```
 
-# 带Bearer token认证
-claude mcp add --transport http secure-api https://api.example.com/mcp \
-  --header "Authorization: Bearer your-token"
+**HTTP服务器示例**：
+```bash
+# HubSpot CRM（真实服务）
+claude mcp add --transport http hubspot https://mcp.hubspot.com/anthropic
 
-# Sentry错误监控
-claude mcp add --transport http sentry https://mcp.sentry.dev/mcp
+# Daloopa数据平台（真实服务）
+claude mcp add --transport http daloopa https://mcp.daloopa.com/server/mcp
 ```
 
 ### 其他管理命令 (8:30-9:00)
@@ -162,11 +174,18 @@ claude mcp add --transport http sentry https://mcp.sentry.dev/mcp
 # 列出所有已配置的服务器
 claude mcp list
 
+# 仅显示特定范围的服务器
+claude mcp list --scope user
+claude mcp list --scope project
+
 # 获取特定服务器的详细信息
-claude mcp get github
+claude mcp get airtable
 
 # 删除服务器
-claude mcp remove github
+claude mcp remove filesystem
+
+# 指定范围删除
+claude mcp remove --scope project sqlite-server
 
 # 重置项目范围的批准选择
 claude mcp reset-project-choices
@@ -233,15 +252,14 @@ claude mcp reset-project-choices
 **适用场景**：从Claude Desktop迁移已有配置
 
 ```bash
-# 导入所有配置
-claude mcp import-from-claude-desktop
+# 导入Claude Desktop配置
+claude mcp add-from-claude-desktop
 
-# 选择性导入特定服务器
-claude mcp import-from-claude-desktop --server filesystem --server github
+# 从JSON文件添加服务器
+claude mcp add-json <name> '<json>'
 
-# 从JSON文件批量导入
-claude mcp add-from-json ./team-config.json
-claude mcp add-from-json https://company.com/mcp-config.json
+# 示例：添加stdio服务器配置
+claude mcp add-json weather-api '{"type":"stdio","command":"/path/to/weather-cli","args":["--api-key","abc123"],"env":{"CACHE_DIR":"/tmp"}}'
 ```
 
 **Claude Desktop配置文件位置**：
@@ -314,15 +332,13 @@ claude mcp add-from-json https://company.com/mcp-config.json
 本地范围（Local）：敏感配置，仅当前目录
 ```
 
-**Local vs Project 实战对比**：
+**三种配置范围实战对比**：
 
-| 维度      | Local 示例                               | Project 示例                     |
-| ------- | -------------------------------------- | ------------------------------ |
-| **文件位置** | `~/.claude.json` 中的 `projects.<绝对路径>` | 项目根目录下的 `.mcp.json`            |
-| **版本控制** | ❌ 不在仓库，**不会**被 git 追踪                | ✅ 在仓库，**会**被 git 追踪            |
-| **协作特性** | 仅你自己有效，同事克隆后看不到                      | 团队/CI 克隆后自动生效                  |
-| **典型用途** | 个人 token、私钥等**敏感**信息；临时调试用            | 团队共享工具链，如公司内网 API、公共数据库       |
-| **生效条件** | 只有 `pwd` 等于配置里写的那个绝对路径时才加载           | 只要 `.mcp.json` 存在就加载（不论在哪台机器）  |
+| 作用域 | 存储位置 | 可见范围 | 典型用法 | 添加方式 |
+| --------------- | -------------------------------- | ------- | --------- | -------------- |
+| **Local**（本地） | `~/.claude.json` 的 projects 节点 | 仅当前目录 | 个人调试、敏感凭证 | 默认或 `-s local` |
+| **Project**（项目） | 项目根目录 `.mcp.json` | 仓库内所有成员 | 团队共享工具 | `-s project` |
+| **User**（用户） | `~/.claude.json` 的 mcpServers 节点 | 本机所有项目 | 常用通用工具 | `-s user` |
 
 **实际配置示例**：
 ```bash
@@ -393,8 +409,9 @@ def sensitive_operation(user_id: str) -> str:
 # 查看所有MCP服务器状态
 claude mcp list
 
-# JSON格式输出（便于脚本处理）
-claude mcp list --format json
+# 仅显示特定范围的服务器
+claude mcp list --scope user
+claude mcp list --scope project
 
 # 检查特定服务器详情
 claude mcp get server-name
