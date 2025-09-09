@@ -76,12 +76,32 @@ claude mcp add myserver --env KEY=value -- python server.py --port 8080
 
 **完整参数说明**：
 
+现在来详细说明claude mcp add命令支持的所有参数：
+
 | 参数 | 简写 | 默认值 | 说明 | 适用协议 |
 |------|------|-------|------|---------|
-| **--scope** | **-s** | **local** | **配置作用域** | 全部 |
-| **--transport** | **-t** | **stdio** | **传输协议** | 全部 |
-| **--env** | **-e** | 无 | **环境变量设置** | stdio |
-| **--header** | **-H** | 无 | **HTTP请求头** | sse/http |
+| **--scope** | **-s** | **local** | **配置作用域**：local（项目特定）/user（跨项目）/project（团队共享） | 全部 |
+| **--transport** | **-t** | **stdio** | **传输协议**：stdio（本地进程）/sse（流式）/http（标准HTTP） | 全部 |
+| **--env** | **-e** | 无 | **环境变量设置**：格式 `--env KEY=value`，可多次使用 | stdio |
+| **--header** | **-H** | 无 | **HTTP请求头**：格式 `--header "Key: Value"`，支持认证 | sse/http |
+
+**参数使用示例**：
+```bash
+# 使用所有参数的完整示例
+claude mcp add my-server \
+  --scope user \
+  --transport stdio \
+  --env API_KEY=secret123 \
+  --env DEBUG=true \
+  -- python /path/to/server.py --port 8080
+
+# SSE服务器带认证头
+claude mcp add api-server \
+  --scope project \
+  --transport sse \
+  --header "Authorization: Bearer token123" \
+  -- https://api.example.com/mcp
+```
 
 ### 三种传输协议详解 (6:00-8:30)
 
