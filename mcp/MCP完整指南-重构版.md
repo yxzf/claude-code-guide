@@ -1078,18 +1078,13 @@ claude mcp add airtable --env AIRTABLE_API_KEY=YOUR_KEY \
   -- npx -y airtable-mcp-server
 ```
 
-> **💡 理解"--"参数的作用**：
+> **💡 理解"--"参数的核心作用**：
 >
 > 双破折号(`--`)分隔Claude自身的CLI标志与传递给MCP服务器的命令和参数。`--`之前的是Claude的选项（如`--env`、`--scope`），`--`之后的是运行MCP服务器的实际命令。
 >
-> **示例对比**：
-> ```bash
-> claude mcp add myserver -- npx server
-> # → 运行：npx server
->
-> claude mcp add myserver --env KEY=value -- python server.py --port 8080
-> # → 运行：python server.py --port 8080，环境变量：KEY=value
-> ```
+> **示例说明**：
+> - `claude mcp add myserver -- npx server` → 运行：npx server
+> - `claude mcp add myserver --env KEY=value -- python server.py --port 8080` → 运行：python server.py --port 8080，环境变量：KEY=value
 >
 > 这样可以防止Claude的标志与服务器标志之间的冲突。
 
@@ -1104,20 +1099,11 @@ claude mcp add airtable --env AIRTABLE_API_KEY=YOUR_KEY \
 
 #### 分协议详细配置
 
-**Option 1: 本地stdio服务器**（最常用）
+**Option 1: 本地stdio服务器**
 
 Stdio服务器作为本地进程运行，非常适合需要直接系统访问或自定义脚本的工具。
 
-```bash
-# 基础语法
-claude mcp add <name> -- <command> [args...]
-
-# 实际示例：添加Airtable服务器
-claude mcp add airtable --env AIRTABLE_API_KEY=YOUR_KEY \
-  -- npx -y airtable-mcp-server
-```
-
-**更多stdio服务器示例**：
+**stdio服务器示例**：
 ```bash
 # 文件系统访问
 claude mcp add filesystem -- npx -y @modelcontextprotocol/server-filesystem ~/Documents
@@ -1134,11 +1120,11 @@ claude mcp add weather --scope user -- uv run weather.py
 claude mcp add my-server -- cmd /c npx -y @some/package
 ```
 
-**Option 2: 远程SSE服务器**（实时流式）
-```bash
-# 基础语法
-claude mcp add --transport sse <name> <url>
+**Option 2: 远程SSE服务器（实时流式）**
 
+适用场景：云服务，实时更新需求，持续数据流
+
+```bash
 # Linear项目管理
 claude mcp add --transport sse linear https://mcp.linear.app/sse
 
@@ -1147,11 +1133,11 @@ claude mcp add --transport sse private-api https://api.company.com/mcp \
   --header "X-API-Key: your-key-here"
 ```
 
-**Option 3: 远程HTTP服务器**（标准REST）
-```bash
-# 基础语法
-claude mcp add --transport http <name> <url>
+**Option 3: 远程HTTP服务器（标准REST）**
 
+适用场景：标准HTTP API，REST服务，Web服务集成
+
+```bash
 # Notion知识库
 claude mcp add --transport http notion https://mcp.notion.com/mcp
 
@@ -1268,7 +1254,7 @@ claude mcp serve --http --host 0.0.0.0 --port 8080
 - **统一开发环境**：提供标准化的代码操作接口，支持多种客户端连接
 - **自动化工作流**：结合MCP协议实现复杂的自动化开发任务
 
-### 5.4 高级配置方法
+### 5.4 安装配置方式
 
 #### JSON文件批量配置
 
@@ -1305,7 +1291,7 @@ claude mcp serve --http --host 0.0.0.0 --port 8080
 - `${VAR}`：环境变量值
 - `${VAR:-default}`：环境变量值或默认值
 
-#### 方式三：Claude Desktop导入
+#### Claude Desktop导入配置
 
 **适用场景**：从Claude Desktop迁移已有配置
 
