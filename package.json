@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "markdown-to-image": "^0.0.13"
+  }
+}
