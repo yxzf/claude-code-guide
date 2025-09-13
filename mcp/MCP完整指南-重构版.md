@@ -1,6 +1,6 @@
 # Model Context Protocol (MCP) 完整指南
 
-![MCP主题图片](images/mcp1.jpg)
+![MCP主题图片](https://raw.githubusercontent.com/yxzf/claude-code-guide/main/mcp/images/mcp1.jpg)
 
 ## 目录
 
@@ -63,7 +63,7 @@ MCP 采用**客户端-服务器架构设计**，AI应用通过MCP客户端与多
 #### 核心类比：AI 世界的 USB-C
 就像 USB-C 为各种设备提供了统一的连接标准，MCP 为 AI 模型与外部资源提供了统一的交互协议。
 
-![MCP对比图](images/mcp2.jpg)
+![MCP对比图](https://raw.githubusercontent.com/yxzf/claude-code-guide/main/mcp/images/mcp2.jpg)
 
 ### 1.2 为什么需要MCP？
 
