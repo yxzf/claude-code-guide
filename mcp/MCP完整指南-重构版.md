@@ -40,7 +40,7 @@
 
 MCP 采用**客户端-服务器架构设计**，AI应用通过MCP客户端与多个MCP服务器建立一对一连接：
 
-<img src="images/mcp_official_architecture.png" alt="MCP核心架构图" width="500">
+<img src="https://raw.githubusercontent.com/yxzf/claude-code-guide/main/mcp/images/mcp_official_architecture.png" alt="MCP核心架构图" width="500">
 
 #### 架构参与者（Participants）
 
