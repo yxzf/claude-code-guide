@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小红书封面 - Claude Subagent 完整讲解</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #a8d8ea;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+        }
+
+        .preview-container {
+            text-align: center;
+        }
+
+        .export-btn {
+            margin-bottom: 20px;
+        }
+
+        .export-btn button {
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #5cb85c, #f5d76e);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(92, 184, 92, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .export-btn button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(92, 184, 92, 0.4);
+        }
+
+        .cover-preview {
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        #coverCanvas {
+            display: block;
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="preview-container">
+        <div class="export-btn">
+            <button onclick="exportCover()">
+                <i class="fas fa-download"></i> 导出小红书封面 (1080x1440)
+            </button>
+        </div>
+        <div class="cover-preview">
+            <canvas id="coverCanvas" width="1080" height="1440"></canvas>
+        </div>
+    </div>
+
+    <script>
+        // 绘制封面
+        function drawCover() {
+            const canvas = document.getElementById('coverCanvas');
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width;
+            const height = canvas.height;
+
+            // 背景渐变（浅蓝色调）
+            const gradient = ctx.createLinearGradient(0, 0, 0, height);
+            gradient.addColorStop(0, '#89c9e8');      // 浅蓝
+            gradient.addColorStop(0.5, '#a8d8ea');    // 中浅蓝
+            gradient.addColorStop(1, '#c2e5f2');      // 淡蓝
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, width, height);
+
+            // 添加装饰圆圈
+            ctx.globalAlpha = 0.15;
+            // 绿色圆圈
+            ctx.fillStyle = '#5cb85c';
+            ctx.beginPath();
+            ctx.arc(width * 0.85, height * 0.12, 220, 0, Math.PI * 2);
+            ctx.fill();
+            // 黄色圆圈
+            ctx.fillStyle = '#f5d76e';
+            ctx.beginPath();
+            ctx.arc(width * 0.15, height * 0.88, 280, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.globalAlpha = 1;
+
+            // 主标题
+            ctx.fillStyle = '#2c3e50';
+            ctx.font = 'bold 85px PingFang SC, Microsoft YaHei, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('Claude Subagent', width / 2, 200);
+
+            ctx.font = 'bold 78px PingFang SC, Microsoft YaHei, sans-serif';
+            ctx.fillText('完整讲解', width / 2, 300);
+
+            // 副标题
+            ctx.fillStyle = '#5a6c7d';
+            ctx.font = '40px PingFang SC, Microsoft YaHei, sans-serif';
+            ctx.fillText('AI助手团队构建指南', width / 2, 380);
+
+            // 三个特性卡片区域
+            const cardY = 480;
+            const cardHeight = 240;
+            const cardSpacing = 20;
+
+            // 独立上下文卡片（绿色）
+            drawFeatureCard(ctx, width / 2, cardY,
+                           '独立上下文',
+                           '专注工作不分心，避免干扰',
+                           '#e8f8f0', '#5cb85c');
+
+            // 专业化分工卡片（黄色）
+            drawFeatureCard(ctx, width / 2, cardY + cardHeight + cardSpacing,
+                           '专业化分工',
+                           '代码审查·数据科学·调试专家',
+                           '#fef9e7', '#f5d76e');
+
+            // 智能调用卡片（红色）
+            drawFeatureCard(ctx, width / 2, cardY + (cardHeight + cardSpacing) * 2,
+                           '智能调用',
+                           'Claude自动匹配任务需求',
+                           '#ffe8e8', '#ff4757');
+
+            // 底部标签
+            const tagY = height - 150;
+            drawTag(ctx, width / 2 - 180, tagY, '零基础');
+            drawTag(ctx, width / 2, tagY, '配置指南');
+            drawTag(ctx, width / 2 + 180, tagY, '最佳实践');
+
+            // 底部描述
+            ctx.fillStyle = '#2c3e50';
+            ctx.font = 'bold 34px PingFang SC, Microsoft YaHei, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('6大章节 × 完整技术指南', width / 2, height - 60);
+        }
+
+        // 绘制特性卡片
+        function drawFeatureCard(ctx, centerX, y, title, subtitle, bgColor, accentColor) {
+            const cardWidth = 900;
+            const cardHeight = 220;
+            const x = centerX - cardWidth / 2;
+            const radius = 20;
+
+            // 卡片阴影
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.15)';
+            ctx.shadowBlur = 20;
+            ctx.shadowOffsetX = 0;
+            ctx.shadowOffsetY = 5;
+
+            // 卡片背景
+            ctx.fillStyle = bgColor;
+            roundRect(ctx, x, y, cardWidth, cardHeight, radius);
+            ctx.fill();
+
+            ctx.shadowColor = 'transparent';
+            ctx.shadowBlur = 0;
+
+            // 左侧装饰条
+            ctx.fillStyle = accentColor;
+            ctx.fillRect(x, y, 8, cardHeight);
+
+            // 特性标题
+            ctx.fillStyle = accentColor;
+            ctx.font = 'bold 50px PingFang SC, Microsoft YaHei, sans-serif';
+            ctx.textAlign = 'left';
+            ctx.fillText(title, x + 40, y + 90);
+
+            // 副标题
+            ctx.fillStyle = '#666';
+            ctx.font = '32px PingFang SC, Microsoft YaHei, sans-serif';
+            ctx.fillText(subtitle, x + 40, y + 150);
+
+            // 图标
+            ctx.font = '60px Font Awesome 6 Free';
+            ctx.fillStyle = accentColor;
+            ctx.textAlign = 'right';
+            const iconMap = {
+                '独立上下文': '\uf2d0',      // Layer Group图标
+                '专业化分工': '\uf0c0',      // Users图标
+                '智能调用': '\uf0e8'         // Sitemap图标
+            };
+            ctx.fillText(iconMap[title] || '\uf013', x + cardWidth - 40, y + 120);
+        }
+
+        // 绘制标签
+        function drawTag(ctx, x, y, text) {
+            const padding = 20;
+            ctx.font = '30px PingFang SC, Microsoft YaHei, sans-serif';
+            const textWidth = ctx.measureText(text).width;
+            const tagWidth = textWidth + padding * 2;
+            const tagHeight = 50;
+
+            // 标签背景
+            ctx.fillStyle = 'rgba(255, 71, 87, 0.15)';
+            roundRect(ctx, x - tagWidth / 2, y - tagHeight / 2, tagWidth, tagHeight, 25);
+            ctx.fill();
+
+            // 标签文字
+            ctx.fillStyle = '#ff4757';
+            ctx.font = 'bold 30px PingFang SC, Microsoft YaHei, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(text, x, y + 10);
+        }
+
+        // 圆角矩形
+        function roundRect(ctx, x, y, width, height, radius) {
+            ctx.beginPath();
+            ctx.moveTo(x + radius, y);
+            ctx.lineTo(x + width - radius, y);
+            ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+            ctx.lineTo(x + width, y + height - radius);
+            ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+            ctx.lineTo(x + radius, y + height);
+            ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+            ctx.lineTo(x, y + radius);
+            ctx.quadraticCurveTo(x, y, x + radius, y);
+            ctx.closePath();
+        }
+
+        // 导出封面
+        function exportCover() {
+            const canvas = document.getElementById('coverCanvas');
+            canvas.toBlob(function(blob) {
+                const link = document.createElement('a');
+                link.download = 'Claude_Subagent完整讲解_小红书封面_1080x1440.png';
+                link.href = URL.createObjectURL(blob);
+                link.click();
+            }, 'image/png', 1.0);
+        }
+
+        // 页面加载时绘制封面
+        window.onload = function() {
+            drawCover();
+        };
+    </script>
+</body>
+</html>

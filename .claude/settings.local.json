@@ -16,7 +16,19 @@
       "mcp__playwright__browser_snapshot",
       "Bash(curl:*)",
       "Bash(git rebase:*)",
-      "WebFetch(domain:github.com)"
+      "WebFetch(domain:github.com)",
+      "mcp__chrome-mcp-server__get_windows_and_tabs",
+      "mcp__chrome-mcp-server__chrome_get_interactive_elements",
+      "mcp__chrome-mcp-server__chrome_fill_or_select",
+      "mcp__chrome-mcp-server__chrome_keyboard",
+      "mcp__chrome-mcp-server__chrome_screenshot",
+      "mcp__sequential-thinking__sequentialthinking",
+      "mcp__chrome-mcp-server__chrome_inject_script",
+      "mcp__chrome-mcp-server__chrome_console",
+      "Bash(python3:*)",
+      "Read(//Users/scg/Desktop/**)",
+      "Bash(git pull:*)",
+      "Bash(git stash:*)"
     ],
     "deny": [],
     "ask": []
